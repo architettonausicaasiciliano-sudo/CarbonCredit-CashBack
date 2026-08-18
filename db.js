@@ -1,5 +1,5 @@
 const sqlite3 = require("sqlite3").verbose();
-const path = path = require("path");
+const path = require("path");
 
 // Utilizza path.join per evitare problemi di percorso relativo su server come Render
 const dbPath = path.join(__dirname, "users.db");
