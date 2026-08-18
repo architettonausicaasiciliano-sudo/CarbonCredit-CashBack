@@ -1,3 +1,0 @@
-node_modules/
-.env
-database.sqliteAdd-Content -Path ".gitignore" -Value "node_modules/"Get-Content .\render.yaml -ErrorAction SilentlyContinue

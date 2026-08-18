@@ -1,24 +1,20 @@
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
-require("dotenv").config(); // 1. Carica le variabili .env per prima cosa
+require("dotenv").config();
 
-const app = express(); // 2. Inizializza Express PRIMA di qualsiasi app.use()
-
+const app = express();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const db = require("./db");
 
 /* =====================================================
-   CORS, MIDDLEWARE & CARTELLA PUBLIC (FRONTEND)
+   CORS & CARTELLA PUBLIC / PROTECTED
 ===================================================== */
 
 app.use(cors());
-app.use(express.json()); // Mantiene attivo il parsing del body JSON per le chiamate API
 
-// Serviamo i file statici dalla cartella public (index.html, checkout.html, style.css...)
+// Serviamo i file statici dalla cartella public e protected
 app.use(express.static(path.join(__dirname, "public")));
-
-// Serviamo i file della cartella protected (dashboard.html, emergency.html, scenarios...)
 app.use("/protected", express.static(path.join(__dirname, "protected")));
 
 /* =====================================================
@@ -30,7 +26,6 @@ app.post(
   express.raw({ type: "application/json" }),
   async (req, res) => {
     const signature = req.headers["stripe-signature"];
-
     let event;
 
     try {
@@ -58,7 +53,6 @@ app.post(
         paymentIntent.metadata.type === "initial_payment"
       ) {
         const email = paymentIntent.metadata.email;
-
         if (email) {
           console.log("INITIAL PAYMENT SUCCEEDED:", email);
         }
@@ -74,7 +68,6 @@ app.post(
       event.type === "customer.subscription.updated"
     ) {
       const subscription = event.data.object;
-
       let email = subscription.metadata && subscription.metadata.email;
 
       if (!email && subscription.customer) {
@@ -82,7 +75,6 @@ app.post(
           const customer = await stripe.customers.retrieve(
             subscription.customer
           );
-
           if (customer && !customer.deleted) {
             email = customer.email;
           }
@@ -116,13 +108,11 @@ app.post(
 
     if (event.type === "invoice.paid") {
       const invoice = event.data.object;
-
       let email = invoice.customer_email;
 
       if (!email && invoice.customer) {
         try {
           const customer = await stripe.customers.retrieve(invoice.customer);
-
           if (customer && !customer.deleted) {
             email = customer.email;
           }
@@ -152,13 +142,11 @@ app.post(
 
     if (event.type === "invoice.payment_failed") {
       const invoice = event.data.object;
-
       let email = invoice.customer_email;
 
       if (!email && invoice.customer) {
         try {
           const customer = await stripe.customers.retrieve(invoice.customer);
-
           if (customer && !customer.deleted) {
             email = customer.email;
           }
@@ -188,7 +176,6 @@ app.post(
 
     if (event.type === "customer.subscription.deleted") {
       const subscription = event.data.object;
-
       let email = subscription.metadata && subscription.metadata.email;
 
       if (!email && subscription.customer) {
@@ -196,7 +183,6 @@ app.post(
           const customer = await stripe.customers.retrieve(
             subscription.customer
           );
-
           if (customer && !customer.deleted) {
             email = customer.email;
           }
@@ -239,27 +225,18 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Scorciatoia per la Dashboard
+// Dashboard utenti abbonati
 app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "dashboard.html"));
 });
 
-// Scorciatoia per la Red Mode / Emergenza
-app.get("/emergency", (req, res) => {
-  res.sendFile(path.join(__dirname, "protected", "emergency.html"));
-});
-
 /* =====================================================
-   HEALTH CHECK
+   API CONFIG & HEALTH CHECK
 ===================================================== */
 
 app.get("/api", (req, res) => {
   res.json({ status: "ok" });
 });
-
-/* =====================================================
-   STRIPE PUBLIC KEY
-===================================================== */
 
 app.get("/api/stripe-config", (req, res) => {
   res.json({
@@ -268,7 +245,7 @@ app.get("/api/stripe-config", (req, res) => {
 });
 
 /* =====================================================
-   CREA PAGAMENTO INIZIALE (0,69 €)
+   CREA PAGAMENTO INIZIALE & ABBONAMENTO STRIPE
 ===================================================== */
 
 app.post("/create-initial-payment", async (req, res) => {
@@ -312,8 +289,6 @@ app.post("/create-initial-payment", async (req, res) => {
       },
     });
 
-    console.log("INITIAL PAYMENT CREATED:", paymentIntent.id);
-
     res.json({
       clientSecret: paymentIntent.client_secret,
       customerId: customer.id,
@@ -324,10 +299,6 @@ app.post("/create-initial-payment", async (req, res) => {
     res.status(500).json({ error: "initial_payment_error" });
   }
 });
-
-/* =====================================================
-   CREA ABBONAMENTO (7 GG PROVA, POI 35 €/MESE)
-===================================================== */
 
 app.post("/create-subscription", async (req, res) => {
   try {
@@ -361,8 +332,6 @@ app.post("/create-subscription", async (req, res) => {
       },
     });
 
-    console.log("SUBSCRIPTION CREATED:", subscription.id);
-
     db.run(
       "UPDATE users SET premium = 1 WHERE email = ?",
       [email],
@@ -386,7 +355,7 @@ app.post("/create-subscription", async (req, res) => {
 });
 
 /* =====================================================
-   CHECK USER STATUS
+   CHECK USER STATUS & ASSETS MANAGEMENT
 ===================================================== */
 
 app.get("/api/user", (req, res) => {
@@ -407,6 +376,34 @@ app.get("/api/user", (req, res) => {
       res.json({
         premium: row ? row.premium === 1 : false,
       });
+    }
+  );
+});
+
+// Recupera tutti gli asset registrati dall'utente
+app.get("/api/assets", (req, res) => {
+  const email = req.query.email;
+  if (!email) return res.status(400).json({ error: "missing_email" });
+
+  db.all("SELECT * FROM assets WHERE user_email = ? ORDER BY id DESC", [email], (error, rows) => {
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ assets: rows || [] });
+  });
+});
+
+// Aggiunge un nuovo asset inserito manualmente
+app.post("/api/assets/manual", (req, res) => {
+  const { email, itemName, category } = req.body;
+  if (!email || !itemName || !category) {
+    return res.status(400).json({ error: "missing_fields" });
+  }
+
+  db.run(
+    "INSERT INTO assets (user_email, item_name, category, source) VALUES (?, ?, ?, 'manual')",
+    [email, itemName, category],
+    function (error) {
+      if (error) return res.status(500).json({ error: error.message });
+      res.json({ success: true, id: this.lastID });
     }
   );
 });
