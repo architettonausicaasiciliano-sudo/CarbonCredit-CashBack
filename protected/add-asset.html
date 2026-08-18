@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aggiungi Bene / Acquisto Sostenibile</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { background: #0b0f19; color: #f3f4f6; font-family: sans-serif; padding: 20px; }
+    .card { background: #111827; border: 1px solid #374151; border-radius: 16px; padding: 20px; max-width: 480px; margin: 0 auto; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #9ca3af; }
+    input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #374151; background: #1f2937; color: white; box-sizing: border-box; }
+    .btn-submit { width: 100%; padding: 14px; background: #10b981; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2 style="color: #34d399; margin-bottom: 16px;">🌱 Registra Acquisto Green</h2>
+  
+  <form id="addAssetForm" enctype="multipart/form-data">
+    <div class="form-group">
+      <label>Nome Bene / Acquisto</label>
+      <input type="text" name="title" placeholder="Es. Pannello Solare 400W / Bici Elettrica" required>
+    </div>
+
+    <div class="form-group">
+      <label>Categoria Sostenibile</label>
+      <select name="category">
+        <option value="Energia">Energia / Efficienza Domestica</option>
+        <option value="Mobilita">Mobilità Elettrica / Sostenibile</option>
+        <option value="SpesaEco">Spesa Biologica / Prodotti Eco</option>
+        <option value="Elettrodomestici">Elettrodomestico A+++</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Importo Speso (€)</label>
+      <input type="number" step="0.01" name="amount" placeholder="0.00" required>
+    </div>
+
+    <div class="form-group">
+      <label>📸 Foto Scontrino, Fattura o Installazione</label>
+      <input type="file" name="photo" accept="image/*">
+    </div>
+
+    <button type="submit" class="btn-submit">GENERA CREDITI & CASHBACK ➔</button>
+  </form>
+</div>
+
+<script>
+  document.getElementById('addAssetForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    const res = await fetch('/api/assets', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert(`Bene registrato! CO2 Risparmiata: ${data.co2Saved} kg | Cashback Accumulato: €${data.cashbackEur}`);
+      window.location.href = '/protected/dashboard.html';
+    }
+  });
+</script>
+
+</body>
+</html>

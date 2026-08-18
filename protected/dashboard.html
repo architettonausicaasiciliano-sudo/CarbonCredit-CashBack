@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySafeHaven - Household Resilience Control Center</title>
+    <title>MyCarbonCredit CashBack - Control Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- HTML2PDF Library for Direct Mobile PDF Downloads -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,6 +13,7 @@
             --card-bg: #1e293b;
             --accent-blue: #38bdf8;
             --accent-green: #22c55e;
+            --accent-emerald: #10b981;
             --accent-yellow: #eab308;
             --accent-red: #ef4444;
             --text-light: #f8fafc;
@@ -56,9 +57,9 @@
         }
 
         .roi-badge {
-            background-color: rgba(34, 197, 94, 0.15);
-            border: 1px solid var(--accent-green);
-            color: var(--accent-green);
+            background-color: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--accent-emerald);
+            color: var(--accent-emerald);
             padding: 4px 10px;
             border-radius: 20px;
             font-size: 0.8rem;
@@ -127,10 +128,14 @@
             padding: 10px 15px;
             border-radius: 0 8px 8px 0;
         }
+        .metric-item.green {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid var(--accent-green);
+        }
         .metric-item .val { font-size: 1.2rem; font-weight: bold; color: var(--text-light); }
         .metric-item .lbl { font-size: 0.8rem; color: var(--text-muted); }
 
-        /* TABLE & INVENTORY CARDS */
+        /* TABLE & ASSETS CARDS */
         .table-responsive { overflow-x: auto; margin-top: 10px; margin-bottom: 15px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border-color); }
@@ -184,7 +189,7 @@
         }
 
         .btn-action {
-            background: var(--accent-blue);
+            background: var(--accent-emerald);
             color: #0f172a;
             border: none;
             padding: 12px 20px;
@@ -195,6 +200,7 @@
             font-size: 0.95rem;
             display: inline-block;
             text-align: center;
+            text-decoration: none;
         }
         .btn-action:hover { opacity: 0.9; }
 
@@ -210,6 +216,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            text-decoration: none;
         }
         .btn-sec:hover { background: var(--border-color); }
 
@@ -297,6 +304,10 @@
             background-color: #e0f2fe !important;
             border-left: 4px solid #0284c7 !important;
         }
+        body.pdf-mode .metric-item.green {
+            background-color: #dcfce7 !important;
+            border-left: 4px solid #16a34a !important;
+        }
         body.pdf-mode .roi-badge {
             background-color: #dcfce7 !important;
             color: #15803d !important;
@@ -316,91 +327,90 @@
         body.pdf-mode .mobile-label { display: none !important; }
         body.pdf-mode td.item-title-cell { border-bottom: 1px solid #cbd5e1 !important; font-size: inherit !important; padding-right: 0 !important; }
     </style>
-    <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#1e293b">
 </head>
 <body>
 
 <div class="container" id="pdfContent">
 <header>
     <div class="header-badges">
-        <span class="badge-active">● CONTINUOUS PROTECTION ACTIVE - EU 72H TRIAL</span>
-        <div class="roi-badge" id="roiBadge" title="Estimated annual savings from anti-waste pantry rotation in peace time">
-            💰 ROI: SAVE €500+/YEAR IN PEACE TIME (+€42.00/mo)
+        <span class="badge-active">● CARBON MONETIZATION ACTIVE - EU CERTIFIED</span>
+        <div class="roi-badge" id="roiBadge" title="Cashback totale e stimato da acquisti e crediti sostenibili">
+            💰 CASHBACK: €0.00 | 🌱 CO2: 0 kg
         </div>
     </div>
-    <h1>Household Resilience Control Center</h1>
-    <p class="subtitle">Active inventory rotation, weather alerts, and emergency management system.</p>
+    <h1>MyCarbonCredit CashBack Control Center</h1>
+    <p class="subtitle">Tracciamento acquisti eco-sostenibili, calcolo crediti di carbonio e monetizzazione cashback.</p>
 </header>
 
-    <!-- EXPIRATION ALERT BANNER -->
+    <!-- PENDING REVIEWS / NOTICE ALERT -->
     <div id="expirationAlert" class="alert-box">
-        ⚠️ <strong>Attention:</strong> Some items in your inventory are expired or expiring within 30 days. Please consume and rotate them.
+        ⚠️ <strong>Attenzione:</strong> Hai alcuni beni o acquisti con verifica in sospeso o in fase di approvazione crediti.
     </div>
 
-    <!-- HOUSEHOLD CONFIGURATION -->
+    <!-- HOUSEHOLD & ECO CONFIGURATION -->
     <div class="card">
-        <h2>🧬 1. Household & Medical Configuration</h2>
+        <h2>🧬 1. Configurazione Nucleo & Impact Estimator</h2>
         <div class="grid-2">
             <div class="counter-group">
-                <label>Adults</label>
+                <label>Pannelli / kW Solari</label>
                 <div class="counter-controls">
-                    <button class="btn-counter" type="button" onclick="updateHousehold('adults', -1)">-</button>
-                    <span id="cnt-adults" class="counter-value">2</span>
-                    <button class="btn-counter" type="button" onclick="updateHousehold('adults', 1)">+</button>
+                    <button class="btn-counter" type="button" onclick="updateEcoState('solarKw', -1)">-</button>
+                    <span id="cnt-solar" class="counter-value">3</span>
+                    <button class="btn-counter" type="button" onclick="updateEcoState('solarKw', 1)">+</button>
                 </div>
             </div>
             <div class="counter-group">
-                <label>Children</label>
+                <label>Km EV / Mese</label>
                 <div class="counter-controls">
-                    <button class="btn-counter" type="button" onclick="updateHousehold('kids', -1)">-</button>
-                    <span id="cnt-kids" class="counter-value">0</span>
-                    <button class="btn-counter" type="button" onclick="updateHousehold('kids', 1)">+</button>
+                    <button class="btn-counter" type="button" onclick="updateEcoState('evKm', -50)">-</button>
+                    <span id="cnt-ev" class="counter-value">300</span>
+                    <button class="btn-counter" type="button" onclick="updateEcoState('evKm', 50)">+</button>
                 </div>
             </div>
             <div class="counter-group">
-                <label>Seniors</label>
+                <label>Componenti Casa</label>
                 <div class="counter-controls">
-                    <button class="btn-counter" type="button" onclick="updateHousehold('elderly', -1)">-</button>
-                    <span id="cnt-elderly" class="counter-value">0</span>
-                    <button class="btn-counter" type="button" onclick="updateHousehold('elderly', 1)">+</button>
+                    <button class="btn-counter" type="button" onclick="updateEcoState('members', -1)">-</button>
+                    <span id="cnt-members" class="counter-value">2</span>
+                    <button class="btn-counter" type="button" onclick="updateEcoState('members', 1)">+</button>
                 </div>
             </div>
             <div class="counter-group">
-                <label>Pets</label>
+                <label>Elettrodomestici Green</label>
                 <div class="counter-controls">
-                    <button class="btn-counter" type="button" onclick="updateHousehold('pets', -1)">-</button>
-                    <span id="cnt-pets" class="counter-value">1</span>
-                    <button class="btn-counter" type="button" onclick="updateHousehold('pets', 1)">+</button>
+                    <button class="btn-counter" type="button" onclick="updateEcoState('greenApps', -1)">-</button>
+                    <span id="cnt-greenApps" class="counter-value">1</span>
+                    <button class="btn-counter" type="button" onclick="updateEcoState('greenApps', 1)">+</button>
                 </div>
             </div>
         </div>
 
         <div class="metrics-summary">
-            <div class="metric-item">
-                <div id="val-water" class="val">21 Liters</div>
-                <div class="lbl">72h Min Water Reserve (Drinking + Hygiene)</div>
+            <div class="metric-item green">
+                <div id="val-co2" class="val">0 kg CO2</div>
+                <div class="lbl">Stima Risparmio CO2 Annuale</div>
             </div>
             <div class="metric-item">
-                <div id="val-food" class="val">12,000 kcal</div>
-                <div class="lbl">72h Calculated Food Rations</div>
+                <div id="val-cashback" class="val">€0.00</div>
+                <div class="lbl">Valore Crediti & Cashback Generato</div>
             </div>
         </div>
     </div>
 
-    <!-- INVENTORY & EXPIRATION MANAGEMENT -->
+    <!-- INVENTORY & CASHBACK TRACKER -->
     <div class="card">
-        <h2>📦 2. Emergency Stock & Expiration Tracker</h2>
+        <h2>📦 2. Registro Beni, Acquisti & Crediti di Carbonio</h2>
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th>Item Name</th>
-                        <th>Category</th>
-                        <th>Est. Value (€)</th>
-                        <th>Expiration Date</th>
-                        <th>Status</th>
-                        <th class="action-column">Action</th>
+                        <th>Nome Bene / Acquisto</th>
+                        <th>Categoria</th>
+                        <th>Spesa (€)</th>
+                        <th>CO2 Salvata</th>
+                        <th>Cashback (€)</th>
+                        <th>Stato Credito</th>
+                        <th class="action-column">Azione</th>
                     </tr>
                 </thead>
                 <tbody id="inventoryTable">
@@ -409,123 +419,136 @@
             </table>
         </div>
 
-        <div class="form-title">➕ Add New Item to Inventory</div>
+        <div class="form-title">➕ Registra Rapido Acquisto Sostenibile</div>
         <form class="form-add" onsubmit="event.preventDefault(); addItem();">
-            <input type="text" id="itemName" placeholder="Item Name (e.g. Crackers)" required>
+            <input type="text" id="itemName" placeholder="Es. Bici Elettrica o Spesa Bio" required>
             <select id="itemCat">
-                <option value="Water">Water</option>
-                <option value="Food">Food</option>
-                <option value="Medical">Medical</option>
-                <option value="Equipment">Equipment</option>
+                <option value="Energia">Energia</option>
+                <option value="Mobilita">Mobilità</option>
+                <option value="SpesaEco">Spesa Eco</option>
+                <option value="Elettrodomestici">Elettrodomestici</option>
             </select>
-            <input type="number" id="itemPrice" placeholder="Value (€)" step="0.50" min="0">
-            <input type="date" id="itemDate">
-            <button type="submit" class="btn-action">+ Add Item</button>
+            <input type="number" id="itemPrice" placeholder="Importo (€)" step="0.50" min="0" required>
+            <input type="text" id="itemCo2" placeholder="CO2 (kg) est." disabled>
+            <button type="submit" class="btn-action">+ Registra Bene</button>
         </form>
     </div>
 
-    <!-- UTILITY ACTIONS (IMPORT, EXPORT, PRINT) -->
+    <!-- UTILITY ACTIONS (ADD PHOTO, IMPORT, EXPORT, PRINT) -->
     <div class="actions-bar">
-        <button class="btn-sec" type="button" onclick="downloadPDF()">📄 Download PDF Sheet</button>
-        <button class="btn-sec" type="button" onclick="exportBackup()">💾 Export Backup (JSON)</button>
-        <button class="btn-sec" type="button" onclick="document.getElementById('importInput').click()">📥 Import Backup (JSON)</button>
+        <a class="btn-action" href="/protected/add-asset.html">📸 Carica con Foto Scontrino</a>
+        <button class="btn-sec" type="button" onclick="downloadPDF()">📄 Scarica Report Impronta (PDF)</button>
+        <button class="btn-sec" type="button" onclick="exportBackup()">💾 Esporta Backup (JSON)</button>
+        <button class="btn-sec" type="button" onclick="document.getElementById('importInput').click()">📥 Importa Backup (JSON)</button>
         <input type="file" id="importInput" style="display:none" accept=".json" onchange="importBackup(event)">
     </div>
 </div>
 
 <script>
     let state = {
-        adults: 2,
-        kids: 0,
-        elderly: 0,
-        pets: 1,
+        solarKw: 3,
+        evKm: 300,
+        members: 2,
+        greenApps: 1,
         inventory: [
-            { id: 1, name: "Natural Bottled Water (6L Packs)", category: "Water", price: 10, date: "2027-02-15" },
-            { id: 2, name: "OTC First Aid Kit", category: "Medical", price: 12, date: "2026-11-01" },
-            { id: 3, name: "Canned Food & High-Calorie Rations", category: "Food", price: 20, date: "2028-06-30" }
+            { id: 1, name: "Impianto Fotovoltaico 3kW", category: "Energia", price: 3500, co2: 1200, cashback: 175, status: "Verified" },
+            { id: 2, name: "E-Bike Monopattino / City", category: "Mobilita", price: 450, co2: 180, cashback: 22.50, status: "Verified" },
+            { id: 3, name: "Spesa Biologica & Locale", category: "SpesaEco", price: 120, co2: 45, cashback: 6.00, status: "Pending" }
         ]
     };
 
-    function init() {
-        const saved = localStorage.getItem('mySafeHavenData');
+    async function init() {
+        const saved = localStorage.getItem('myCarbonCreditData');
         if (saved) {
             try { state = JSON.parse(saved); } catch(e) {}
         }
+
+        // Tenta sincronizzazione con il server se disponibile
+        try {
+            const res = await fetch('/api/assets');
+            if (res.ok) {
+                const apiAssets = await res.json();
+                if (Array.isArray(apiAssets) && apiAssets.length > 0) {
+                    state.inventory = apiAssets.map(a => ({
+                        id: a.id,
+                        name: a.title,
+                        category: a.category,
+                        price: a.amount,
+                        co2: a.co2_saved,
+                        cashback: a.cashback_eur,
+                        status: a.status === 'pending' ? 'Pending' : 'Verified'
+                    }));
+                }
+            }
+        } catch(err) {
+            console.log("Running standalone or local mode");
+        }
+
         render();
     }
 
     function save() {
-        localStorage.setItem('mySafeHavenData', JSON.stringify(state));
+        localStorage.setItem('myCarbonCreditData', JSON.stringify(state));
         render();
     }
 
-    function updateHousehold(type, delta) {
+    function updateEcoState(type, delta) {
         if (state[type] + delta >= 0) {
             state[type] += delta;
             save();
         }
     }
 
-    function calculateExpiration(dateStr) {
-        if (!dateStr) return { label: 'No Date', class: 'status-ok', critical: false, active: true };
-        const now = new Date();
-        const exp = new Date(dateStr);
-        const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
-
-        if (diffDays < 0) {
-            return { label: '🔴 Expired', class: 'status-crit', critical: true, active: false };
-        } else if (diffDays <= 30) {
-            return { label: `🔴 Expires in ${diffDays}d`, class: 'status-crit', critical: true, active: true };
-        } else if (diffDays <= 90) {
-            return { label: `🟡 Replace Soon (${diffDays}d)`, class: 'status-warn', critical: false, active: true };
-        } else {
-            return { label: '🟢 Fresh', class: 'status-ok', critical: false, active: true };
-        }
-    }
-
     function render() {
-        document.getElementById('cnt-adults').innerText = state.adults;
-        document.getElementById('cnt-kids').innerText = state.kids;
-        document.getElementById('cnt-elderly').innerText = state.elderly;
-        document.getElementById('cnt-pets').innerText = state.pets;
+        document.getElementById('cnt-solar').innerText = state.solarKw;
+        document.getElementById('cnt-ev').innerText = state.evKm;
+        document.getElementById('cnt-members').innerText = state.members;
+        document.getElementById('cnt-greenApps').innerText = state.greenApps;
 
-        const totalPeople = state.adults + state.kids + state.elderly;
-        const waterLiters = totalPeople * 3 * 3;
-        const calories = totalPeople * 2000 * 3;
+        // Calcolo impatto base stimato
+        const estCo2Annual = (state.solarKw * 400) + (state.evKm * 1.5) + (state.greenApps * 150);
+        const estCashbackAnnual = estCo2Annual * 0.12;
 
-        document.getElementById('val-water').innerText = `${waterLiters} Liters`;
-        document.getElementById('val-food').innerText = `${calories.toLocaleString()} kcal`;
+        document.getElementById('val-co2').innerText = `${estCo2Annual.toLocaleString()} kg CO2`;
+        document.getElementById('val-cashback').innerText = `€${estCashbackAnnual.toFixed(2)}`;
 
         const tbody = document.getElementById('inventoryTable');
         tbody.innerHTML = '';
-        let hasCriticalExpirations = false;
-        let totalRoiValue = 0;
+        let hasPendingItems = false;
+        let totalCashback = 0;
+        let totalCo2Saved = 0;
 
         state.inventory.forEach(item => {
-            const expInfo = calculateExpiration(item.date);
-            if (expInfo.critical) hasCriticalExpirations = true;
+            if (item.status === 'Pending') hasPendingItems = true;
             
             const itemPrice = parseFloat(item.price) || 0;
-            if (expInfo.active) {
-                totalRoiValue += itemPrice;
-            }
+            const itemCo2 = parseFloat(item.co2) || (itemPrice * 1.2);
+            const itemCashback = parseFloat(item.cashback) || (itemPrice * 0.05);
+
+            totalCashback += itemCashback;
+            totalCo2Saved += itemCo2;
+
+            const isVerified = item.status === 'Verified' || item.status === 'Approvato';
+            const statusClass = isVerified ? 'status-ok' : 'status-warn';
+            const statusLabel = isVerified ? '🟢 Verificato' : '🟡 In Revisione';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="item-title-cell"><strong>${item.name}</strong></td>
-                <td><span class="mobile-label">Category:</span> ${item.category}</td>
-                <td><span class="mobile-label">Value:</span> €${itemPrice.toFixed(2)}</td>
-                <td><span class="mobile-label">Expiration:</span> ${item.date || 'N/A'}</td>
-                <td><span class="mobile-label">Status:</span> <span class="status-tag ${expInfo.class}">${expInfo.label}</span></td>
+                <td><span class="mobile-label">Categoria:</span> ${item.category}</td>
+                <td><span class="mobile-label">Spesa:</span> €${itemPrice.toFixed(2)}</td>
+                <td><span class="mobile-label">CO2:</span> ${itemCo2.toFixed(1)} kg</td>
+                <td><span class="mobile-label">Cashback:</span> €${itemCashback.toFixed(2)}</td>
+                <td><span class="mobile-label">Stato:</span> <span class="status-tag ${statusClass}">${statusLabel}</span></td>
                 <td class="action-column">
-                    <button class="btn-delete" title="Delete Item" onclick="deleteItem(${item.id})">🗑️</button>
+                    <button class="btn-delete" title="Elimina Bene" onclick="deleteItem(${item.id})">🗑️</button>
                 </td>
             `;
             tbody.appendChild(tr);
         });
 
-        document.getElementById('roiBadge').innerText = `💰 ROI: +€${totalRoiValue.toFixed(2)}`;
-        document.getElementById('expirationAlert').style.display = hasCriticalExpirations ? 'block' : 'none';
+        document.getElementById('roiBadge').innerText = `💰 CASHBACK: €${totalCashback.toFixed(2)} | 🌱 CO2: ${totalCo2Saved.toFixed(0)} kg`;
+        document.getElementById('expirationAlert').style.display = hasPendingItems ? 'block' : 'none';
     }
 
     function addItem() {
@@ -534,33 +557,35 @@
         const category = document.getElementById('itemCat').value;
         const priceInput = document.getElementById('itemPrice');
         const price = parseFloat(priceInput.value) || 0;
-        const dateInput = document.getElementById('itemDate');
-        const date = dateInput.value;
 
-        if (!name) {
-            alert('Please enter an item name.');
+        if (!name || price <= 0) {
+            alert('Inserisci un nome valido e un importo maggiore di zero.');
             return;
         }
+
+        const co2 = parseFloat((price * 1.2).toFixed(2));
+        const cashback = parseFloat((price * 0.05).toFixed(2));
 
         state.inventory.push({
             id: Date.now(),
             name: name,
             category: category,
             price: price,
-            date: date
+            co2: co2,
+            cashback: cashback,
+            status: 'Pending'
         });
 
         nameInput.value = '';
         priceInput.value = '';
-        dateInput.value = '';
         save();
     }
 
-function deleteItem(id) {
+    function deleteItem(id) {
         const item = state.inventory.find(i => i.id === id);
-        const itemName = item ? item.name : 'this item';
+        const itemName = item ? item.name : 'questo bene';
         
-        if (confirm(`Are you sure you want to delete "${itemName}" from the inventory?`)) {
+        if (confirm(`Sei sicuro di voler rimuovere "${itemName}" dal tuo registro?`)) {
             state.inventory = state.inventory.filter(i => i.id !== id);
             save();
         }
@@ -578,7 +603,7 @@ function deleteItem(id) {
         const element = document.getElementById('pdfContent');
         const opt = {
             margin:       [8, 8, 8, 8],
-            filename:     `MySafeHaven_Emergency_Sheet_${new Date().toISOString().slice(0,10)}.pdf`,
+            filename:     `MyCarbonCredit_Report_${new Date().toISOString().slice(0,10)}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { 
                 scale: 2, 
@@ -606,7 +631,7 @@ function deleteItem(id) {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `MySafeHaven_Vault_Backup_${new Date().toISOString().slice(0,10)}.json`);
+        downloadAnchor.setAttribute("download", `MyCarbonCredit_Backup_${new Date().toISOString().slice(0,10)}.json`);
         downloadAnchor.click();
         downloadAnchor.remove();
     }
@@ -622,12 +647,12 @@ function deleteItem(id) {
                 if (importedData.inventory && Array.isArray(importedData.inventory)) {
                     state = importedData;
                     save();
-                    alert('Backup successfully imported and state restored!');
+                    alert('Backup importato e stato ripristinato con successo!');
                 } else {
-                    alert('Invalid backup file format.');
+                    alert('Formato del file di backup non valido.');
                 }
             } catch(err) {
-                alert('Error reading JSON file.');
+                alert('Errore durante la lettura del file JSON.');
             }
         };
         reader.readAsText(file);

@@ -422,25 +422,22 @@
             .form-add { grid-template-columns: 1fr; }
             .top-nav-links { display: none; }
         }
-    /* REGOLA DI STAMPA PDF */
-@media print {
-    body * {
-        visibility: hidden !important;
-    }
-    #print-emergency-doc, #print-emergency-doc * {
-        visibility: visible !important;
-    }
-    #print-emergency-doc {
-        display: block !important;
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        background: #ffffff !important;
-        color: #000000 !important;
-        padding: 20px !important;
-    }
-}    
+
+        /* REGOLA DI STAMPA PDF */
+        @media print {
+            body * { visibility: hidden !important; }
+            #print-emergency-doc, #print-emergency-doc * { visibility: visible !important; }
+            #print-emergency-doc {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 20px !important;
+            }
+        }    
     </style>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1e293b">
@@ -467,9 +464,10 @@
         <h1 style="color: #f8fafc; font-size: 1.8rem; margin-bottom: 8px;">Active Subscription — Control Center Unlocked!</h1>
         <p style="color: #94a3b8; max-width: 600px; margin: 0 auto; font-size: 0.95rem;">
             You have full access to the MySafeHaven resilience platform compliant with EU Preparedness Strategy directives.
-</p>
+        </p>
+    </div>
 
-<!-- 1. HEADER PRINCIPALE & BADGES -->
+    <!-- 1. HEADER PRINCIPALE & BADGES -->
     <header>
         <div class="header-badges">
             <span class="badge-active">● CONTINUOUS PROTECTION ACTIVE - EU 72H TRIAL</span>
@@ -494,7 +492,7 @@
         </button>
     </div>
 
-    <!-- 3. MONITORAGGIO PROTOCOLLI PER RISCHIO (IN PRIMO PIANO) -->
+    <!-- 3. MONITORAGGIO PROTOCOLLI PER RISCHIO -->
     <div class="card" id="scenarios">
         <h2>📊 Risk Protocol Completion Status</h2>
         <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">
@@ -747,7 +745,7 @@
 </div>
 
 <!-- EMERGENCY PRINTABLE SHEET (ENGLISH) -->
-<div id="print-emergency-doc">
+<div id="print-emergency-doc" style="display: none;">
     <div class="emergency-header">
         <h1>CRITICAL EMERGENCY PROTOCOLS & HOUSEHOLD REPORT</h1>
         <p><strong>Status:</strong> Offline Emergency Reference Guide</p>
@@ -762,109 +760,50 @@
             <ul>
                 <li><strong>Power Protection:</strong> Unplug sensitive electronics to prevent power surge damage when grid restores.</li>
                 <li><strong>Food Preservation:</strong> Keep refrigerator and freezer doors closed. Unopened fridge keeps food cold for 4 hours; full freezer holds temperature for 48 hours.</li>
-                <li><strong>Lighting & Safety:</strong> Use LED flashlights or headlamps. Avoid open candles to eliminate fire hazard.</li>
-                <li><strong>Comms & Power:</strong> Switch phone to Maximum Power Saving mode. Use power banks only for critical updates.</li>
+                <li><strong>Lighting & Safety:</strong> Use LED lanterns or flashlights. Avoid candles due to fire risk.</li>
             </ul>
         </div>
 
         <div class="protocol-box">
-            <h3>☣️ CBRN Threat (Chemical, Biological, Radiological, Nuclear)</h3>
+            <h3>☣️ CBRN / Toxic Risks</h3>
             <ul>
-                <li><strong>Immediate Shelter:</strong> Go indoors immediately. Close and lock all windows, exterior doors, and fireplace dampers.</li>
-                <li><strong>Air Isolation:</strong> Turn off all HVAC systems, fans, and clothes dryers. Seal room gaps with wet towels or duct tape.</li>
-                <li><strong>Positioning:</strong> For chemical threats, move to higher floors. For radiological threats, move to the center basement or interior room.</li>
-                <li><strong>Decontamination:</strong> If exposed, remove outer clothing, seal in plastic bags, and wash skin thoroughly with soap and warm water.</li>
+                <li><strong>Shelter-in-Place:</strong> Seal doors, windows, and air vents using duct tape and plastic sheeting.</li>
+                <li><strong>Air Management:</strong> Turn off all HVAC systems, fans, and external air intakes immediately.</li>
             </ul>
         </div>
 
         <div class="protocol-box">
-            <h3>🔥 Disaster Evacuation</h3>
+            <h3>🔥 Disasters & Evacuation</h3>
             <ul>
-                <li><strong>Grab-and-Go:</strong> Collect 72-hour Bug-Out Bag, critical prescription medication, emergency cash, and identity documents.</li>
-                <li><strong>Utility Shutdown:</strong> Shut off main gas valve, electricity breaker, and main water intake line before exiting.</li>
-                <li><strong>Personal Protection:</strong> Wear sturdy shoes, long trousers, and protective long-sleeve clothing.</li>
-                <li><strong>Route & Comms:</strong> Follow designated evacuation routes. Leave a written note inside indicating your departure time and destination.</li>
+                <li><strong>Go-Bag Readiness:</strong> Ensure 72-hour emergency kits and essential identification documents are packed.</li>
+                <li><strong>Evacuation Routes:</strong> Verify primary and secondary evacuation paths out of your immediate area.</li>
             </ul>
         </div>
-
-        <div class="protocol-box">
-            <h3>⚔️ Conflict & Extreme Crisis</h3>
-            <ul>
-                <li><strong>Hardened Shelter:</strong> Seek immediate shelter in an interior room without windows, below ground level if possible.</li>
-                <li><strong>Light & Noise Blackout:</strong> Cover all windows with heavy blankets to eliminate light leaks at night. Keep sound to a minimum.</li>
-                <li><strong>Essential Proximity:</strong> Keep clean drinking water, first aid supplies, and emergency radio within immediate physical reach.</li>
-                <li><strong>Information Monitoring:</strong> Maintain battery/crank radio tuned to official emergency frequencies at scheduled intervals.</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- 2. FIRST AID & MEDICAL PROCEDURES -->
-    <div class="emergency-section">
-        <h2>2. Immediate First Aid Procedures</h2>
-        <ul>
-            <li><strong>Severe Bleeding:</strong> Apply firm, direct continuous pressure to the wound using sterile gauze or clean cloth. Elevate if possible. Do not remove saturated pads; add more on top.</li>
-            <li><strong>Thermal/Chemical Burns:</strong> Cool burn immediately under cold running water for at least 10–20 minutes. Do not apply ice, butter, or ointments. Do not pop blisters. Cover loosely with sterile dressing.</li>
-            <li><strong>Airway Obstruction (Choking):</strong> Perform 5 firm back blows between shoulder blades using the heel of your hand, followed by 5 abdominal thrusts (Heimlich maneuver) until clear.</li>
-            <li><strong>Shock Management:</strong> Lay victim flat on back, elevate feet 30 cm (12 inches) if no spinal injury is suspected, cover with emergency foil blanket to maintain body warmth, and reassure constantly.</li>
-        </ul>
-    </div>
-
-    <!-- 3. CRITICAL HOUSEHOLD SUPPLIES SUMMARY -->
-    <div class="emergency-section">
-        <h2>3. Essential Supply Reserves (72h Target)</h2>
-        <table class="inventory-print-table">
-            <thead>
-                <tr>
-                    <th>Category</th>
-                    <th>Minimum Required Standard</th>
-                    <th>Status / Instructions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Water Supply</strong></td>
-                    <td>3 Liters per person/day (18L total for household)</td>
-                    <td>Ration strictly for drinking & hygiene. Store away from sunlight.</td>
-                </tr>
-                <tr>
-                    <td><strong>Rations / Food</strong></td>
-                    <td>2,000 kcal per person/day (Non-perishable)</td>
-                    <td>Consume perishable fridge items first, then canned goods.</td>
-                </tr>
-                <tr>
-                    <td><strong>Medical / OTC</strong></td>
-                    <td>First Aid Kit, Painkillers, Antiseptic, Bandages</td>
-                    <td>Check expiration dates; replace yellow-flagged medical items.</td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 </div>
 
 <script>
-    let state = {
-        adults: 2,
-        kids: 0,
-        elderly: 0,
-        pets: 1,
-        inventory: [
-            { id: 1, name: "Bottled Natural Water (6L Pack)", category: "Water", price: 10, date: "2027-02-15" },
-            { id: 2, name: "OTC First Aid Kit", category: "Medical", price: 12, date: "2026-11-01" },
-            { id: 3, name: "Canned Food & Caloric Rations", category: "Food", price: 20, date: "2028-06-30" }
-        ]
-    };
+    let household = { adults: 2, kids: 0, elderly: 0, pets: 1 };
+    let inventory = [
+        { name: "Mineral Water (6L)", cat: "Water", price: 3.50, date: "2026-12-31" },
+        { name: "Canned Beans Set", cat: "Food", price: 6.20, date: "2027-05-15" }
+    ];
 
-    function init() {
-        const saved = localStorage.getItem('mySafeHavenData');
-        if (saved) {
-            try { state = JSON.parse(saved); } catch(e) {}
+    function updateHousehold(type, delta) {
+        if (household[type] + delta >= 0) {
+            household[type] += delta;
+            document.getElementById(`cnt-${type}`).innerText = household[type];
+            recalculateMetrics();
         }
-        render();
     }
 
-    function save() {
-        localStorage.setItem('mySafeHavenData', JSON.stringify(state));
-        render();
+    function recalculateMetrics() {
+        const totalPeople = household.adults + household.kids + household.elderly;
+        const waterLiters = (totalPeople * 3 * 3) + (household.pets * 1 * 3);
+        const foodKcal = ((household.adults + household.elderly) * 2000 + household.kids * 1500) * 3;
+        
+        document.getElementById('val-water').innerText = waterLiters + " Liters";
+        document.getElementById('val-food').innerText = foodKcal.toLocaleString() + " kcal";
     }
 
     function openSOSModal() {
@@ -875,154 +814,117 @@
         document.getElementById('sosModal').style.display = 'none';
     }
 
-    function updateHousehold(type, delta) {
-        if (state[type] + delta >= 0) {
-            state[type] += delta;
-            save();
-        }
-    }
-
-    function calculateExpiration(dateStr) {
-        if (!dateStr) return { label: 'No Date', class: 'status-ok', critical: false, active: true };
-        const now = new Date();
-        const exp = new Date(dateStr);
-        const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
-
-        if (diffDays < 0) {
-            return { label: '🔴 Expired', class: 'status-crit', critical: true, active: false };
-        } else if (diffDays <= 30) {
-            return { label: `🔴 Expiring in ${diffDays}gg`, class: 'status-crit', critical: true, active: true };
-        } else if (diffDays <= 90) {
-            return { label: `🟡 Replace (${diffDays}gg)`, class: 'status-warn', critical: false, active: true };
-        } else {
-            return { label: '🟢 Fresh', class: 'status-ok', critical: false, active: true };
-        }
-    }
-
-    function render() {
-        document.getElementById('cnt-adults').innerText = state.adults;
-        document.getElementById('cnt-kids').innerText = state.kids;
-        document.getElementById('cnt-elderly').innerText = state.elderly;
-        document.getElementById('cnt-pets').innerText = state.pets;
-
-        const totalPeople = state.adults + state.kids + state.elderly;
-        const waterLiters = totalPeople * 3 * 3;
-        const calories = totalPeople * 2000 * 3;
-
-        document.getElementById('val-water').innerText = `${waterLiters} Liters`;
-        document.getElementById('val-food').innerText = `${calories.toLocaleString()} kcal`;
-
-        const scenarios = ['blackout', 'cbrn', 'disaster', 'conflict'];
-        const defaultPct = { blackout: 75, cbrn: 40, disaster: 90, conflict: 50 };
-
-        scenarios.forEach(sc => {
-            const pct = localStorage.getItem(`progress_${sc}`) || defaultPct[sc];
-            const elPct = document.getElementById(`pct-${sc}`);
-            const elBar = document.getElementById(`bar-${sc}`);
-            if (elPct) elPct.innerText = pct + '%';
-            if (elBar) elBar.style.width = pct + '%';
-        });
-
+    function renderInventory() {
         const tbody = document.getElementById('inventoryTable');
         tbody.innerHTML = '';
-        let hasCriticalExpirations = false;
-        let totalRoiValue = 0;
+        const today = new Date();
+        let hasExpiring = false;
 
-        state.inventory.forEach(item => {
-            const expInfo = calculateExpiration(item.date);
-            if (expInfo.critical) hasCriticalExpirations = true;
+        inventory.forEach((item, index) => {
+            const expDate = new Date(item.date);
+            const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
             
-            const itemPrice = parseFloat(item.price) || 0;
-            if (expInfo.active) totalRoiValue += itemPrice;
+            let statusClass = 'status-ok';
+            let statusText = 'OK';
+            if (diffDays < 0) {
+                statusClass = 'status-crit';
+                statusText = 'EXPIRED';
+                hasExpiring = true;
+            } else if (diffDays <= 30) {
+                statusClass = 'status-warn';
+                statusText = 'EXPIRING SOON';
+                hasExpiring = true;
+            }
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><strong>${item.name}</strong></td>
-                <td><span class="mobile-label">Category:</span> ${item.category}</td>
-                <td><span class="mobile-label">Value:</span> €${itemPrice.toFixed(2)}</td>
-                <td><span class="mobile-label">Expiration Date:</span> ${item.date || 'N/A'}</td>
-                <td><span class="mobile-label">Status:</span> <span class="status-tag ${expInfo.class}">${expInfo.label}</span></td>
-                <td><button class="btn-delete" onclick="deleteItem(${item.id})">🗑️</button></td>
+                <td><span class="mobile-label">Item:</span>${item.name}</td>
+                <td><span class="mobile-label">Category:</span>${item.cat}</td>
+                <td><span class="mobile-label">Value:</span>€${parseFloat(item.price).toFixed(2)}</td>
+                <td><span class="mobile-label">Expiration:</span>${item.date}</td>
+                <td><span class="mobile-label">Status:</span><span class="status-tag ${statusClass}">${statusText}</span></td>
+                <td><button class="btn-delete" onclick="deleteItem(${index})">🗑️</button></td>
             `;
             tbody.appendChild(tr);
         });
 
-        document.getElementById('roiBadge').innerText = `💰 ROI: +€${totalRoiValue.toFixed(2)}`;
-        document.getElementById('expirationAlert').style.display = hasCriticalExpirations ? 'block' : 'none';
+        document.getElementById('expirationAlert').style.display = hasExpiring ? 'block' : 'none';
     }
 
     function addItem() {
         const name = document.getElementById('itemName').value;
-        const category = document.getElementById('itemCat').value;
-        const price = document.getElementById('itemPrice').value;
+        const cat = document.getElementById('itemCat').value;
+        const price = document.getElementById('itemPrice').value || 0;
         const date = document.getElementById('itemDate').value;
 
-        if (!name) return;
+        if (!name || !date) {
+            alert('Please complete item name and expiration date.');
+            return;
+        }
 
-        const newItem = {
-            id: Date.now(),
-            name,
-            category,
-            price: price ? parseFloat(price) : 0,
-            date
-        };
-
-        state.inventory.push(newItem);
-        save();
+        inventory.push({ name, cat, price, date });
+        renderInventory();
 
         document.getElementById('itemName').value = '';
         document.getElementById('itemPrice').value = '';
         document.getElementById('itemDate').value = '';
     }
 
-    function deleteItem(id) {
-        state.inventory = state.inventory.filter(item => item.id !== id);
-        save();
+    function deleteItem(index) {
+        inventory.splice(index, 1);
+        renderInventory();
     }
 
     function exportBackup() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ household, inventory }));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `mysafehaven_backup_${new Date().toISOString().slice(0,10)}.json`);
+        downloadAnchor.setAttribute("download", "MySafeHaven_Backup.json");
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
     }
 
-    function importBackup(e) {
-        const fileReader = new FileReader();
-        fileReader.onload = function(event) {
+    function importBackup(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
             try {
-                const importedState = JSON.parse(event.target.result);
-                if (importedState && importedState.inventory) {
-                    state = importedState;
-                    save();
-                    alert("Backup imported successfully!");
-                }
-            } catch(err) {
-                alert("Invalid backup file.");
+                const data = JSON.parse(e.target.result);
+                if (data.household) household = data.household;
+                if (data.inventory) inventory = data.inventory;
+                
+                Object.keys(household).forEach(key => {
+                    const el = document.getElementById(`cnt-${key}`);
+                    if (el) el.innerText = household[key];
+                });
+                recalculateMetrics();
+                renderInventory();
+                alert('Backup successfully imported!');
+            } catch (err) {
+                alert('Invalid JSON backup file.');
             }
         };
-        if (e.target.files[0]) fileReader.readAsText(e.target.files[0]);
+        reader.readAsText(file);
     }
 
-function downloadPDF() {
-        window.print();
+    function downloadPDF() {
+        const element = document.getElementById('pdfContent');
+        const opt = {
+            margin:       0.5,
+            filename:     'MySafeHaven_Report.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
     }
 
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js').then(reg => {
-                console.log('Service Worker PWA Registrato');
-            }).catch(err => {
-                console.log('Registrazione SW non riuscita:', err);
-            });
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', () => {
+        recalculateMetrics();
+        renderInventory();
+    });
 </script>
-
 </body>
 </html>
