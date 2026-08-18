@@ -3,487 +3,158 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EcoCredits - Sustainable Habit & Carbon Credit Tracker</title>
-  <link rel="stylesheet" href="style.css">
+  <title>EcoCredits — CarbonCredit CashBack</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#1e293b">
-  
+  <link rel="stylesheet" href="/style.css">
   <style>
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --accent-green: #10b981;
+      --accent-green-hover: #059669;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --border-color: #30363d;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #0b0f19;
-      color: #f3f4f6;
-      line-height: 1.35;
-      padding: 20px 10px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
       min-height: 100vh;
+      padding: 20px;
     }
 
-    .container {
-      width: 100%;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
-    /* SIMULATOR COMPONENT */
-    .simulator-tabs {
-      display: flex !important;
-      flex-direction: row !important;
-      gap: 8px;
-      margin-bottom: 12px;
-      justify-content: center;
-    }
-
-    .sim-tab {
-      flex: 1;
-      padding: 10px 6px;
-      border-radius: 10px;
-      border: 2px solid #1f2937;
-      background: #111827;
-      color: #9ca3af;
-      font-size: 11px;
-      font-weight: 800;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .sim-tab.active-normal {
-      background: #064e3b !important;
-      border-color: #10b981 !important;
-      color: #ffffff !important;
-    }
-
-    .sim-tab.active-emergency {
-      background: #7f1d1d !important;
-      border-color: #ef4444 !important;
-      color: #ffffff !important;
-    }
-
-    .sim-box {
-      background: #0b0f19;
-      border-radius: 10px;
-      padding: 12px;
-    }
-
-    .sim-list {
-      list-style: none;
-      font-size: 13px;
-      color: #e5e7eb;
-    }
-
-    .sim-list li {
-      margin-bottom: 6px;
-    }
-
-    /* STEPS SECTION */
-    .steps-section {
-      margin-top: 18px;
-      border-top: 1px solid #1e293b;
-      padding-top: 14px;
-    }
-
-    .section-head {
-      text-align: center;
-      font-size: 15px;
-      font-weight: 900;
-      color: #ffffff;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    /* QUIZ MODAL BLINDATO (DISABILITATO DI DEFAULT) */
-    .quiz-overlay {
-      display: none !important;
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      background: rgba(11, 15, 25, 0.95) !important;
-      backdrop-filter: blur(10px) !important;
-      z-index: 99999 !important;
-      justify-content: center !important;
-      align-items: center !important;
-      padding: 20px !important;
-    }
-
-    /* CLASSE JS PER APRIRE IL QUIZ */
-    .quiz-overlay.open {
-      display: flex !important;
-    }
-
-    .quiz-card {
-      background: #111827;
-      border: 2px solid #374151;
-      border-radius: 24px;
-      padding: 30px 24px;
-      width: 100%;
+    .app-container {
       max-width: 480px;
-      position: relative;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 28px 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      text-align: center;
     }
 
-    .close-quiz {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      color: #9ca3af;
-      font-size: 28px;
-      cursor: pointer;
+    .badge {
+      display: inline-block;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .quiz-progress {
-      height: 8px;
-      background: #1f2937;
-      border-radius: 10px;
-      margin-bottom: 25px;
-      overflow: hidden;
-    }
-
-    .quiz-progress-bar {
-      height: 100%;
-      width: 25%;
-      background: #2563eb;
-      transition: width 0.3s ease;
-    }
-
-    .quiz-step-title {
-      font-size: 16px;
-      font-weight: 800;
-      margin-bottom: 20px;
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
       color: #ffffff;
     }
 
-    .quiz-step {
-      display: none !important;
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 28px;
     }
 
-    .quiz-step.active {
-      display: block !important;
-    }
-
-    .option-btn {
-      width: 100%;
-      background: #1f2937;
-      border: 1px solid #374151;
-      color: #f3f4f6;
-      padding: 14px;
-      border-radius: 14px;
-      margin-bottom: 10px;
+    .card-feature {
+      background: #21262d;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
       text-align: left;
-      font-size: 14px;
+    }
+
+    .card-feature h3 {
+      font-size: 1rem;
+      color: var(--accent-green);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-feature p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .btn-primary {
+      display: block;
+      width: 100%;
+      background: var(--accent-green);
+      color: #000;
       font-weight: 700;
+      padding: 14px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 1rem;
+      margin-top: 24px;
+      transition: background 0.2s ease;
+      border: none;
       cursor: pointer;
     }
 
-    /* ANIMAZIONI PULSE PER TUTTI I PULSANTI */
-    @keyframes orangePulse {
-      0% { box-shadow: 0 0 10px rgba(234, 88, 12, 0.4); }
-      50% { box-shadow: 0 0 25px rgba(234, 88, 12, 0.85); }
-      100% { box-shadow: 0 0 10px rgba(234, 88, 12, 0.4); }
+    .btn-primary:hover {
+      background: var(--accent-green-hover);
     }
 
-    @keyframes greenPulse {
-      0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
-      50% { box-shadow: 0 0 22px rgba(16, 185, 129, 0.8); }
-      100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
-    }
-
-    @keyframes redPulse {
-      0% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
-      50% { box-shadow: 0 0 22px rgba(239, 68, 68, 0.85); }
-      100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
-    }
-
-    @keyframes purplePulse {
-      0% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); }
-      50% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.7); }
-      100% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); }
-    }
-
-    .btn-pulse {
-      transition: transform 0.2s ease, filter 0.2s ease;
-    }
-
-    .btn-pulse:hover {
-      transform: scale(1.02) !important;
-      filter: brightness(1.1);
+    footer {
+      margin-top: 24px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
     }
   </style>
 </head>
 <body>
 
-<div class="container">
+  <div class="app-container">
+    <span class="badge">🌱 Sostenibilità & Carbon Credits</span>
+    
+    <h1>EcoCredits App</h1>
+    <p class="subtitle">Trasforma le tue abitudini ecologiche quotidiane e la gestione sostenibile in crediti di carbonio e cashback reale.</p>
 
-  <!-- 1. BANNER 3 PILLARS -->
-  <div onclick="openQuiz()" class="btn-pulse" style="display: flex; justify-content: center; align-items: center; gap: 6px 10px; flex-wrap: wrap; padding: 10px 12px; background: rgba(30, 41, 59, 0.7); border: 1px solid #38bdf8; border-radius: 14px; margin-bottom: 14px; cursor: pointer; width: 100%;">
-    <div style="display: flex; align-items: center; gap: 4px;">
-      <span style="font-size: 16px;">🌱</span>
-      <span style="color: #38bdf8; font-weight: 900; font-size: 11px; text-transform: uppercase;">Eco Habits</span>
+    <div class="card-feature">
+      <h3>📊 Traccia le tue Eco-Azioni</h3>
+      <p>Registra ogni scelta sostenibile e calcola subito l'impatto positivo di CO₂ risparmiata.</p>
     </div>
-    <span style="color: #475569; font-size: 10px;">•</span>
-    <div style="display: flex; align-items: center; gap: 4px;">
-      <span style="font-size: 16px;">🚲</span>
-      <span style="color: #38bdf8; font-weight: 900; font-size: 11px; text-transform: uppercase;">Green Mobility</span>
+
+    <div class="card-feature">
+      <h3>💶 Carbon Credit & Cashback</h3>
+      <p>Converti i tuoi punti accumulati in crediti negoziabili e richiedi il tuo cashback.</p>
     </div>
-    <span style="color: #475569; font-size: 10px;">•</span>
-    <div style="display: flex; align-items: center; gap: 4px;">
-      <span style="font-size: 16px;">💎</span>
-      <span style="color: #38bdf8; font-weight: 900; font-size: 11px; text-transform: uppercase;">Carbon Credits</span>
-    </div>
+
+    <a href="/checkout.html" class="btn-primary">Inizia Ora — Abbonati</a>
+
+    <footer>
+      <p>&copy; 2026 EcoCredits. Tutti i diritti riservati.</p>
+    </footer>
   </div>
 
-  <!-- 2. HERO SECTION -->
-  <section onclick="openQuiz()" class="hero btn-pulse" style="text-align: center; width: 100%; margin-bottom: 14px; cursor: pointer; background: rgba(30, 41, 59, 0.4); border: 2px solid #ea580c; border-radius: 20px; padding: 16px 12px; animation: orangePulse 2.5s infinite;">
-
-    <!-- HOOK BANNER -->
-    <div style="margin-bottom: 12px; font-size: 12px; font-weight: 900; line-height: 1.4; text-transform: uppercase;">
-      <div style="color: #34d399; margin-bottom: 3px;">💰 MONETIZE YOUR DAILY SUSTAINABLE HABITS</div>
-      <div style="color: #38bdf8; font-size: 11.5px; margin-bottom: 3px; letter-spacing: 0.5px;">📶 100% OFFLINE HABIT LOGGING</div>
-      <div style="color: #f59e0b; font-size: 12.5px;">🌍 TURN REDUCED CO₂ INTO VERIFIED CARBON CREDITS</div>
-    </div>
-
-    <!-- TITOLO PRINCIPALE -->
-    <h1 style="font-size: 20px; font-weight: 900; color: #ffffff; margin: 6px 0 4px 0; line-height: 1.25; text-transform: uppercase;">
-      EVERY GREEN CHOICE BUILDS REAL VALUE
-    </h1>
-    
-    <!-- SUBTITLE -->
-    <div style="font-weight: 900; font-size: 12px; letter-spacing: 1px; margin-bottom: 14px; text-transform: uppercase;">
-      <div style="color: #f59e0b; margin-bottom: 2px;">TRACK. REDUCE. MONETIZE.</div>
-      <div style="color: #10b981; font-size: 11px; letter-spacing: 0.8px; font-weight: 900;">SUSTAINABILITY & REWARDS</div>
-    </div>
-
-    <!-- MEGAPULSANTE ARANCIONE -->
-    <div class="btn-action-orange" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color: #ffffff; padding: 16px 14px; border-radius: 18px; border: 2px solid #ffedd5; text-align: center;">
-      
-      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; text-align: center;">
-        <span style="font-size: 28px; line-height: 1; margin-bottom: 4px;">🎯</span>
-        <strong style="font-size: 16px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; line-height: 1.2;">CLICK AND START CARBON IMPACT TEST</strong>
-        <small style="font-size: 10.5px; font-weight: 800; color: #ffedd5; margin-top: 4px;">CALCULATE YOUR MONTHLY CARBON POTENTIAL IN 30 SECONDS ➔</small>
-      </div>
-
-      <div style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.3); margin: 2px 0;"></div>
-
-      <p style="font-size: 12px; color: #fff7ed; line-height: 1.35; margin: 0; font-weight: 500; text-align: center;">
-        Quantify your everyday eco-friendly choices, track CO₂ reductions, and convert sustainable habits into tradeable carbon credits automatically.
-      </p>
-
-    </div>
-
-  </section>
-
-  <!-- 3. SIMULATORE INTERATTIVO -->
-  <div style="margin-top: 20px; padding: 16px; background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; border-radius: 18px;">
-    
-    <div onclick="openQuiz()" class="btn-pulse" style="font-size: 12px; font-weight: 900; color: #c084fc; text-transform: uppercase; letter-spacing: 1px; text-align: center; margin-bottom: 12px; cursor: pointer; padding: 10px; background: rgba(168, 85, 247, 0.15); border: 1px solid #a855f7; border-radius: 12px; animation: purplePulse 2s infinite;">
-      🎮 TRY THE INTERACTIVE APP SIMULATOR ➔
-    </div>
-    
-    <div class="simulator-tabs">
-      <button id="tabNormal" onclick="switchSim('normal', event)" class="sim-tab active-normal btn-pulse">
-        🟢 Daily Eco Habits
-      </button>
-      <button id="tabEmergency" onclick="switchSim('emergency', event)" class="sim-tab btn-pulse">
-        💎 Carbon Credit Engine
-      </button>
-    </div>
-
-    <!-- NORMAL MODE -->
-    <div id="simNormalContent" onclick="openQuiz()" class="sim-box btn-pulse" style="border: 2px solid #10b981; display: block; cursor: pointer; animation: greenPulse 2.5s infinite;">
-      <div style="color: #34d399; font-size: 12px; font-weight: 900; margin-bottom: 8px; text-align: center;">
-        🌱 DAILY TRACKING — OFFLINE READY
-      </div>
-      <ul class="sim-list">
-        <li><strong>• Habit Logging:</strong> Fast tracking for green mobility, zero-waste food, & energy saving.</li>
-        <li><strong>• Real-Time Impact:</strong> Instant calculation of CO₂ offset per action.</li>
-        <li><strong>• Monthly Subscription:</strong> Premium subscription to unlock carbon credit generation.</li>
-      </ul>
-    </div>
-
-    <!-- EMERGENCY / MONETIZATION MODE -->
-    <div id="simEmergencyContent" onclick="openQuiz()" class="sim-box btn-pulse" style="border: 2px solid #ef4444; display: none; cursor: pointer; animation: redPulse 2.5s infinite;">
-      <div style="color: #ef4444; font-size: 12px; font-weight: 900; margin-bottom: 8px; text-align: center;">
-        💎 CARBON CREDIT MONETIZATION ENGINE
-      </div>
-      <ul class="sim-list">
-        <li><strong>• Credit Conversion:</strong> Convert verified CO₂ savings into tradeable carbon credits.</li>
-        <li><strong>• Marketplace Integration:</strong> Connect directly with green buyers and business backers.</li>
-        <li><strong>• Offline Synchronization:</strong> Log actions anytime; syncs automatically when online.</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- 4. HOW IT WORKS SECTION -->
-  <div class="steps-section">
-    <div class="section-head btn-pulse" onclick="openQuiz()" style="cursor: pointer; display: inline-block; width: 100%; padding: 6px 0;">
-      ⚡ HOW IT WORKS IN 3 SIMPLE STEPS
-    </div>
-    
-    <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 8px;">
-      
-      <!-- STEP 1 -->
-      <div onclick="openQuiz()" class="btn-pulse" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 14px; cursor: pointer;">
-        <div style="font-size: 20px; min-width: 38px; height: 38px; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #3b82f6;">📲</div>
-        <div style="flex: 1; text-align: left;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 12px; font-weight: 900; color: #ffffff; text-transform: uppercase;">LOG HABITS</span>
-            <span style="font-size: 10px; color: #3b82f6; font-weight: 900;">STEP 1</span>
-          </div>
-          <p style="font-size: 11px; color: #9ca3af; margin-top: 2px; line-height: 1.2;">Log daily mobility, energy saving, and eco choices with zero hassle.</p>
-        </div>
-      </div>
-
-      <!-- STEP 2 -->
-      <div onclick="openQuiz()" class="btn-pulse" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 14px; cursor: pointer;">
-        <div style="font-size: 20px; min-width: 38px; height: 38px; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #10b981;">📊</div>
-        <div style="flex: 1; text-align: left;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 12px; font-weight: 900; color: #ffffff; text-transform: uppercase;">CALCULATE CO₂</span>
-            <span style="font-size: 10px; color: #10b981; font-weight: 900;">STEP 2</span>
-          </div>
-          <p style="font-size: 11px; color: #9ca3af; margin-top: 2px; line-height: 1.2;">Quantify your carbon reduction accurately with automated metrics.</p>
-        </div>
-      </div>
-
-      <!-- STEP 3 -->
-      <div onclick="openQuiz()" class="btn-pulse" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 14px; cursor: pointer;">
-        <div style="font-size: 20px; min-width: 38px; height: 38px; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #ef4444;">💎</div>
-        <div style="flex: 1; text-align: left;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 12px; font-weight: 900; color: #ffffff; text-transform: uppercase;">EARN CARBON CREDITS</span>
-            <span style="font-size: 10px; color: #ef4444; font-weight: 900;">STEP 3</span>
-          </div>
-          <p style="font-size: 11px; color: #9ca3af; margin-top: 2px; line-height: 1.2;">Convert your accumulated carbon offset into tradeable credits.</p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-
-<!-- INTERACTIVE QUIZ MODAL -->
-<div id="quizModal" class="quiz-overlay">
-  <div class="quiz-card">
-    <span class="close-quiz" onclick="closeQuiz()">&times;</span>
-    
-    <div class="quiz-progress">
-      <div id="progressBar" class="quiz-progress-bar"></div>
-    </div>
-
-    <div id="step1" class="quiz-step active">
-      <div class="quiz-step-title">1. What is your primary daily mode of transportation?</div>
-      <button class="option-btn" onclick="nextStep(1, 'transport', 'Car / Motorbike', 10)">🚗 Private Car / Motorbike</button>
-      <button class="option-btn" onclick="nextStep(1, 'transport', 'Public Transit', 20)">🚌 Public Transit / Carpooling</button>
-      <button class="option-btn" onclick="nextStep(1, 'transport', 'Bicycle / Walking', 30)">🚲 Bicycle / Walking / EV</button>
-    </div>
-
-    <div id="step2" class="quiz-step">
-      <div class="quiz-step-title">2. How do you track household energy & sustainable consumption?</div>
-      <button class="option-btn" onclick="nextStep(2, 'energy', 'No tracking', 10)">⚠️ No active tracking</button>
-      <button class="option-btn" onclick="nextStep(2, 'energy', 'Basic conscious efforts', 20)">💡 Basic energy savings & recycling</button>
-      <button class="option-btn" onclick="nextStep(2, 'energy', 'Renewables / Smart tracking', 35)">☀️ Renewable energy / Smart devices</button>
-    </div>
-
-    <div id="step3" class="quiz-step">
-      <div class="quiz-step-title">3. How often do you make eco-friendly purchasing choices?</div>
-      <button class="option-btn" onclick="nextStep(3, 'purchases', 'Rarely', 5)">🛒 Rarely / Standard choices</button>
-      <button class="option-btn" onclick="nextStep(3, 'purchases', 'Occasionally', 15)">🌿 Occasionally (Local / Zero-waste)</button>
-      <button class="option-btn" onclick="nextStep(3, 'purchases', 'Consistently', 25)">💚 Consistently prioritize sustainable brands</button>
-    </div>
-
-    <div id="step4" class="quiz-step">
-      <div class="quiz-step-title">4. What is your primary goal for tracking sustainable habits?</div>
-      <button class="option-btn" onclick="finishQuiz('goal', 'Monetize Carbon Credits', 15)">💎 Monetize choices into Carbon Credits</button>
-      <button class="option-btn" onclick="finishQuiz('goal', 'Reduce Personal Footprint', 10)">🌍 Reduce personal carbon footprint</button>
-      <button class="option-btn" onclick="finishQuiz('goal', 'Both Monetization & Impact', 15)">🚀 Both environmental impact & earnings</button>
-    </div>
-  </div>
-</div>
-
-<script type="text/javascript">
-  function switchSim(mode, event) {
-    if (event) event.stopPropagation();
-    
-    var tabNormal = document.getElementById('tabNormal');
-    var tabEmergency = document.getElementById('tabEmergency');
-    var contentNormal = document.getElementById('simNormalContent');
-    var contentEmergency = document.getElementById('simEmergencyContent');
-
-    if (mode === 'normal') {
-      tabNormal.className = 'sim-tab active-normal btn-pulse';
-      tabEmergency.className = 'sim-tab btn-pulse';
-      contentNormal.style.display = 'block';
-      contentEmergency.style.display = 'none';
-    } else {
-      tabNormal.className = 'sim-tab btn-pulse';
-      tabEmergency.className = 'sim-tab active-emergency btn-pulse';
-      contentNormal.style.display = 'none';
-      contentEmergency.style.display = 'block';
+  <script>
+    // Registrazione del Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('Service Worker registrato con successo:', reg.scope))
+          .catch(err => console.error('Errore registrazione Service Worker:', err));
+      });
     }
-  }
-
-  var currentScore = 0;
-  var quizAnswers = {};
-
-  function openQuiz() {
-    var modal = document.getElementById('quizModal');
-    modal.classList.add('open');
-    resetQuiz();
-  }
-
-  function closeQuiz() {
-    var modal = document.getElementById('quizModal');
-    modal.classList.remove('open');
-  }
-
-  function resetQuiz() {
-    currentScore = 0;
-    quizAnswers = {};
-    document.getElementById('progressBar').style.width = '25%';
-    
-    var steps = document.querySelectorAll('.quiz-step');
-    for (var i = 0; i < steps.length; i++) {
-      steps[i].classList.remove('active');
-    }
-    document.getElementById('step1').classList.add('active');
-  }
-
-  function nextStep(current, key, value, points) {
-    quizAnswers[key] = value;
-    currentScore += points;
-
-    document.getElementById('step' + current).classList.remove('active');
-    document.getElementById('step' + (current + 1)).classList.add('active');
-    document.getElementById('progressBar').style.width = ((current + 1) * 25) + '%';
-  }
-
-  function finishQuiz(key, value, points) {
-    quizAnswers[key] = value;
-    currentScore += points;
-
-    var finalScore = Math.min(Math.max(currentScore, 18), 95);
-
-    localStorage.setItem('ecoCredits_score', finalScore);
-    localStorage.setItem('riskScore', finalScore);
-    localStorage.setItem('ecoCredits_answers', JSON.stringify(quizAnswers));
-
-    window.location.href = 'checkout.html';
-  }
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(function() {});
-  }
-</script>
-
+  </script>
 </body>
 </html>
