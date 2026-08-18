@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MySafeHaven - Global Household Resilience</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #0b0f19;
+      color: #f3f4f6;
+      line-height: 1.6;
+      padding: 20px 15px;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0 30px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* HERO SECTION */
+    .hero {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .hero-btn {
+      display: inline-block;
+      width: 100%;
+      max-width: 520px;
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+      color: #ffffff;
+      text-decoration: none;
+      padding: 18px 24px;
+      border-radius: 14px;
+      font-size: 20px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(180, 83, 9, 0.45);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+.hero-btn {
+  animation: ctaPulse 2.5s infinite;
+}
+    .hero-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(217, 119, 6, 0.6);
+    }
+@keyframes ctaPulse {
+  0% {
+    box-shadow: 0 8px 25px rgba(180, 83, 9, 0.45);
+  }
+
+  50% {
+    box-shadow: 0 8px 35px rgba(217, 119, 6, 0.6);
+  }
+
+  100% {
+    box-shadow: 0 8px 25px rgba(180, 83, 9, 0.45);
+  }
+}
+    .hero-btn span {
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
+      opacity: 0.9;
+      margin-top: 4px;
+      text-transform: none;
+    }
+
+    .hero h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin: 30px 0 10px;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .hero-subtag {
+      color: #f59e0b;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      color: #9ca3af;
+      font-size: 13px;
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* GRID CATEGORIES */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .cat-card {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: default;
+    }
+
+    .cat-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .cat-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* SIMULATOR COMPONENT (THE RED ARROW SECTION) */
+    .simulator-container {
+      background: #0d1527;
+      border: 1px solid #1e3a8a;
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 35px;
+      box-shadow: 0 0 25px rgba(30, 58, 138, 0.25);
+    }
+
+    .simulator-head {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: #818cf8;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .simulator-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .sim-tab {
+      flex: 1;
+      padding: 12px 10px;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      background: #111827;
+      color: #9ca3af;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .sim-tab.active-normal {
+      background: #064e3b;
+      border-color: #10b981;
+      color: #ffffff;
+    }
+
+    .sim-tab.active-emergency {
+      background: #7f1d1d;
+      border-color: #ef4444;
+      color: #ffffff;
+    }
+
+    .sim-box {
+      background: #0b0f19;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .sim-box-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sim-list {
+      list-style: none;
+      font-size: 13px;
+      color: #d1d5db;
+    }
+
+    .sim-list li {
+      margin-bottom: 10px;
+    }
+
+    .sim-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* STEPS SECTION */
+    .steps-section {
+      margin-top: 40px;
+      border-top: 1px solid #1f2937;
+      padding-top: 30px;
+    }
+
+    .section-head {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f3f4f6;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* QUIZ MODAL */
+    .quiz-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 15, 25, 0.94);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .quiz-card {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 20px;
+      padding: 30px 24px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      position: relative;
+    }
+
+    .close-quiz {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      color: #6b7280;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .quiz-progress {
+      height: 6px;
+      background: #1f2937;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .quiz-progress-bar {
+      height: 100%;
+      width: 25%;
+      background: #2563eb;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-step-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+
+    .option-btn {
+      width: 100%;
+      background: #1f2937;
+      border: 1px solid #374151;
+      color: #e5e7eb;
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .option-btn:hover {
+      background: #374151;
+      border-color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="logo">
+        🛡️ MY SAFE HAVEN
+      </div>
+      <div class="badge">DEFENSE & RESILIENCE</div>
+    </header>
+
+    <!-- HERO SECTION WITH TEST BUTTON AT THE TOP -->
+    <section class="hero">
+      <button class="hero-btn" onclick="openQuiz()">
+        🎯 START RESILIENCE TEST
+        <span>CALCULATE YOUR AUTONOMY & SAVINGS IN 2 MINUTES ➔</span>
+      </button>
+
+      <h1>EVEN IN PANIC, YOU HAVE A CLEAR AND SIMPLE PLAN</h1>
+      <div class="hero-btn">PREPARE. PROTECT. PREVAIL.</div>
+      <p>
+        No alarmism, just smart organization. <strong>MySafeHaven</strong> guides you step-by-step according to EU Civil Protection guidelines:
+        rotate food & meds so nothing expires (<strong>save up to €500/year</strong>), keep your <strong>72-hour evacuation bag always ready</strong>, and protect your family with total peace of mind.
+      </p>
+
+      <!-- CATEGORY CARDS -->
+      <div class="grid-3">
+        <div class="cat-card">
+          <div class="cat-icon">🌊</div>
+          <div class="cat-title">Natural Disasters</div>
+        </div>
+        <div class="cat-card">
+          <div class="cat-icon">⚡</div>
+          <div class="cat-title">Total Blackout</div>
+        </div>
+        <div class="cat-card">
+          <div class="cat-icon">🪖</div>
+          <div class="cat-title">Conflicts & CBRN</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIMULATOR SECTION (FULL INTERACTIVE SIMULATOR) -->
+    <div class="simulator-container">
+      <div class="simulator-head">🎮 TRY THE INTERACTIVE APP SIMULATOR</div>
+      
+      <div class="simulator-tabs">
+        <button id="tabNormal" class="sim-tab active-normal" onclick="switchSim('normal')">
+          🟢 Normal Mode (Peace Time)
+        </button>
+        <button id="tabEmergency" class="sim-tab" onclick="switchSim('emergency')">
+          🔴 Emergency / Blackout Mode
+        </button>
+      </div>
+
+      <!-- NORMAL MODE CONTENT -->
+      <div id="simNormalContent" class="sim-box">
+        <div class="sim-box-title" style="color: #10b981;">
+          🌱 NORMAL MODE (HOUSEHOLD MANAGEMENT)
+        </div>
+        <ul class="sim-list">
+          <li><strong>• Pantry:</strong> 12 items expiring this week (Anti-waste menu generated).</li>
+          <li><strong>• Meds:</strong> Antibiotics supply valid for 6 months.</li>
+          <li><strong>• Monthly Savings:</strong> <span style="color: #4ade80; font-weight: 700;">€500+/year saved in peace time (+€42/mo)</span>.</li>
+        </ul>
+      </div>
+
+      <!-- EMERGENCY MODE CONTENT -->
+      <div id="simEmergencyContent" class="sim-box" style="display: none;">
+        <div class="sim-box-title" style="color: #ef4444;">
+          🚨 EMERGENCY / BLACKOUT MODE (100% OFFLINE)
+        </div>
+        <ul class="sim-list">
+          <li><strong>• 72h Autonomy Protocol:</strong> Activated without cellular/internet connection.</li>
+          <li><strong>• Action Plan:</strong> Immediate checklist to seal home or evacuate in 5 minutes.</li>
+          <li><strong>• Critical Supplies:</strong> Rationing plan calibrated for your family size.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS SECTION -->
+    <div class="steps-section">
+      <div class="section-head">⚡ HOW IT WORKS IN 3 SIMPLE STEPS</div>
+      <div class="grid-3">
+        <div class="cat-card">
+          <div style="font-size: 11px; color: #2563eb; font-weight: 800; margin-bottom: 4px;">STEP 1</div>
+          <div class="cat-title" style="color: #ffffff; font-size: 15px;">TRACK</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 6px;">Maintain active oversight of your emergency inventory and expiration timelines below.</p>
+        </div>
+        <div class="cat-card">
+          <div style="font-size: 11px; color: #2563eb; font-weight: 800; margin-bottom: 4px;">STEP 2</div>
+          <div class="cat-title" style="color: #ffffff; font-size: 15px;">SAVE</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 6px;">The app tells you what to consume before it expires. Save up to €500/year.</p>
+        </div>
+        <div class="cat-card">
+          <div style="font-size: 11px; color: #2563eb; font-weight: 800; margin-bottom: 4px;">STEP 3</div>
+          <div class="cat-title" style="color: #ffffff; font-size: 15px;">PROTECT</div>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 6px;">In emergencies, follow the checklist to evacuate or seal your home safely.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INTERACTIVE QUIZ MODAL -->
+  <div id="quizModal" class="quiz-overlay">
+    <div class="quiz-card">
+      <span class="close-quiz" onclick="closeQuiz()">&times;</span>
+      
+      <div class="quiz-progress">
+        <div id="progressBar" class="quiz-progress-bar"></div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div id="step1" class="quiz-step">
+        <div class="quiz-step-title">1. How many people are in your household?</div>
+        <button class="option-btn" onclick="nextStep(1, 'family', '1-2 People', 20)">👤 1 - 2 People</button>
+        <button class="option-btn" onclick="nextStep(1, 'family', '3-4 People', 25)">👥 3 - 4 People</button>
+        <button class="option-btn" onclick="nextStep(1, 'family', '5+ People', 30)">👨‍👩‍👧‍👦 5+ People</button>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="step2" class="quiz-step" style="display: none;">
+        <div class="quiz-step-title">2. How many days of emergency water & food supply do you have?</div>
+        <button class="option-btn" onclick="nextStep(2, 'water_food', 'Less than 24h', 10)">⚠️ Less than 24 hours</button>
+        <button class="option-btn" onclick="nextStep(2, 'water_food', '1-2 Days', 20)">🥫 1 - 2 Days</button>
+        <button class="option-btn" onclick="nextStep(2, 'water_food', '3+ Days (EU Compliant)', 35)">🛡️ 3+ Days (EU Compliant)</button>
+      </div>
+
+      <!-- STEP 3 -->
+      <div id="step3" class="quiz-step" style="display: none;">
+        <div class="quiz-step-title">3. Do you have emergency power backup or off-grid cooking gear?</div>
+        <button class="option-btn" onclick="nextStep(3, 'power', 'None', 5)">❌ None</button>
+        <button class="option-btn" onclick="nextStep(3, 'power', 'Basic flashlight / Powerbank', 15)">🔋 Basic flashlight / Powerbank</button>
+        <button class="option-btn" onclick="nextStep(3, 'power', 'Solar generator / Camping stove', 25)">☀️ Solar generator / Camping stove</button>
+      </div>
+
+      <!-- STEP 4 -->
+      <div id="step4" class="quiz-step" style="display: none;">
+        <div class="quiz-step-title">4. Are your essential documents & cash ready for a 5-min evacuation?</div>
+        <button class="option-btn" onclick="finishQuiz('docs_cash', 'Not organized', 5)">📄 Scattered around the house</button>
+        <button class="option-btn" onclick="finishQuiz('docs_cash', 'Digital copy only', 10)">📱 Digital copies on phone</button>
+        <button class="option-btn" onclick="finishQuiz('docs_cash', 'Ready in waterproof pouch', 15)">🎒 Ready in a grab-and-go bag</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* SIMULATOR SWITCHER */
+    function switchSim(mode) {
+      const tabNormal = document.getElementById('tabNormal');
+      const tabEmergency = document.getElementById('tabEmergency');
+      const contentNormal = document.getElementById('simNormalContent');
+      const contentEmergency = document.getElementById('simEmergencyContent');
+
+      if (mode === 'normal') {
+        tabNormal.className = 'sim-tab active-normal';
+        tabEmergency.className = 'sim-tab';
+        contentNormal.style.display = 'block';
+        contentEmergency.style.display = 'none';
+      } else {
+        tabNormal.className = 'sim-tab';
+        tabEmergency.className = 'sim-tab active-emergency';
+        contentNormal.style.display = 'none';
+        contentEmergency.style.display = 'block';
+      }
+    }
+
+    /* QUIZ FUNCTIONALITY */
+    let currentScore = 0;
+    let quizAnswers = {};
+
+    function openQuiz() {
+      document.getElementById('quizModal').style.display = 'flex';
+      resetQuiz();
+    }
+
+    function closeQuiz() {
+      document.getElementById('quizModal').style.display = 'none';
+    }
+
+    function resetQuiz() {
+      currentScore = 0;
+      quizAnswers = {};
+      document.getElementById('progressBar').style.width = '25%';
+      document.getElementById('step1').style.display = 'block';
+      document.getElementById('step2').style.display = 'none';
+      document.getElementById('step3').style.display = 'none';
+      document.getElementById('step4').style.display = 'none';
+    }
+
+    function nextStep(current, key, value, points) {
+      quizAnswers[key] = value;
+      currentScore += points;
+
+      document.getElementById(`step${current}`).style.display = 'none';
+      document.getElementById(`step${current + 1}`).style.display = 'block';
+      document.getElementById('progressBar').style.width = `${(current + 1) * 25}%`;
+    }
+
+    function finishQuiz(key, value, points) {
+      quizAnswers[key] = value;
+      currentScore += points;
+
+      const finalScore = Math.min(Math.max(currentScore, 18), 95);
+
+      // Save quiz results for Checkout Page & Stripe logic
+      localStorage.setItem('mySafeHaven_score', finalScore);
+      localStorage.setItem('riskScore', finalScore);
+      localStorage.setItem('mySafeHaven_answers', JSON.stringify(quizAnswers));
+
+      // Direct redirect to checkout.html
+      window.location.href = 'checkout.html';
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

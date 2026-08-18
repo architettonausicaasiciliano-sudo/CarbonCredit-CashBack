@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Your Order - MySafeHaven</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f3f4f6;
+      color: #1f2937;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 15px;
+    }
+
+    .checkout-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      width: 100%;
+      max-width: 460px;
+      padding: 28px 24px;
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1f2937;
+      letter-spacing: 0.5px;
+    }
+
+    .main-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #111827;
+      margin-top: 4px;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    /* BLUE BADGE BOX */
+    .status-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 14px;
+      margin: 20px 0;
+    }
+
+    .status-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1d4ed8;
+    }
+
+    .score-pill {
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .status-list {
+      list-style: none;
+      font-size: 12px;
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    /* SUMMARY SECTION */
+    .summary-section {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .summary-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 12px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 8px;
+      color: #4b5563;
+    }
+
+    .discount-tag {
+      color: #16a34a;
+      font-weight: 700;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 12px;
+      margin-top: 8px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    /* FORM INPUTS */
+    .section-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: #2563eb;
+    }
+
+    /* STRIPE PAYMENT CONTAINER */
+    #card-element {
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #ffffff;
+      margin-bottom: 20px;
+    }
+
+    .pay-btn {
+      width: 100%;
+      background: #111827;
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .pay-btn:hover {
+      background: #1f2937;
+    }
+
+    .pay-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 14px;
+    }
+
+    .terms-text {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-top: 16px;
+      text-align: center;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="checkout-card">
+    <div class="brand-header">
+      <div class="brand-title">MySafeHaven</div>
+      <div class="main-title">Complete Your Order</div>
+      <div class="subtitle">Full access to household preparation plan & EU 72h Grab Bag.</div>
+    </div>
+
+    <!-- AUTONOMY BOX -->
+    <div class="status-box">
+      <div class="status-head">
+        <div class="status-badge">
+          🛡️ EU 72h Autonomy
+        </div>
+        <div id="scorePill" class="score-pill">56%</div>
+      </div>
+      <ul class="status-list">
+        <li>• <strong>Household:</strong> Registered</li>
+        <li>• <strong>Water & Food:</strong> 2L/day per person supply</li>
+        <li>• <strong>Docs & Cash:</strong> Included in EU 72h plan</li>
+      </ul>
+    </div>
+
+    <!-- ORDER SUMMARY -->
+    <div class="summary-section">
+      <div class="summary-title">Order Summary</div>
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span style="text-decoration: line-through; color: #9ca3af;">€1.73</span>
+      </div>
+      <div class="summary-row">
+        <span>Discount</span>
+        <span class="discount-tag">60% discount today</span>
+      </div>
+      <div class="summary-row" style="color: #ef4444; font-weight: 600;">
+        <span></span>
+        <span>-€1.03</span>
+      </div>
+      <div class="total-row">
+        <span>Pay now:</span>
+        <span style="font-size: 20px;">0.69 €</span>
+      </div>
+    </div>
+
+    <!-- BILLING INFO -->
+    <label class="section-label" for="email">Billing Information</label>
+    <input type="email" id="email" class="input-field" placeholder="your.email@example.com" required>
+
+    <!-- PAYMENT SECTION -->
+    <label class="section-label">Payment</label>
+    <form id="payment-form">
+      <div id="card-element"></div>
+      <button id="submit-btn" class="pay-btn">Pay 0.69 €</button>
+    </form>
+
+    <div class="footer-note">
+      🔒 Secure & encrypted payment
+      <div style="color: #f59e0b; margin-top: 2px;">★★★★★ 4.6 / 5</div>
+    </div>
+
+    <p class="terms-text">
+      By proceeding, you accept the Terms & Conditions and Privacy Policy. Today's payment is €0.69. After a 7-day trial, your subscription will automatically renew at €35/month until cancelled.
+    </p>
+  </div>
+
+  <script>
+  // 1. Recupera lo score
+  const score = localStorage.getItem('mySafeHaven_score') || '56';
+  const scorePill = document.getElementById('scorePill');
+  if (scorePill) scorePill.innerText = score + '%';
+
+  // 2. Chiave Pubblica di Stripe
+  const STRIPE_PUBLIC_KEY = 'pk_test_51TYTYHHyr3eYjbnKyxVT0eP6ksppsaluF7JdKyBQsxZM9ok3oYzsxvLuUSCqlM8wWFxti1c6HZpuIwX2J4QQxUEp00T0X1lf7A'; 
+
+  const stripe = Stripe(STRIPE_PUBLIC_KEY);
+  const elements = stripe.elements();
+  
+  // Crea e monta l'elemento per la carta di credito (Senza il campo CAP)
+  const cardElement = elements.create('card', {
+    hidePostalCode: true, // <-- DISABILITA IL CAMPO DEL CODICE POSTALE
+    style: {
+      base: {
+        fontSize: '15px',
+        color: '#111827',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        '::placeholder': { color: '#9ca3af' }
+      },
+      invalid: {
+        color: '#ef4444'
+      }
+    }
+  });
+  
+  cardElement.mount('#card-element');
+
+  // 3. Gestione invio pagamento
+  const form = document.getElementById('payment-form');
+  const submitBtn = document.getElementById('submit-btn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const emailInput = document.getElementById('email').value.trim();
+
+    if (!emailInput) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Processing...';
+
+    try {
+      // Step A: Crea il pagamento iniziale da 0.69 €
+      const res = await fetch('/create-initial-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput, score: score })
+      });
+
+      const data = await res.json();
+
+      if (!data.clientSecret) {
+        alert('Payment initialization failed. Check server logs.');
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Pay 0.69 €';
+        return;
+      }
+
+      // Step B: Conferma il pagamento con la carta inserita dall'utente
+      const result = await stripe.confirmCardPayment(data.clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: { email: emailInput }
+        }
+      });
+
+      if (result.error) {
+        alert(result.error.message);
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Pay 0.69 €';
+      } else {
+        // Step C: Pagamento 0.69 € riuscito -> Crea l'abbonamento con i 7 giorni di prova
+        await fetch('/create-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerId: data.customerId,
+            paymentIntentId: data.paymentIntentId,
+            email: emailInput,
+            score: score
+          })
+        });
+
+        // Salva la mail e vai alla pagina di successo
+        localStorage.setItem('email', emailInput);
+        window.location.href = `/dashboard?email=${encodeURIComponent(emailInput)}`;
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Connection error with the server.');
+      submitBtn.disabled = false;
+      submitBtn.innerText = 'Pay 0.69 €';
+    }
+  });
+</script>
+</body>
+</html>
