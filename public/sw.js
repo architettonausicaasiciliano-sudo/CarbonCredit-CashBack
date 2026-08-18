@@ -1,41 +1,20 @@
-const CACHE_NAME = 'mysafehaven-v2.1.0';
-
-// Elenco degli asset critici da archiviare offline
+const CACHE_NAME = 'carboncredit-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/checkout.html',
-  '/success.html',
-  '/public/success.html',
-  '/premium.html',
   '/style.css',
-  '/app.js',
-  '/premium.js',
   '/manifest.json',
-  '/protected/dashboard.html',
-  '/protected/emergency.html',
-  '/protected/scenarios/blackout.html',
-  '/protected/scenarios/cbrn.html',
-  '/protected/scenarios/conflict.html',
-  '/protected/scenarios/disaster.html',
-  '/offline/evacuation-guide.html',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
+  '/success.html'
 ];
 
-// Installazione: Pre-caching tollerante che impedisce il blocco dell'installazione se un file non viene trovato
+// Installazione: Pre-cache degli asset e attivazione immediata
 self.addEventListener('install', (event) => {
+  self.skipWaiting(); // Forza il nuovo Service Worker ad attivarsi subito
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      console.log('[Service Worker] Pre-caching degli asset critici');
-      await Promise.allSettled(
-        ASSETS_TO_CACHE.map((url) =>
-          cache.add(url).catch((err) => {
-            console.warn(`[Service Worker] Errore salvataggio in cache per ${url}:`, err);
-          })
-        )
-      );
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
   );
 });
 
@@ -55,14 +34,14 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Strategy: Stale-While-Revalidate con Fallback Offline per le pagine HTML
+// Fetch Strategy: Stale-While-Revalidate con Fallback Offline
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Serve da cache e aggiorna in background se c'è connessione
+        // Serve da cache e aggiorna in background
         fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => {
@@ -86,13 +65,11 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       }).catch(async () => {
-        // Fallback quando la rete è assente durante la navigazione HTML
+        // Fallback quando non c'è connessione durante la navigazione HTML
         if (event.request.headers.get('accept')?.includes('text/html')) {
           return (
-            (await caches.match('/success.html')) ||
-            (await caches.match('/public/success.html')) ||
-            (await caches.match('/protected/dashboard.html')) ||
-            (await caches.match('/offline/evacuation-guide.html'))
+            (await caches.match('/index.html')) ||
+            (await caches.match('/success.html'))
           );
         }
       });
