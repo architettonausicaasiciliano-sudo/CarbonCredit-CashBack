@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MySafeHaven - Checkout</title>
+
+  <!-- STRIPE SDK -->
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px 14px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 28px 24px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0284c7;
+      letter-spacing: -0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 10px 0 4px;
+    }
+
+    .subtitle {
+      font-size: 13.5px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    /* DYNAMIC EU 72H SUMMARY BOX */
+    .eu-summary-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 22px;
+      font-size: 13px;
+      color: #0369a1;
+      line-height: 1.6;
+    }
+
+    .eu-summary-title {
+      font-weight: 700;
+      color: #0284c7;
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+
+    .order-box {
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px;
+      background: #f8fafc;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+
+    .old-price {
+      text-decoration: line-through;
+      color: #94a3b8;
+    }
+
+    .discount {
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    .total-row {
+      border-top: 1px solid #e2e8f0;
+      margin-top: 12px;
+      padding-top: 12px;
+    }
+
+    .total-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .total-price {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .billing {
+      margin-top: 22px;
+    }
+
+    .billing-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      background: #fff;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    .payment-title {
+      margin-top: 22px;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    #payment-element {
+      margin-top: 10px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 16px;
+      border: 0;
+      border-radius: 12px;
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    button:hover {
+      background: #1e293b;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #payment-message {
+      display: none;
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .secure {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .rating {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .stars {
+      color: #eab308;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    .legal {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #64748b;
+    }
+
+    .legal strong {
+      color: #334155;
+    }
+
+    .cancel {
+      margin-top: 8px;
+      font-size: 10.5px;
+      color: #94a3b8;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 12px 8px;
+      }
+
+      .card {
+        padding: 22px 18px;
+        border-radius: 16px;
+      }
+
+      .title {
+        font-size: 21px;
+      }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1e293b">
+</head>
+
+<body>
+
+<div class="container">
+  <div class="card">
+
+    <div class="header">
+      <div class="logo">🛡️ MySafeHaven</div>
+
+      <div class="title">
+        Complete Your Order
+      </div>
+
+      <div class="subtitle">
+        Instant access to your Household Resilience Plan & EU 72h Protocol.
+      </div>
+    </div>
+
+    <!-- DYNAMIC QUIZ RESULT BOX -->
+    <div id="quizSummaryBox" class="eu-summary-box" style="display: none;">
+      <div class="eu-summary-title">
+        <span>📋 Generated Resilience Profile</span>
+        <span id="summaryScore" style="background: #0284c7; color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;">--%</span>
+      </div>
+      <div id="summaryDetails">
+        Loading your profile...
+      </div>
+    </div>
+
+    <div class="section-title">
+      Order Summary
+    </div>
+
+    <div class="order-box">
+
+      <div class="row">
+        <span>Resilience Plan Subtotal</span>
+        <span class="old-price">€1.73</span>
+      </div>
+
+      <div class="row">
+        <span>Promotional Diagnostic Discount</span>
+        <span class="discount">− €1.03 (60%)</span>
+      </div>
+
+      <div class="row total-row">
+        <span class="total-label">
+          Pay now:
+        </span>
+
+        <span class="total-price">
+          €0.69
+        </span>
+      </div>
+
+    </div>
+
+    <div class="billing">
+
+      <div class="billing-title">
+        Billing Information
+      </div>
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Your primary email address"
+        autocomplete="email"
+        required
+      >
+
+    </div>
+
+    <div class="payment-title">
+      Payment Method
+    </div>
+
+    <div id="payment-element"></div>
+
+    <div id="payment-message"></div>
+
+    <button id="payBtn" type="button">
+      Confirm & Pay €0.69
+    </button>
+
+    <div class="secure">
+      🔒 Secure & SSL Encrypted Payment
+    </div>
+
+    <div class="rating">
+      <span class="stars">★★★★★</span>
+      <strong>4.8 / 5</strong> · Over 1,200 assessments completed
+    </div>
+
+    <div class="legal">
+      By proceeding, you agree to our
+      <strong>Terms & Conditions</strong>
+      and <strong>Privacy Policy</strong>.
+
+      Initial payment is €0.69.
+      After a 7-day trial period, the service automatically renews at
+      €35/month for continuous resource & software updates, cancelable anytime.
+
+      <div class="cancel">
+        You can cancel your subscription in one click by contacting customer support.
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+  /* =========================================
+      RETRIEVE AND DISPLAY QUIZ RESULTS
+  ========================================= */
+  const score = localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore");
+  const answersRaw = localStorage.getItem("mySafeHaven_answers");
+  const summaryBox = document.getElementById("quizSummaryBox");
+  const summaryScore = document.getElementById("summaryScore");
+  const summaryDetails = document.getElementById("summaryDetails");
+
+  if (score && summaryBox) {
+    summaryBox.style.display = "block";
+    summaryScore.innerText = `${score}%`;
+    
+    let answers = {};
+    try { answers = JSON.parse(answersRaw) || {}; } catch(e) {}
+
+    summaryDetails.innerHTML = `
+      • <strong>Household Size:</strong> ${answers.family || 'Registered'}<br/>
+      • <strong>Water & Food Autonomy:</strong> ${answers.water_food || 'Configured in plan'}<br/>
+      • <strong>Power Backup:</strong> ${answers.power || 'Profiled'}<br/>
+      • <strong>72h Evacuation Readiness:</strong> ${answers.docs_cash || 'Included in recommendations'}
+    `;
+  }
+
+  const btn = document.getElementById("payBtn");
+  const emailInput = document.getElementById("email");
+  const message = document.getElementById("payment-message");
+  const paymentElementDiv = document.getElementById("payment-element");
+
+  if (!btn || !emailInput) {
+    console.error("CHECKOUT ERROR: Missing form elements");
+    return;
+  }
+
+  let stripe;
+  let elements;
+  let paymentElement;
+
+  let clientSecret = null;
+  let customerId = null;
+  let paymentIntentId = null;
+  let paymentReady = false;
+  let creatingPayment = false;
+  let isDemoMode = false;
+
+  function showError(text) {
+    message.innerText = text;
+    message.style.display = "block";
+  }
+
+  function hideError() {
+    message.style.display = "none";
+  }
+
+  // RETRIEVE PREVIOUSLY SAVED EMAIL
+  const savedEmail = localStorage.getItem("email");
+  if (!emailInput.value && savedEmail) {
+    emailInput.value = savedEmail;
+  }
+
+  try {
+    /* =========================================
+        STRIPE CONFIG & INITIALIZATION (ROTTA RELATIVA)
+    ========================================= */
+    const configResponse = await fetch("/api/stripe-config");
+
+    if (!configResponse.ok) {
+      throw new Error("Backend unreachable. Activating local test mode.");
+    }
+
+    const config = await configResponse.json();
+
+    if (!config.publishableKey) {
+      throw new Error("Stripe publishable key not configured.");
+    }
+
+    stripe = Stripe(config.publishableKey);
+
+} catch (error) {
+    console.error("STRIPE INITIALIZATION ERROR:", error.message);
+    isDemoMode = false;
+    showError("Impossibile caricare il modulo di pagamento. Riprova più tardi.");
+    btn.disabled = true;
+  }
+
+  async function initializePayment() {
+    if (isDemoMode) {
+      paymentReady = true;
+      return;
+    }
+
+    if (creatingPayment || paymentReady) return;
+
+    const email = emailInput.value.trim();
+    if (!email) return;
+
+    creatingPayment = true;
+
+    try {
+      const variant = localStorage.getItem("abVariant") || "A";
+      const currentScore = localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore") || "50";
+
+      /* ROTTA RELATIVA PER L'INTENT DI PAGAMENTO */
+      const response = await fetch("/create-initial-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, variant, score: currentScore })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error creating payment intent.");
+      }
+
+      clientSecret = data.clientSecret;
+      customerId = data.customerId;
+      paymentIntentId = data.paymentIntentId;
+
+      elements = stripe.elements({ clientSecret });
+      paymentElement = elements.create("payment", { terms: { card: 'never' } });
+      paymentElement.mount("#payment-element");
+
+      paymentReady = true;
+      btn.innerText = "Confirm & Pay €0.69";
+
+    } catch (error) {
+      console.error("PAYMENT INIT ERROR:", error);
+      showError(error.message || "Unable to load payment module.");
+    } finally {
+      creatingPayment = false;
+    }
+  }
+
+  /* EMAIL INPUT EVENTS */
+  emailInput.addEventListener("input", () => {
+    hideError();
+    if (!isDemoMode) paymentReady = false;
+  });
+
+  emailInput.addEventListener("change", () => {
+    hideError();
+    initializePayment();
+  });
+
+  emailInput.addEventListener("blur", () => {
+    initializePayment();
+  });
+
+  if (emailInput.value.trim()) {
+    await initializePayment();
+  }
+
+  /* =========================================
+      PAYMENT SUBMISSION HANDLING
+  ========================================= */
+  btn.addEventListener("click", async (event) => {
+    event.preventDefault();
+    hideError();
+
+    const email = emailInput.value.trim();
+
+    if (!email) {
+      showError("Please enter a valid email address to continue.");
+      emailInput.focus();
+      return;
+    }
+
+    // LOCAL DEMO SIMULATION
+    if (isDemoMode) {
+      btn.disabled = true;
+      btn.innerText = "Processing...";
+
+      setTimeout(() => {
+        localStorage.setItem("email", email);
+        localStorage.setItem("hasPaid", "true");
+        window.location.href = "success.html";
+      }, 600);
+
+      return;
+    }
+
+    // STRIPE REALTIME PAYMENT
+    if (!paymentReady) {
+      btn.innerText = "Initializing...";
+      btn.disabled = true;
+
+      try {
+        await initializePayment();
+      } finally {
+        btn.disabled = false;
+      }
+
+      if (!paymentReady) return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Processing payment...";
+
+    try {
+      const result = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: window.location.origin + "/success.html"
+        },
+        redirect: "if_required"
+      });
+
+      if (result.error) {
+        showError(result.error.message || "Payment was unsuccessful.");
+        btn.disabled = false;
+        btn.innerText = "Confirm & Pay €0.69";
+        return;
+      }
+
+      const currentScore = localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore") || "50";
+
+      const subscriptionResponse = await fetch("/create-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerId,
+          paymentIntentId,
+          email,
+          variant: localStorage.getItem("abVariant") || "A",
+          score: currentScore
+        })
+      });
+
+      const subscriptionData = await subscriptionResponse.json();
+
+      if (!subscriptionResponse.ok) {
+        throw new Error(subscriptionData.error || "Unable to activate subscription.");
+      }
+
+      localStorage.setItem("email", email);
+      localStorage.setItem("hasPaid", "true");
+      window.location.href = "success.html";
+
+    } catch (error) {
+      console.error("PAYMENT ERROR:", error);
+      showError(error.message || "An error occurred during payment.");
+      btn.disabled = false;
+      btn.innerText = "Confirm & Pay €0.69";
+    }
+  });
+
+});
+</script>
+
+</body>
+</html>

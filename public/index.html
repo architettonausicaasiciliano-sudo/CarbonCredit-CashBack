@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MySafeHaven - Global Household Resilience</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #0b0f19;
+      color: #f3f4f6;
+      line-height: 1.35;
+      padding: 20px 10px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* SIMULATOR COMPONENT */
+    .simulator-tabs {
+      display: flex !important;
+      flex-direction: row !important;
+      gap: 8px;
+      margin-bottom: 12px;
+      justify-content: center;
+    }
+
+    .sim-tab {
+      flex: 1;
+      padding: 10px 6px;
+      border-radius: 10px;
+      border: 2px solid #1f2937;
+      background: #111827;
+      color: #9ca3af;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .sim-tab.active-normal {
+      background: #064e3b !important;
+      border-color: #10b981 !important;
+      color: #ffffff !important;
+    }
+
+    .sim-tab.active-emergency {
+      background: #7f1d1d !important;
+      border-color: #ef4444 !important;
+      color: #ffffff !important;
+    }
+
+    .sim-box {
+      background: #0b0f19;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .sim-list {
+      list-style: none;
+      font-size: 13px;
+      color: #e5e7eb;
+    }
+
+    .sim-list li {
+      margin-bottom: 6px;
+    }
+
+    /* STEPS SECTION */
+    .steps-section {
+      margin-top: 18px;
+      border-top: 1px solid #1e293b;
+      padding-top: 14px;
+    }
+
+    .section-head {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* QUIZ MODAL BLINDATO (DISABILITATO DI DEFAULT) */
+    .quiz-overlay {
+      display: none !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(11, 15, 25, 0.95) !important;
+      backdrop-filter: blur(10px) !important;
+      z-index: 99999 !important;
+      justify-content: center !important;
+      align-items: center !important;
+      padding: 20px !important;
+    }
+
+    /* CLASSE JS PER APRIRE IL QUIZ */
+    .quiz-overlay.open {
+      display: flex !important;
+    }
+
+    .quiz-card {
+      background: #111827;
+      border: 2px solid #374151;
+      border-radius: 24px;
+      padding: 30px 24px;
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+    }
+
+    .close-quiz {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      color: #9ca3af;
+      font-size: 28px;
+      cursor: pointer;
+    }
+
+    .quiz-progress {
+      height: 8px;
+      background: #1f2937;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      overflow: hidden;
+    }
+
+    .quiz-progress-bar {
+      height: 100%;
+      width: 25%;
+      background: #2563eb;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-step-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+
+    .quiz-step {
+      display: none !important;
+    }
+
+    .quiz-step.active {
+      display: block !important;
+    }
+
+    .option-btn {
+      width: 100%;
+      background: #1f2937;
+      border: 1px solid #374151;
+      color: #f3f4f6;
+      padding: 14px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    /* ANIMAZIONI PULSE PER TUTTI I PULSANTI */
+    @keyframes orangePulse {
+      0% { box-shadow: 0 0 10px rgba(234, 88, 12, 0.4); }
+      50% { box-shadow: 0 0 25px rgba(234, 88, 12, 0.85); }
+      100% { box-shadow: 0 0 10px rgba(234, 88, 12, 0.4); }
+    }
+
+    @keyframes greenPulse {
+      0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+      50% { box-shadow: 0 0 22px rgba(16, 185, 129, 0.8); }
+      100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+    }
+
+    @keyframes redPulse {
+      0% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 0 22px rgba(239, 68, 68, 0.85); }
+      100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+    }
+
+    @keyframes purplePulse {
+      0% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.7); }
+      100% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); }
+    }
+
+    .btn-pulse {
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .btn-pulse:hover {
+      transform: scale(1.02) !important;
+      filter: brightness(1.1);
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1e293b">
+</head>
+<body>
+
+<div class="container">
+
+<!-- 1. BANNER 3 SCENARI (CON ANIMAZIONE HOVER) -->
+    <div onclick="openQuiz()" class="btn-pulse" style="display: flex; justify-content: center; align-items: center; gap: 6px 10px; flex-wrap: wrap; padding: 10px 12px; background: rgba(30, 41, 59, 0.7); border: 1px solid #38bdf8; border-radius: 14px; margin-bottom: 14px; cursor: pointer; width: 100%;">
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <span style="font-size: 16px;">🌊</span>
+        <span style="color: #38bdf8; font-weight: 900; font-size: 11px; text-transform: uppercase;">Natural Disasters</span>
+      </div>
+      <span style="color: #475569; font-size: 10px;">•</span>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <span style="font-size: 16px;">⚡</span>
+        <span style="color: #38bdf8; font-weight: 900; font-size: 11px; text-transform: uppercase;">Total Blackout</span>
+      </div>
+      <span style="color: #475569; font-size: 10px;">•</span>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <span style="font-size: 16px;">🪖</span>
+        <span style="color: #38bdf8; font-weight: 900; font-size: 11px; text-transform: uppercase;">Conflicts & CBRN</span>
+      </div>
+    </div>
+
+<!-- 2. HERO SECTION -->
+    <section onclick="openQuiz()" class="hero btn-pulse" style="text-align: center; width: 100%; margin-bottom: 14px; cursor: pointer; background: rgba(30, 41, 59, 0.4); border: 2px solid #ea580c; border-radius: 20px; padding: 16px 12px; animation: orangePulse 2.5s infinite;">
+
+      <!-- HOOK BANNER -->
+      <div style="margin-bottom: 12px; font-size: 12px; font-weight: 900; line-height: 1.4; text-transform: uppercase;">
+        <div style="color: #34d399; margin-bottom: 3px;">💰 SAVE UP TO €500/YEAR IN PEACE TIME</div>
+        <div style="color: #ef4444; font-size: 11.5px; margin-bottom: 3px; letter-spacing: 0.5px;">📶 100% OFFLINE READY</div>
+        <div style="color: #ef4444; font-size: 12.5px;">🚨 IN EMERGENCIES, SAVE YOUR LIFE AND YOUR FAMILY</div>
+      </div>
+
+      <!-- TITOLO PRINCIPALE -->
+      <h1 style="font-size: 20px; font-weight: 900; color: #ffffff; margin: 6px 0 4px 0; line-height: 1.25; text-transform: uppercase;">
+        EVEN IN PANIC, YOU HAVE A CLEAR PLAN
+      </h1>
+      
+      <!-- SUBTITLE -->
+      <div style="font-weight: 900; font-size: 12px; letter-spacing: 1px; margin-bottom: 14px; text-transform: uppercase;">
+        <div style="color: #f59e0b; margin-bottom: 2px;">PREPARE. PROTECT. PREVAIL.</div>
+        <!-- SCRITTA VERDE RICHIESTA -->
+        <div style="color: #10b981; font-size: 11px; letter-spacing: 0.8px; font-weight: 900;">DEFENSE & RESILIENCE</div>
+      </div>
+
+      <!-- MEGAPULSANTE ARANCIONE -->
+      <div class="btn-action-orange" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color: #ffffff; padding: 16px 14px; border-radius: 18px; border: 2px solid #ffedd5; text-align: center;">
+        
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; text-align: center;">
+          <span style="font-size: 28px; line-height: 1; margin-bottom: 4px;">🎯</span>
+          <strong style="font-size: 16px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; line-height: 1.2;">CLICK AND START RESILIENCE TEST</strong>
+          <small style="font-size: 10.5px; font-weight: 800; color: #ffedd5; margin-top: 4px;">CALCULATE YOUR EU 72H AUTONOMY IN 30 SECONDS ➔</small>
+        </div>
+
+        <div style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.3); margin: 2px 0;"></div>
+
+        <p style="font-size: 12px; color: #fff7ed; line-height: 1.35; margin: 0; font-weight: 500; text-align: center;">
+          When crisis hits, <strong style="color: #ffffff; font-weight: 900;">MySafeHaven</strong> acts as an emergency autopilot guiding your family step-by-step. Fully aligned with EU 72h autonomy directives.
+        </p>
+
+      </div>
+
+    </section>
+
+<!-- 3. SIMULATORE INTERATTIVO -->
+    <div style="margin-top: 20px; padding: 16px; background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; border-radius: 18px;">
+      
+      <!-- SCRITTA VIOLA CLICCABILE CON ANIMAZIONE PULSE -->
+      <div onclick="openQuiz()" class="btn-pulse" style="font-size: 12px; font-weight: 900; color: #c084fc; text-transform: uppercase; letter-spacing: 1px; text-align: center; margin-bottom: 12px; cursor: pointer; padding: 10px; background: rgba(168, 85, 247, 0.15); border: 1px solid #a855f7; border-radius: 12px; animation: purplePulse 2s infinite;">
+        🎮 TRY THE INTERACTIVE APP SIMULATOR ➔
+      </div>
+      
+      <!-- TAB MOBILI PER SCAMBIARE LA MODALITA' -->
+      <div class="simulator-tabs">
+        <button id="tabNormal" onclick="switchSim('normal', event)" class="sim-tab active-normal btn-pulse">
+          🟢 Normal Mode (Peace Time)
+        </button>
+        <button id="tabEmergency" onclick="switchSim('emergency', event)" class="sim-tab btn-pulse">
+          🔴 Emergency / Blackout Mode
+        </button>
+      </div>
+
+      <!-- NORMAL MODE (RIQUADRO VERDE CLICCABILE CON ANIMAZIONE) -->
+      <div id="simNormalContent" onclick="openQuiz()" class="sim-box btn-pulse" style="border: 2px solid #10b981; display: block; cursor: pointer; animation: greenPulse 2.5s infinite;">
+        <div style="color: #34d399; font-size: 12px; font-weight: 900; margin-bottom: 8px; text-align: center;">
+          🌱 NORMAL MODE — HOUSEHOLD SAVINGS
+        </div>
+        <ul class="sim-list">
+          <li><strong>• Anti-Waste Pantry:</strong> Smart rotation alerts before expiration dates.</li>
+          <li><strong>• Medical Inventory:</strong> Automatic tracking of essential medicines.</li>
+          <li><strong>• Financial ROI:</strong> <span style="color: #34d399; font-weight: 800;">💰 ROI: SAVE €500+/YEAR IN PEACE TIME (+€42.00/mo)</span> (Average €500/year).</li>
+        </ul>
+      </div>
+
+      <!-- EMERGENCY MODE (RIQUADRO ROSSO CLICCABILE CON ANIMAZIONE) -->
+      <div id="simEmergencyContent" onclick="openQuiz()" class="sim-box btn-pulse" style="border: 2px solid #ef4444; display: none; cursor: pointer; animation: redPulse 2.5s infinite;">
+        <div style="color: #ef4444; font-size: 12px; font-weight: 900; margin-bottom: 8px; text-align: center;">
+          🚨 EMERGENCY / BLACKOUT MODE (100% OFFLINE)
+        </div>
+        <ul class="sim-list">
+          <li><strong>• 72h Autonomy Protocol:</strong> Works instantly with zero cellular/internet signal.</li>
+          <li><strong>• Action Plan:</strong> Step-by-step checklist to seal home or evacuate.</li>
+          <li><strong>• Rationing Engine:</strong> Precision survival plan calibrated for your family.</li>
+        </ul>
+      </div>
+    </div>
+
+<!-- 4. HOW IT WORKS SECTION (TUTTI GLI ELEMENTI INTERATTIVI) -->
+    <div class="steps-section">
+      <!-- TITOLO PRINCIPALE CLICCABILE CON HOVER -->
+      <div class="section-head btn-pulse" onclick="openQuiz()" style="cursor: pointer; display: inline-block; width: 100%; padding: 6px 0;">
+        ⚡ HOW IT WORKS IN 3 SIMPLE STEPS
+      </div>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 8px;">
+        
+        <!-- STEP 1 -->
+        <div onclick="openQuiz()" class="btn-pulse" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 14px; cursor: pointer;">
+          <div style="font-size: 20px; min-width: 38px; height: 38px; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #3b82f6;">🔍</div>
+          <div style="flex: 1; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12px; font-weight: 900; color: #ffffff; text-transform: uppercase;">TRACK</span>
+              <span style="font-size: 10px; color: #3b82f6; font-weight: 900;">STEP 1</span>
+            </div>
+            <p style="font-size: 11px; color: #9ca3af; margin-top: 2px; line-height: 1.2;">Scan food, meds, and water supplies. Zero manual entry.</p>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div onclick="openQuiz()" class="btn-pulse" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 14px; cursor: pointer;">
+          <div style="font-size: 20px; min-width: 38px; height: 38px; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #10b981;">💰</div>
+          <div style="flex: 1; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12px; font-weight: 900; color: #ffffff; text-transform: uppercase;">SAVE & REPAY</span>
+              <span style="font-size: 10px; color: #10b981; font-weight: 900;">STEP 2</span>
+            </div>
+            <p style="font-size: 11px; color: #9ca3af; margin-top: 2px; line-height: 1.2;">Consume goods before they expire. Save up to €500/year.</p>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div onclick="openQuiz()" class="btn-pulse" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 14px; cursor: pointer;">
+          <div style="font-size: 20px; min-width: 38px; height: 38px; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #ef4444;">🛡️</div>
+          <div style="flex: 1; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12px; font-weight: 900; color: #ffffff; text-transform: uppercase;">PROTECT OFFLINE</span>
+              <span style="font-size: 10px; color: #ef4444; font-weight: 900;">STEP 3</span>
+            </div>
+            <p style="font-size: 11px; color: #9ca3af; margin-top: 2px; line-height: 1.2;">Follow the 100% offline checklist to evacuate or seal your home.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+<!-- INTERACTIVE QUIZ MODAL -->
+<div id="quizModal" class="quiz-overlay">
+  <div class="quiz-card">
+    <span class="close-quiz" onclick="closeQuiz()">&times;</span>
+    
+    <div class="quiz-progress">
+      <div id="progressBar" class="quiz-progress-bar"></div>
+    </div>
+
+    <div id="step1" class="quiz-step active">
+      <div class="quiz-step-title">1. How many people are in your household?</div>
+      <button class="option-btn" onclick="nextStep(1, 'family', '1-2 People', 20)">👤 1 - 2 People</button>
+      <button class="option-btn" onclick="nextStep(1, 'family', '3-4 People', 25)">👥 3 - 4 People</button>
+      <button class="option-btn" onclick="nextStep(1, 'family', '5+ People', 30)">👨👩👧👦 5+ People</button>
+    </div>
+
+    <div id="step2" class="quiz-step">
+      <div class="quiz-step-title">2. How many days of emergency water & food supply do you have?</div>
+      <button class="option-btn" onclick="nextStep(2, 'water_food', 'Less than 24h', 10)">⚠️ Less than 24 hours</button>
+      <button class="option-btn" onclick="nextStep(2, 'water_food', '1-2 Days', 20)">🥫 1 - 2 Days</button>
+      <button class="option-btn" onclick="nextStep(2, 'water_food', '3+ Days', 35)">🛡️ 3+ Days (EU Compliant)</button>
+    </div>
+
+    <div id="step3" class="quiz-step">
+      <div class="quiz-step-title">3. Do you have emergency power backup or off-grid cooking gear?</div>
+      <button class="option-btn" onclick="nextStep(3, 'power', 'None', 5)">❌ None</button>
+      <button class="option-btn" onclick="nextStep(3, 'power', 'Basic flashlight / Powerbank', 15)">🔋 Basic flashlight / Powerbank</button>
+      <button class="option-btn" onclick="nextStep(3, 'power', 'Solar generator / Camping stove', 25)">☀️ Solar generator / Camping stove</button>
+    </div>
+
+    <div id="step4" class="quiz-step">
+      <div class="quiz-step-title">4. Are your essential documents & cash ready for a 5-min evacuation?</div>
+      <button class="option-btn" onclick="finishQuiz('docs_cash', 'Not organized', 5)">📄 Scattered around the house</button>
+      <button class="option-btn" onclick="finishQuiz('docs_cash', 'Digital copy only', 10)">📱 Digital copies on phone</button>
+      <button class="option-btn" onclick="finishQuiz('docs_cash', 'Ready in waterproof pouch', 15)">🎒 Ready in a grab-and-go bag</button>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+function switchSim(mode, event) {
+    if (event) event.stopPropagation(); // Impedisce l'apertura del quiz quando si cambia scheda
+    
+    var tabNormal = document.getElementById('tabNormal');
+    var tabEmergency = document.getElementById('tabEmergency');
+    var contentNormal = document.getElementById('simNormalContent');
+    var contentEmergency = document.getElementById('simEmergencyContent');
+
+    if (mode === 'normal') {
+      tabNormal.className = 'sim-tab active-normal btn-pulse';
+      tabEmergency.className = 'sim-tab btn-pulse';
+      contentNormal.style.display = 'block';
+      contentEmergency.style.display = 'none';
+    } else {
+      tabNormal.className = 'sim-tab btn-pulse';
+      tabEmergency.className = 'sim-tab active-emergency btn-pulse';
+      contentNormal.style.display = 'none';
+      contentEmergency.style.display = 'block';
+    }
+  }
+
+  var currentScore = 0;
+  var quizAnswers = {};
+
+  function openQuiz() {
+    var modal = document.getElementById('quizModal');
+    modal.classList.add('open');
+    resetQuiz();
+  }
+
+  function closeQuiz() {
+    var modal = document.getElementById('quizModal');
+    modal.classList.remove('open');
+  }
+
+  function resetQuiz() {
+    currentScore = 0;
+    quizAnswers = {};
+    document.getElementById('progressBar').style.width = '25%';
+    
+    var steps = document.querySelectorAll('.quiz-step');
+    for (var i = 0; i < steps.length; i++) {
+      steps[i].classList.remove('active');
+    }
+    document.getElementById('step1').classList.add('active');
+  }
+
+  function nextStep(current, key, value, points) {
+    quizAnswers[key] = value;
+    currentScore += points;
+
+    document.getElementById('step' + current).classList.remove('active');
+    document.getElementById('step' + (current + 1)).classList.add('active');
+    document.getElementById('progressBar').style.width = ((current + 1) * 25) + '%';
+  }
+
+  function finishQuiz(key, value, points) {
+    quizAnswers[key] = value;
+    currentScore += points;
+
+    var finalScore = Math.min(Math.max(currentScore, 18), 95);
+
+    localStorage.setItem('mySafeHaven_score', finalScore);
+    localStorage.setItem('riskScore', finalScore);
+    localStorage.setItem('mySafeHaven_answers', JSON.stringify(quizAnswers));
+
+    window.location.href = 'checkout.html';
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function() {});
+  }
+</script>
+
+</body>
+</html>

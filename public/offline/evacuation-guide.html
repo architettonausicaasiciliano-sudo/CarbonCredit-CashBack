@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySafeHaven - Guida Offline & Mappe Evacuazione</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --accent-blue: #38bdf8;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            padding: 15px;
+            padding-bottom: 80px;
+            line-height: 1.5;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; }
+
+        .offline-status {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 10px; color: var(--accent-blue); }
+        h2 { font-size: 1.15rem; margin-bottom: 12px; color: var(--accent-green); }
+
+        .btn-call {
+            display: block;
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: white;
+            text-align: center;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .checklist { list-style: none; margin-top: 10px; }
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .btn-back {
+            display: inline-block;
+            background: var(--border-color);
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+    </style>
+    <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1e293b">
+</head>
+<body>
+
+<div class="container">
+    <div class="offline-status">
+        🟢 MODALITÀ OFFLINE ATTIVA — Dati salvati in locale
+    </div>
+
+    <a href="tel:112" class="btn-call">🚨 Chiamata d'Emergenza (112)</a>
+
+    <div class="card">
+        <h1>🗺️ Guida Tattica di Evacuazione 72h</h1>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 15px;">
+            Consultazione immediata disponibile senza copertura di rete o segnale dati.
+        </p>
+
+        <h2>🎒 Checklist Bug-Out Bag (Zaino 72h)</h2>
+        <ul class="checklist">
+            <li>✅ Documenti d'identità in busta impermeabile</li>
+            <li>✅ 3L d'acqua per persona + pastiglie potabilizzanti</li>
+            <li>✅ Razioni ad alto contenuto calorico (no cottura)</li>
+            <li>✅ Torcia a manovella o frontale con batterie di riserva</li>
+            <li>✅ Kit di Primo Soccorso OTC + farmaci essenziali</li>
+            <li>✅ Radio AM/FM d'emergenza a manovella/solare</li>
+            <li>✅ Contanti in piccoli tagli</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>⚡ Azioni Immediate Interruzione Rete</h2>
+        <ol style="padding-left: 20px; color: var(--text-muted); font-size: 0.9rem;">
+            <li style="margin-bottom: 8px;"><strong style="color: white;">Chiudi le utenze:</strong> Intercetta gas e acqua principale in caso di sisma o alluvione.</li>
+            <li style="margin-bottom: 8px;"><strong style="color: white;">Punto di Ritrovo Domestico:</strong> Sincronizza il nucleo familiare su una posizione predefinita.</li>
+            <li style="margin-bottom: 8px;"><strong style="color: white;">Frequenze Radio:</strong> Sintonizzati sulle stazioni d'emergenza nazionali per bollettini ufficiali.</li>
+        </ol>
+    </div>
+
+    <a href="/success.html" class="btn-back">← Torna al Centro di Controllo</a>
+</div>
+
+</body>
+</html>

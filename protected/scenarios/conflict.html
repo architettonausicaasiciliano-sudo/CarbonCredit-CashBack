@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conflict & Civil Threat Protocol | MySafeHaven</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --accent-blue: #38bdf8;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --text-light: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      line-height: 1.6;
+      padding: 16px 10px 80px 10px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    /* TOP BAR NAVIGATION */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--card-bg);
+      color: var(--accent-blue);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+    .btn-back:hover { background: var(--border-color); }
+
+    /* DISCLAIMER BANNER */
+    .disclaimer-box {
+      background: var(--card-bg);
+      border-left: 4px solid var(--accent-red);
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .disclaimer-box strong { color: #fca5a5; }
+
+    /* HEADER SCENARIO */
+    .scenario-header {
+      background: linear-gradient(135deg, #7f1d1d 0%, #1e293b 100%);
+      border: 1px solid var(--accent-red);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .scenario-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fecdd3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .scenario-subtitle {
+      font-size: 0.85rem;
+      color: #fca5a5;
+      margin-top: 6px;
+    }
+
+    /* PROGRESS BAR */
+    .progress-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+    }
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: 6px;
+    }
+    .progress-track {
+      background: var(--bg-dark);
+      border-radius: 6px;
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    .progress-fill {
+      background: linear-gradient(90deg, #ef4444, #f97316);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* PHASE CARDS */
+    .phase-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .phase-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .badge-red {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fde047;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .phase-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #f1f5f9;
+      margin-bottom: 12px;
+    }
+
+    /* TASK LIST ITEMS */
+    .task-list { list-style: none; }
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .task-item:hover {
+      border-color: var(--accent-red);
+    }
+    .task-item input[type="checkbox"] {
+      accent-color: var(--accent-red);
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .task-item label { cursor: pointer; width: 100%; }
+    .task-item strong { color: #fff; }
+
+    /* ALERT BOX */
+    .warning-box {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid var(--accent-red);
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #fca5a5;
+      margin-top: 12px;
+    }
+
+    /* BOTTOM TACTICAL NAVIGATION BAR */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 600;
+      gap: 3px;
+      flex: 1;
+      height: 100%;
+      transition: color 0.2s;
+    }
+    .nav-item:hover, .nav-item.active {
+      color: var(--accent-red);
+    }
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+    }
+    .nav-sos {
+      position: relative;
+      top: -12px;
+    }
+    .sos-badge {
+      width: 48px;
+      height: 48px;
+      background: var(--accent-red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+      border: 3px solid var(--bg-dark);
+      transition: transform 0.2s;
+    }
+    .sos-badge:hover {
+      transform: scale(1.08);
+    }
+    .sos-icon {
+      width: 22px;
+      height: 22px;
+      stroke: #ffffff;
+    }
+    .sos-label {
+      color: var(--accent-red);
+      font-weight: 800;
+      font-size: 0.65rem;
+      margin-top: 2px;
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1e293b">
+</head>
+<body>
+
+<div class="container">
+
+  <!-- TOP BAR NAVIGATION -->
+  <div class="topbar">
+    <a href="/success.html" class="btn-back">
+      ⬅ Back to Control Center
+    </a>
+  </div>
+
+  <!-- LEGAL & REFERENCE DISCLAIMER -->
+  <div class="disclaimer-box">
+    ℹ️ <strong>Civil Defense Guidelines:</strong> Tactical protocol for active shooter threats, civil unrest, and military escalation. All recommendations align with standardized international civil defense response frameworks.
+  </div>
+
+  <!-- PLAYBOOK HEADER -->
+  <div class="scenario-header">
+    <div class="scenario-title">
+      ⚔️ Conflict & Terrorism Protocol
+    </div>
+    <div class="scenario-subtitle">
+      Tactical response procedures for urban violence, armed attacks, active threats, and shelling.
+    </div>
+  </div>
+
+  <!-- DYNAMIC PROGRESS TRACKER -->
+  <div class="progress-container">
+    <div class="progress-info">
+      <span>Protocol Completion</span>
+      <span id="progress-text">0%</span>
+    </div>
+    <div class="progress-track">
+      <div id="progress-fill" class="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- PHASE 1: IMMEDIATE THREAT -->
+  <div class="phase-card">
+    <span class="phase-badge badge-red">🔴 PHASE 1: ACTIVE THREAT / ATTACK (IMMEDIATE)</span>
+    <div class="phase-title">Run, Hide, Tell Protocol</div>
+    
+    <ul class="task-list">
+      <li class="task-item">
+        <input type="checkbox" id="conflict-1-1">
+        <label for="conflict-1-1">
+          🏃 <strong>RUN (Escape):</strong> If a safe escape route is available, leave the immediate area immediately. Prioritize speed over personal belongings.
+        </label>
+      </li>
+      <li class="task-item">
+        <input type="checkbox" id="conflict-1-2">
+        <label for="conflict-1-2">
+          🚪 <strong>HIDE (Barricade):</strong> If escape routes are blocked, take shelter in a secure room. Lock and heavy-barricade doors, turn off lighting, stay away from windows, and silence mobile devices (turn off vibration).
+        </label>
+      </li>
+      <li class="task-item">
+        <input type="checkbox" id="conflict-1-3">
+        <label for="conflict-1-3">
+          🚨 <strong>TELL (Inform Authorities):</strong> Dial emergency response services (112) only when completely hidden and safe to speak or broadcast discreet location details.
+        </label>
+      </li>
+    </ul>
+
+    <div class="warning-box">
+      ⚠️ <strong>POLICE INTERVENTION WARNING:</strong> Upon law enforcement arrival, keep hands visible, open, and raised at all times. Avoid sudden movements, pointing, or shouting.
+    </div>
+  </div>
+
+  <!-- PHASE 2: SUSTAINED THREAT / SHELLING -->
+  <div class="phase-card">
+    <span class="phase-badge badge-amber">🟡 PHASE 2: CIVIL UNREST & SHELLING</span>
+    <div class="phase-title">Shelter-in-Place & Ballistic Protection</div>
+    
+    <ul class="task-list">
+      <li class="task-item">
+        <input type="checkbox" id="conflict-2-1">
+        <label for="conflict-2-1">
+          🏠 <strong>Interior Windowless Room:</strong> During indirect fire, artillery shelling, or heavy gunfire, position yourself on low floors in interior hallways, bathrooms, or stairwells far removed from glass and load-bearing exterior walls.
+        </label>
+      </li>
+      <li class="task-item">
+        <input type="checkbox" id="conflict-2-2">
+        <label for="conflict-2-2">
+          🆔 <strong>Identification & Vital Documents:</strong> Maintain official physical identification, emergency medical cards, and critical documentation on your person inside a waterproof tactical pouch.
+        </label>
+      </li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+  // AUTOMATIC CHECKLIST & PROGRESS CALCULATOR VIA BROWSER LOCAL STORAGE
+  function updateProgress() {
+    const checkboxes = document.querySelectorAll('.task-item input[type="checkbox"]');
+    const checked = document.querySelectorAll('.task-item input[type="checkbox"]:checked');
+    const percentage = checkboxes.length ? Math.round((checked.length / checkboxes.length) * 100) : 0;
+    
+    document.getElementById('progress-fill').style.width = percentage + '%';
+    document.getElementById('progress-text').textContent = percentage + '%';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const checkboxes = document.querySelectorAll('.task-item input[type="checkbox"]');
+    
+    // Load state
+    checkboxes.forEach(cb => {
+      const savedState = localStorage.getItem('conflict_' + cb.id);
+      if (savedState === 'true') cb.checked = true;
+      
+      // Update state and progress bar on change
+      cb.addEventListener('change', (e) => {
+        localStorage.setItem('conflict_' + e.target.id, e.target.checked);
+        updateProgress();
+      });
+    });
+
+    updateProgress();
+  });
+</script>
+
+<!-- BOTTOM TACTICAL NAVIGATION BAR -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+    </svg>
+    <span class="nav-label">Home</span>
+  </a>
+
+  <a href="#map" class="nav-item">
+    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+      <line x1="8" y1="2" x2="8" y2="18"></line>
+      <line x1="16" y1="6" x2="16" y2="22"></line>
+    </svg>
+    <span class="nav-label">Maps & Zones</span>
+  </a>
+
+  <!-- Primary Emergency SOS Action -->
+  <a href="tel:112" class="nav-item nav-sos">
+    <div class="sos-badge">
+      <svg class="sos-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+      </svg>
+    </div>
+    <span class="nav-label sos-label">SOS 112</span>
+  </a>
+
+  <a href="#checklist" class="nav-item active">
+    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m9 11 3 3L22 4"></path>
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+    </svg>
+    <span class="nav-label">Protocol</span>
+  </a>
+
+  <a href="guide-offline.html" class="nav-item">
+    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+    </svg>
+    <span class="nav-label">Guide</span>
+  </a>
+</nav>
+<script>
+    function updateProgress() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        if (checkboxes.length === 0) return;
+        const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+        const percentage = Math.round((checked / checkboxes.length) * 100);
+        
+        localStorage.setItem('progress_disaster', percentage);
+        const checkboxStates = Array.from(checkboxes).map(cb => cb.checked);
+        localStorage.setItem('state_disaster_cb', JSON.stringify(checkboxStates));
+    }
+
+    function loadProgress() {
+        const savedStates = JSON.parse(localStorage.getItem('state_disaster_cb') || '[]');
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach((cb, index) => {
+            if (savedStates[index] !== undefined) cb.checked = savedStates[index];
+            cb.addEventListener('change', updateProgress);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProgress);
+</script>
+</body>
+</html>

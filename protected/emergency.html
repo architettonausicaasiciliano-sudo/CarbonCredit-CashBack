@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RED MODE - Universal Emergency Protocol | MySafeHaven</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #090d16;
+      color: #f8fafc;
+      line-height: 1.5;
+      padding: 16px 10px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    /* RED ALERT HEADER BAR */
+    .emergency-bar {
+      background: #dc2626;
+      color: #ffffff;
+      padding: 12px 16px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      box-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+    }
+    .emergency-bar strong {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .btn-exit {
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 6px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* QUICK CALL & HELP ACTION BAR */
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .btn-action {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 14px;
+      text-align: center;
+    }
+    .btn-call {
+      background: #ef4444;
+      color: #ffffff;
+      border: 1px solid #f87171;
+    }
+    .btn-share {
+      background: #1e293b;
+      color: #38bdf8;
+      border: 1px solid #334155;
+    }
+
+    /* LEGAL DISCLAIMER BANNER */
+    .disclaimer-box {
+      background: #1e1b4b;
+      border-left: 4px solid #818cf8;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      color: #c7d2fe;
+      margin-bottom: 20px;
+    }
+
+    /* STEP CARDS */
+    .step-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .step-badge {
+      background: #dc2626;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .step-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+
+    /* CHECKLIST ITEMS */
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+    .check-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #ef4444;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- EMERGENCY TOP BAR -->
+  <div class="emergency-bar">
+    <div>
+      🔴 <strong>RED MODE ACTIVE</strong>
+    </div>
+    <a href="/protected/dashboard.html" class="btn-exit">Exit to Peace Mode</a>
+  </div>
+
+  <!-- QUICK EMERGENCY ACTIONS -->
+  <div class="action-grid">
+    <a href="tel:112" class="btn-action btn-call">
+      <span>📞 CALL 112 / 911</span>
+      <small style="font-weight:400; font-size:11px; opacity:0.9;">Emergency Services</small>
+    </a>
+    <button onclick="shareLocation()" class="btn-action btn-share">
+      <span>📍 SHARE LOCATION</span>
+      <small style="font-weight:400; font-size:11px; opacity:0.8;">GPS Coordinates</small>
+    </button>
+  </div>
+
+  <!-- LEGAL & REFERENCE DISCLAIMER -->
+  <div class="disclaimer-box">
+    ℹ️ <strong>EU Emergency Response Protocol:</strong> Sequence aligned with <em>EU Preparedness Union Strategy</em> guidelines. Adhere strictly to local civil protection authorities when orders are broadcasted.
+  </div>
+
+  <!-- PHASE 1: MINUTES 0 - 15 -->
+  <div class="step-card">
+    <div class="step-header">
+      <span class="step-badge">MIN 0 - 15</span>
+      <div class="step-title">1. Life Safety & Immediate Shelter</div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox" id="c1">
+      <label for="c1"><strong>Assess Danger & Shelter:</strong> If structural damage or external air hazard occurs, move to a windowless interior room or evacuate immediately with your Go Bag.</label>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox" id="c2">
+      <label for="c2"><strong>Secure Key Utilities:</strong> Unless immediate danger prevents it, guidelines advise turning off main gas, power, and water valves.</label>
+    </div>
+  </div>
+
+  <!-- PHASE 2: MINUTES 15 - 60 -->
+  <div class="step-card">
+    <div class="step-header">
+      <span class="step-badge">MIN 15 - 60</span>
+      <div class="step-title">2. Water Reserve & Comms Check</div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox" id="c3">
+      <label for="c3"><strong>Impound Tap Water:</strong> Fill bathtubs, clean containers, and bottles promptly before municipal water pressure drops or becomes contaminated.</label>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox" id="c4">
+      <label for="c4"><strong>Conserve Phone Power:</strong> Send a single concise SMS to key family contacts with your status and location. Switch phone to Maximum Power Saving mode.</label>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox" id="c5">
+      <label for="c5"><strong>Tune to Emergency Radio:</strong> Turn on a battery or crank radio to receive official directives from local authorities.</label>
+    </div>
+  </div>
+
+  <!-- PHASE 3: HOURS 1 - 72 -->
+  <div class="step-card">
+    <div class="step-header">
+      <span class="step-badge">HOURS 1 - 72</span>
+      <div class="step-title">3. Sustained Off-Grid Survival</div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox" id="c6">
+      <label for="c6"><strong>Protect Cold Supplies:</strong> Avoid opening refrigerators or freezers unnecessarily. Ration perishable foods first.</label>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox" id="c7">
+      <label for="c7"><strong>Secure Cash & Documents:</strong> Keep identity documents and small cash reserves in waterproof bags ready for immediate movement.</label>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function shareLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        const lat = position.coords.latitude.toFixed(5);
+        const lon = position.coords.longitude.toFixed(5);
+        alert("Your GPS Coordinates:\nLatitude: " + lat + "\nLongitude: " + lon + "\n\n(Ready to copy or send via SMS)");
+      }, function(error) {
+        alert("Unable to retrieve GPS location. Please check browser permissions.");
+      });
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  }
+</script>
+
+</body>
+</html>
