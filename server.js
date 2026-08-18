@@ -265,8 +265,8 @@ app.post("/create-initial-payment", async (req, res) => {
     });
 
     db.run(
-      "INSERT OR IGNORE INTO users (email, premium) VALUES (?, 0)",
-      [email],
+      "INSERT OR IGNORE INTO users (email, premium, stripe_customer_id) VALUES (?, 0, ?)",
+      [email, customer.id],
       (error) => {
         if (error) {
           console.error("DATABASE INSERT ERROR:", error);
@@ -333,8 +333,8 @@ app.post("/create-subscription", async (req, res) => {
     });
 
     db.run(
-      "UPDATE users SET premium = 1 WHERE email = ?",
-      [email],
+      "UPDATE users SET premium = 1, stripe_customer_id = ? WHERE email = ?",
+      [customerId, email],
       (error) => {
         if (error) {
           console.error("PREMIUM TRIAL ERROR:", error);
@@ -355,7 +355,7 @@ app.post("/create-subscription", async (req, res) => {
 });
 
 /* =====================================================
-   CHECK USER STATUS & ASSETS MANAGEMENT
+   CHECK USER STATUS & CREDITS
 ===================================================== */
 
 app.get("/api/user", (req, res) => {
@@ -366,7 +366,7 @@ app.get("/api/user", (req, res) => {
   }
 
   db.get(
-    "SELECT premium FROM users WHERE email = ?",
+    "SELECT email, premium, carbon_credits FROM users WHERE email = ?",
     [email],
     (error, row) => {
       if (error) {
@@ -374,36 +374,141 @@ app.get("/api/user", (req, res) => {
       }
 
       res.json({
+        email: email,
         premium: row ? row.premium === 1 : false,
+        carbon_credits: row ? row.carbon_credits : 0.0,
       });
     }
   );
 });
 
-// Recupera tutti gli asset registrati dall'utente
-app.get("/api/assets", (req, res) => {
+/* =====================================================
+   GESTIONE AZIONI ECO & CREDITI DI CARBONIO
+===================================================== */
+
+// Recupera le azioni eco registrate dall'utente
+app.get("/api/eco-actions", (req, res) => {
   const email = req.query.email;
   if (!email) return res.status(400).json({ error: "missing_email" });
 
-  db.all("SELECT * FROM assets WHERE user_email = ? ORDER BY id DESC", [email], (error, rows) => {
-    if (error) return res.status(500).json({ error: error.message });
-    res.json({ assets: rows || [] });
-  });
+  db.all(
+    "SELECT * FROM eco_actions WHERE user_email = ? ORDER BY id DESC",
+    [email],
+    (error, rows) => {
+      if (error) return res.status(500).json({ error: error.message });
+      res.json({ ecoActions: rows || [] });
+    }
+  );
 });
 
-// Aggiunge un nuovo asset inserito manualmente
-app.post("/api/assets/manual", (req, res) => {
-  const { email, itemName, category } = req.body;
-  if (!email || !itemName || !category) {
+// Registra una nuova azione sostenibile e aggiorna i crediti dell'utente
+app.post("/api/eco-actions", (req, res) => {
+  const { email, title, category, creditsEarned, co2SavedKg, source } = req.body;
+
+  if (!email || !title || !category) {
     return res.status(400).json({ error: "missing_fields" });
   }
 
+  const credits = parseFloat(creditsEarned) || 1.0;
+  const co2 = parseFloat(co2SavedKg) || 0.0;
+  const actionSource = source || "manual";
+
+  // 1. Inserisce l'azione nella tabella eco_actions
   db.run(
-    "INSERT INTO assets (user_email, item_name, category, source) VALUES (?, ?, ?, 'manual')",
-    [email, itemName, category],
+    "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source) VALUES (?, ?, ?, ?, ?, ?)",
+    [email, title, category, credits, co2, actionSource],
     function (error) {
       if (error) return res.status(500).json({ error: error.message });
-      res.json({ success: true, id: this.lastID });
+
+      const actionId = this.lastID;
+
+      // 2. Incrementa il saldo crediti dell'utente
+      db.run(
+        "UPDATE users SET carbon_credits = carbon_credits + ? WHERE email = ?",
+        [credits, email],
+        (updateError) => {
+          if (updateError) console.error("CREDITS UPDATE ERROR:", updateError);
+
+          // 3. Registra la transazione di guadagno crediti
+          db.run(
+            "INSERT INTO transactions (user_email, type, credits, amount_eur, status) VALUES (?, 'earn', ?, 0.0, 'completed')",
+            [email, credits]
+          );
+
+          res.json({
+            success: true,
+            id: actionId,
+            creditsAdded: credits,
+          });
+        }
+      );
+    }
+  );
+});
+
+/* =====================================================
+   TRANSAZIONI & CASHBACK / MONETIZZAZIONE
+===================================================== */
+
+// Recupera le transazioni dell'utente (guadagni e riscatti cashback)
+app.get("/api/transactions", (req, res) => {
+  const email = req.query.email;
+  if (!email) return res.status(400).json({ error: "missing_email" });
+
+  db.all(
+    "SELECT * FROM transactions WHERE user_email = ? ORDER BY id DESC",
+    [email],
+    (error, rows) => {
+      if (error) return res.status(500).json({ error: error.message });
+      res.json({ transactions: rows || [] });
+    }
+  );
+});
+
+// Richiesta di riscatto cashback in € scambiando crediti di carbonio
+app.post("/api/redeem-cashback", (req, res) => {
+  const { email, creditsToRedeem, amountEur } = req.body;
+
+  if (!email || !creditsToRedeem || !amountEur) {
+    return res.status(400).json({ error: "missing_fields" });
+  }
+
+  const credits = parseFloat(creditsToRedeem);
+  const amount = parseFloat(amountEur);
+
+  // Verifica se l'utente ha abbastanza crediti
+  db.get(
+    "SELECT carbon_credits FROM users WHERE email = ?",
+    [email],
+    (error, row) => {
+      if (error) return res.status(500).json({ error: error.message });
+      if (!row || row.carbon_credits < credits) {
+        return res.status(400).json({ error: "insufficient_credits" });
+      }
+
+      // Detrae i crediti e registra la transazione cashback
+      db.run(
+        "UPDATE users SET carbon_credits = carbon_credits - ? WHERE email = ?",
+        [credits, email],
+        (updateError) => {
+          if (updateError) return res.status(500).json({ error: updateError.message });
+
+          db.run(
+            "INSERT INTO transactions (user_email, type, credits, amount_eur, status) VALUES (?, 'cashback', ?, ?, 'pending')",
+            [email, credits, amount],
+            function (txError) {
+              if (txError) return res.status(500).json({ error: txError.message });
+
+              res.json({
+                success: true,
+                transactionId: this.lastID,
+                redeemedCredits: credits,
+                cashbackEur: amount,
+              });
+            }
+          );
+        }
+      );
     }
   );
 });
