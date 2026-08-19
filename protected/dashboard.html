@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyCarbonCredit CashBack - Control Center</title>
+    <title>Dashboard — CarbonCredit CashBack</title>
+    
+    <!-- Google Fonts & Style Globale -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- HTML2PDF Library for Direct Mobile PDF Downloads -->
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <!-- HTML2PDF Library per export PDF immediato -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         :root {
             --bg-dark: #0f172a;
@@ -26,7 +31,7 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-light);
-            padding: 15px;
+            padding: 20px 15px;
             line-height: 1.5;
         }
 
@@ -135,7 +140,6 @@
         .metric-item .val { font-size: 1.2rem; font-weight: bold; color: var(--text-light); }
         .metric-item .lbl { font-size: 0.8rem; color: var(--text-muted); }
 
-        /* TABLE & ASSETS CARDS */
         .table-responsive { overflow-x: auto; margin-top: 10px; margin-bottom: 15px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border-color); }
@@ -151,7 +155,6 @@
         }
         .status-ok { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
         .status-warn { background: rgba(234, 179, 8, 0.2); color: var(--accent-yellow); }
-        .status-crit { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
 
         .btn-delete {
             background: rgba(239, 68, 68, 0.15);
@@ -161,12 +164,8 @@
             font-size: 0.95rem;
             padding: 5px 10px;
             border-radius: 6px;
-            transition: all 0.2s;
         }
-        .btn-delete:hover, .btn-delete:active {
-            background: var(--accent-red);
-            color: white;
-        }
+        .btn-delete:hover { background: var(--accent-red); color: white; }
 
         .mobile-label { display: none; color: var(--text-muted); font-size: 0.8rem; }
 
@@ -185,7 +184,6 @@
             border-radius: 6px;
             font-size: 0.95rem;
             width: 100%;
-            color-scheme: dark;
         }
 
         .btn-action {
@@ -220,13 +218,10 @@
         }
         .btn-sec:hover { background: var(--border-color); }
 
-        /* RESPONSIVE DESIGN FOR MOBILE SCREENS */
         @media (max-width: 650px) {
             .mobile-label { display: inline-block; font-weight: normal; margin-right: 6px; }
-            
             table, thead, tbody, th, td, tr { display: block; }
             thead { display: none; }
-            
             tr {
                 background: rgba(15, 23, 42, 0.6);
                 border: 1px solid var(--border-color);
@@ -235,124 +230,48 @@
                 padding: 12px 14px;
                 position: relative;
             }
-            
-            td {
-                border-bottom: none;
-                padding: 5px 0;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
-            
-            td.item-title-cell {
-                display: block;
-                font-size: 1.05rem;
-                padding-right: 45px;
-                margin-bottom: 8px;
-                border-bottom: 1px dashed var(--border-color);
-                padding-bottom: 8px;
-            }
-            
-            td.action-column {
-                position: absolute;
-                top: 10px;
-                right: 12px;
-                padding: 0;
-            }
-
+            td { border-bottom: none; padding: 5px 0; display: flex; align-items: center; justify-content: space-between; }
+            td.item-title-cell { display: block; font-size: 1.05rem; padding-right: 45px; margin-bottom: 8px; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; }
+            td.action-column { position: absolute; top: 10px; right: 12px; padding: 0; }
             .form-add { grid-template-columns: 1fr; }
-            .btn-action { width: 100%; padding: 14px; }
-            .actions-bar .btn-sec { width: 100%; justify-content: center; padding: 14px; }
+            .btn-action, .actions-bar .btn-sec { width: 100%; justify-content: center; }
         }
 
-        /* PRINT STYLES FOR NATIVE PRINT */
-        @media print {
-            body { background: white !important; color: black !important; padding: 0; }
-            .card { border: 1px solid #ccc !important; background: white !important; color: black !important; }
-            .btn-counter, .form-add, .form-title, .actions-bar, .badge-active, #importInput, .action-column { display: none !important; }
-            h1, h2, td, th { color: black !important; }
-            .status-tag, .roi-badge { border: 1px solid #000; color: black !important; background: none !important; }
-            .metric-item { border-left-color: #000 !important; background: #f5f5f5 !important; }
-            
-            table { display: table !important; }
-            thead { display: table-header-group !important; }
-            tr { display: table-row !important; background: none !important; border: none !important; padding: 0 !important; }
-            td { display: table-cell !important; border-bottom: 1px solid #ddd !important; }
-            .mobile-label { display: none !important; }
-            td.item-title-cell { border-bottom: 1px solid #ddd !important; font-size: inherit !important; padding-right: 0 !important; }
-        }
-
-        /* STRICT PDF LIGHT MODE OVERRIDES */
-        body.pdf-mode {
-            background-color: #ffffff !important;
-            color: #0f172a !important;
-            padding: 10px !important;
-        }
-        body.pdf-mode * {
-            color: #0f172a !important;
-            text-shadow: none !important;
-            box-shadow: none !important;
-        }
-        body.pdf-mode .card {
-            background-color: #f1f5f9 !important;
-            border: 1px solid #cbd5e1 !important;
-        }
-        body.pdf-mode .counter-group {
-            background-color: #e2e8f0 !important;
-        }
-        body.pdf-mode .metric-item {
-            background-color: #e0f2fe !important;
-            border-left: 4px solid #0284c7 !important;
-        }
-        body.pdf-mode .metric-item.green {
-            background-color: #dcfce7 !important;
-            border-left: 4px solid #16a34a !important;
-        }
-        body.pdf-mode .roi-badge {
-            background-color: #dcfce7 !important;
-            color: #15803d !important;
-            border: 1px solid #16a34a !important;
-        }
-        body.pdf-mode .status-ok { background-color: #dcfce7 !important; color: #15803d !important; }
-        body.pdf-mode .status-warn { background-color: #fef9c3 !important; color: #a16207 !important; }
-        body.pdf-mode .status-crit { background-color: #fee2e2 !important; color: #b91c1c !important; }
-        
+        /* PDF MODALITY OVERRIDES */
+        body.pdf-mode { background-color: #ffffff !important; color: #0f172a !important; padding: 10px !important; }
+        body.pdf-mode * { color: #0f172a !important; text-shadow: none !important; box-shadow: none !important; }
+        body.pdf-mode .card { background-color: #f1f5f9 !important; border: 1px solid #cbd5e1 !important; }
         body.pdf-mode table { display: table !important; }
         body.pdf-mode thead { display: table-header-group !important; }
-        body.pdf-mode tr { display: table-row !important; background: transparent !important; padding: 0 !important; }
-        body.pdf-mode td, body.pdf-mode th { 
-            display: table-cell !important; 
-            border-bottom: 1px solid #cbd5e1 !important; 
-        }
+        body.pdf-mode tr { display: table-row !important; }
+        body.pdf-mode td, body.pdf-mode th { display: table-cell !important; border-bottom: 1px solid #cbd5e1 !important; }
         body.pdf-mode .mobile-label { display: none !important; }
-        body.pdf-mode td.item-title-cell { border-bottom: 1px solid #cbd5e1 !important; font-size: inherit !important; padding-right: 0 !important; }
     </style>
 </head>
 <body>
 
 <div class="container" id="pdfContent">
-<header>
-    <div class="header-badges">
-        <span class="badge-active">● CARBON MONETIZATION ACTIVE - EU CERTIFIED</span>
-        <div class="roi-badge" id="roiBadge" title="Cashback totale e stimato da acquisti e crediti sostenibili">
-            💰 CASHBACK: €0.00 | 🌱 CO2: 0 kg
+    <header>
+        <div class="header-badges">
+            <span class="badge-active">● CARBON MONETIZATION ACTIVE - EU CERTIFIED</span>
+            <div class="roi-badge" id="roiBadge">
+                💰 CASHBACK: €0.00 | 🌱 CO2: 0 kg
+            </div>
         </div>
-    </div>
-    <h1>MyCarbonCredit CashBack Control Center</h1>
-    <p class="subtitle">Tracciamento acquisti eco-sostenibili, calcolo crediti di carbonio e monetizzazione cashback.</p>
-</header>
+        <h1>🏆 EcoCredits Control Center</h1>
+        <p class="subtitle">Tracciamento acquisti eco-sostenibili, calcolo crediti di carbonio e monetizzazione cashback.</p>
+    </header>
 
-    <!-- PENDING REVIEWS / NOTICE ALERT -->
     <div id="expirationAlert" class="alert-box">
-        ⚠️ <strong>Attenzione:</strong> Hai alcuni beni o acquisti con verifica in sospeso o in fase di approvazione crediti.
+        ⚠️ <strong>Attenzione:</strong> Hai alcuni beni o acquisti con verifica crediti in corso di approvazione.
     </div>
 
-    <!-- HOUSEHOLD & ECO CONFIGURATION -->
+    <!-- CONFIGURAZIONE IMPATTO -->
     <div class="card">
-        <h2>🧬 1. Configurazione Nucleo & Impact Estimator</h2>
+        <h2>🌱 1. Configurazione Nucleo & Impact Estimator</h2>
         <div class="grid-2">
             <div class="counter-group">
-                <label>Pannelli / kW Solari</label>
+                <label>kW Solari / Pannelli</label>
                 <div class="counter-controls">
                     <button class="btn-counter" type="button" onclick="updateEcoState('solarKw', -1)">-</button>
                     <span id="cnt-solar" class="counter-value">3</span>
@@ -388,7 +307,7 @@
         <div class="metrics-summary">
             <div class="metric-item green">
                 <div id="val-co2" class="val">0 kg CO2</div>
-                <div class="lbl">Stima Risparmio CO2 Annuale</div>
+                <div class="lbl">Stima Risparmio CO₂ Annuale</div>
             </div>
             <div class="metric-item">
                 <div id="val-cashback" class="val">€0.00</div>
@@ -397,7 +316,7 @@
         </div>
     </div>
 
-    <!-- INVENTORY & CASHBACK TRACKER -->
+    <!-- REGISTRO BENI -->
     <div class="card">
         <h2>📦 2. Registro Beni, Acquisti & Crediti di Carbonio</h2>
         <div class="table-responsive">
@@ -407,15 +326,13 @@
                         <th>Nome Bene / Acquisto</th>
                         <th>Categoria</th>
                         <th>Spesa (€)</th>
-                        <th>CO2 Salvata</th>
+                        <th>CO₂ Salvata</th>
                         <th>Cashback (€)</th>
                         <th>Stato Credito</th>
                         <th class="action-column">Azione</th>
                     </tr>
                 </thead>
-                <tbody id="inventoryTable">
-                    <!-- Dynamic Items -->
-                </tbody>
+                <tbody id="inventoryTable"></tbody>
             </table>
         </div>
 
@@ -434,7 +351,7 @@
         </form>
     </div>
 
-    <!-- UTILITY ACTIONS (ADD PHOTO, IMPORT, EXPORT, PRINT) -->
+    <!-- AZIONI RAPIDE -->
     <div class="actions-bar">
         <a class="btn-action" href="/protected/add-asset.html">📸 Carica con Foto Scontrino</a>
         <button class="btn-sec" type="button" onclick="downloadPDF()">📄 Scarica Report Impronta (PDF)</button>
@@ -452,7 +369,7 @@
         greenApps: 1,
         inventory: [
             { id: 1, name: "Impianto Fotovoltaico 3kW", category: "Energia", price: 3500, co2: 1200, cashback: 175, status: "Verified" },
-            { id: 2, name: "E-Bike Monopattino / City", category: "Mobilita", price: 450, co2: 180, cashback: 22.50, status: "Verified" },
+            { id: 2, name: "E-Bike / Monopattino City", category: "Mobilita", price: 450, co2: 180, cashback: 22.50, status: "Verified" },
             { id: 3, name: "Spesa Biologica & Locale", category: "SpesaEco", price: 120, co2: 45, cashback: 6.00, status: "Pending" }
         ]
     };
@@ -463,7 +380,6 @@
             try { state = JSON.parse(saved); } catch(e) {}
         }
 
-        // Tenta sincronizzazione con il server se disponibile
         try {
             const res = await fetch('/api/assets');
             if (res.ok) {
@@ -481,7 +397,7 @@
                 }
             }
         } catch(err) {
-            console.log("Running standalone or local mode");
+            console.log("Modalità standalone / offline attiva");
         }
 
         render();
@@ -505,7 +421,6 @@
         document.getElementById('cnt-members').innerText = state.members;
         document.getElementById('cnt-greenApps').innerText = state.greenApps;
 
-        // Calcolo impatto base stimato
         const estCo2Annual = (state.solarKw * 400) + (state.evKm * 1.5) + (state.greenApps * 150);
         const estCashbackAnnual = estCo2Annual * 0.12;
 
@@ -583,9 +498,7 @@
 
     function deleteItem(id) {
         const item = state.inventory.find(i => i.id === id);
-        const itemName = item ? item.name : 'questo bene';
-        
-        if (confirm(`Sei sicuro di voler rimuovere "${itemName}" dal tuo registro?`)) {
+        if (confirm(`Rimuovere "${item ? item.name : 'questo bene'}" dal registro?`)) {
             state.inventory = state.inventory.filter(i => i.id !== id);
             save();
         }
@@ -602,24 +515,16 @@
 
         const element = document.getElementById('pdfContent');
         const opt = {
-            margin:       [8, 8, 8, 8],
-            filename:     `MyCarbonCredit_Report_${new Date().toISOString().slice(0,10)}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { 
-                scale: 2, 
-                useCORS: true, 
-                backgroundColor: '#ffffff', 
-                logging: false,
-                scrollX: 0,
-                scrollY: 0
-            },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            margin: [8, 8, 8, 8],
+            filename: `EcoCredits_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         try {
             await html2pdf().set(opt).from(element).save();
         } catch (err) {
-            console.error('PDF Generation Error:', err);
             window.print();
         } finally {
             document.body.classList.remove('pdf-mode');
@@ -631,7 +536,7 @@
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `MyCarbonCredit_Backup_${new Date().toISOString().slice(0,10)}.json`);
+        downloadAnchor.setAttribute("download", `EcoCredits_Backup_${new Date().toISOString().slice(0,10)}.json`);
         downloadAnchor.click();
         downloadAnchor.remove();
     }
@@ -647,12 +552,12 @@
                 if (importedData.inventory && Array.isArray(importedData.inventory)) {
                     state = importedData;
                     save();
-                    alert('Backup importato e stato ripristinato con successo!');
+                    alert('Backup importato con successo!');
                 } else {
-                    alert('Formato del file di backup non valido.');
+                    alert('Formato del file non valido.');
                 }
             } catch(err) {
-                alert('Errore durante la lettura del file JSON.');
+                alert('Errore durante il caricamento del file JSON.');
             }
         };
         reader.readAsText(file);
