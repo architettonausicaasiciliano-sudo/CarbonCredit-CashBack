@@ -558,7 +558,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       setTimeout(() => {
         localStorage.setItem("email", email);
         localStorage.setItem("hasPaid", "true");
-        window.location.href = "success.html";
+        window.location.href = "/protected/success.html";
       }, 600);
 
       return;
@@ -585,7 +585,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const result = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: window.location.origin + "/success.html"
+          return_url: window.location.origin + "/protected/success.html"
         },
         redirect: "if_required"
       });
@@ -619,7 +619,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       localStorage.setItem("email", email);
       localStorage.setItem("hasPaid", "true");
-      window.location.href = "success.html";
+      window.location.href = "/protected/success.html";
 
     } catch (error) {
       console.error("PAYMENT ERROR:", error);

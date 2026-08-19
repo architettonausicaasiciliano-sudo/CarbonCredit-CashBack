@@ -253,6 +253,11 @@ app.get("/checkout", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "checkout.html"));
 });
 
+// Pagina di successo/conferma (area protetta)
+app.get("/success", (req, res) => {
+  res.sendFile(path.join(__dirname, "protected", "success.html"));
+});
+
 // Dashboard utenti abbonati
 app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "dashboard.html"));
