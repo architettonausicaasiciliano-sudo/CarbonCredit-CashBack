@@ -1,72 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCredits — Active Subscription & Control Center</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CarbonCredit CashBack - Access Granted</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px 14px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 24px;
+      padding: 32px 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(22, 163, 74, 0.15);
+      border: 1px solid #16a34a;
+      color: #4ade80;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+    }
+
+    .icon-box {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0 0 10px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .stats-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .stats-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #16a34a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed #334155;
+      font-size: 13.5px;
+      color: #cbd5e1;
+    }
+
+    .stat-item:last-child {
+      border-bottom: none;
+    }
+
+    .stat-val {
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: #16a34a;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #15803d;
+    }
+
+    .btn-secondary {
+      background: #334155;
+      color: #f8fafc;
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .footer-note {
+      font-size: 11.5px;
+      color: #64748b;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        
-        <div class="success-header">
-            <div style="font-size: 50px; margin-bottom: 10px;">🎉⚡</div>
-            <span class="status-badge">● Subscription Active & Verified</span>
-            <h1>EcoCredits Control Center</h1>
-            <p>Your subscription is officially active! We calculated your potential earnings and carbon offset based on your test.</p>
-        </div>
+<div class="container">
+  <div class="card">
+    <div class="badge">🌱 ACTIVE SUBSCRIPTION — CARBON DASHBOARD UNLOCKED</div>
+    <div class="icon-box">🎉</div>
+    <h1 class="title">Welcome to CarbonCredit CashBack!</h1>
+    <p class="subtitle">
+      Your payment was successful. Your account is active and configured to track eco-friendly actions and convert carbon savings into rewards.
+    </p>
 
-        <div class="dashboard-grid">
-            <div class="dash-card">
-                <div class="dash-label">Your CashBack Target</div>
-                <div class="dash-val" id="displayCashback">€0.00 / yr</div>
-            </div>
-            <div class="dash-card">
-                <div class="dash-label">Est. CO₂ Offset</div>
-                <div class="dash-val" id="displayCo2">0 kg</div>
-            </div>
-            <div class="dash-card">
-                <div class="dash-label">Account Status</div>
-                <div class="dash-val" style="color: #34d399;">UNLOCKED</div>
-            </div>
-            <div class="dash-card">
-                <div class="dash-label">Verification</div>
-                <div class="dash-val">READY</div>
-            </div>
-        </div>
-
-        <div class="quiz-card" style="margin-top: 20px;">
-            <h2 style="font-size: 16px; margin-bottom: 10px;">📸 Next Step: Start Monetizing</h2>
-            <p style="font-size: 13px; color: #94a3b8; line-height: 1.5;">
-                Upload your grocery receipts, renewable energy bills, or land ownership documents to start receiving your daily carbon cashback payouts.
-            </p>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
-            <a href="/protected/add-asset.html" class="btn-cta-giant" style="margin-bottom: 0;">
-                📸 UPLOAD RECEIPT / ADD GREEN ASSET →
-            </a>
-
-            <a href="/protected/dashboard.html" class="btn-cta-giant" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: #bae6fd; box-shadow: 0 0 20px rgba(2, 132, 199, 0.4); margin-bottom: 0;">
-                📊 VIEW CONTROL CENTER DASHBOARD
-            </a>
-        </div>
-
-        <footer class="footer-text">
-            © 2026 EcoCredits Inc. Carbon Cashback Clearance Hub.
-        </footer>
-
+    <div class="stats-box">
+      <div class="stats-title">Account & Diagnostic Overview</div>
+      <div class="stat-item">
+        <span>Registered Email:</span>
+        <span class="stat-val" id="emailVal">--</span>
+      </div>
+      <div class="stat-item">
+        <span>Sustainability Score:</span>
+        <span class="stat-val" id="scoreVal" style="color: #4ade80;">--%</span>
+      </div>
+      <div class="stat-item">
+        <span>Membership Plan:</span>
+        <span class="stat-val">7-Day Trial (€35/mo)</span>
+      </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const cashback = localStorage.getItem('userCashback') || '0.00';
-            const co2 = localStorage.getItem('userCo2') || '0';
-            
-            document.getElementById('displayCashback').textContent = '€' + cashback;
-            document.getElementById('displayCo2').textContent = co2 + ' kg';
-        });
-    </script>
+    <div class="btn-group">
+      <a href="/dashboard" class="btn btn-primary">Go to Carbon Dashboard →</a>
+      <a href="/add-asset" class="btn btn-secondary">+ Register First Green Asset</a>
+      <button onclick="window.print()" class="btn btn-secondary">📄 Download Audit Certificate (PDF)</button>
+    </div>
+
+    <div class="footer-note">
+      Questions or need assistance? Reach out via support in your dashboard.
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const email = localStorage.getItem("email") || "Subscriber";
+  const score = localStorage.getItem("carbonCredit_score") || localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore") || "85";
+
+  document.getElementById("emailVal").innerText = email;
+  document.getElementById("scoreVal").innerText = score + "%";
+});
+</script>
+
 </body>
 </html>
