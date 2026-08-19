@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MySafeHaven - Checkout</title>
+  <title>CarbonCredit CashBack - Checkout</title>
 
   <!-- STRIPE SDK -->
   <script src="https://js.stripe.com/v3/"></script>
@@ -45,7 +45,7 @@
     .logo {
       font-size: 18px;
       font-weight: 800;
-      color: #0284c7;
+      color: #16a34a;
       letter-spacing: -0.5px;
       display: inline-flex;
       align-items: center;
@@ -65,21 +65,21 @@
       line-height: 1.5;
     }
 
-    /* DYNAMIC EU 72H SUMMARY BOX */
+    /* DYNAMIC SUMMARY BOX */
     .eu-summary-box {
-      background: #f0f9ff;
-      border: 1px solid #bae6fd;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
       border-radius: 14px;
       padding: 16px;
       margin-bottom: 22px;
       font-size: 13px;
-      color: #0369a1;
+      color: #15803d;
       line-height: 1.6;
     }
 
     .eu-summary-title {
       font-weight: 700;
-      color: #0284c7;
+      color: #16a34a;
       font-size: 14px;
       margin-bottom: 10px;
       display: flex;
@@ -160,8 +160,8 @@
     }
 
     input:focus {
-      border-color: #0284c7;
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      border-color: #16a34a;
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
     }
 
     .payment-title {
@@ -274,22 +274,22 @@
   <div class="card">
 
     <div class="header">
-      <div class="logo">🛡️ MySafeHaven</div>
+      <div class="logo">🌱 CarbonCredit CashBack</div>
 
       <div class="title">
         Complete Your Order
       </div>
 
       <div class="subtitle">
-        Instant access to your Household Resilience Plan & EU 72h Protocol.
+        Instant access to your CarbonCredit CashBack Dashboard & Asset Tracker.
       </div>
     </div>
 
     <!-- DYNAMIC QUIZ RESULT BOX -->
     <div id="quizSummaryBox" class="eu-summary-box" style="display: none;">
       <div class="eu-summary-title">
-        <span>📋 Generated Resilience Profile</span>
-        <span id="summaryScore" style="background: #0284c7; color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;">--%</span>
+        <span>🌱 Generated Sustainability Profile</span>
+        <span id="summaryScore" style="background: #16a34a; color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;">--%</span>
       </div>
       <div id="summaryDetails">
         Loading your profile...
@@ -303,7 +303,7 @@
     <div class="order-box">
 
       <div class="row">
-        <span>Resilience Plan Subtotal</span>
+        <span>CarbonCredit Plan Subtotal</span>
         <span class="old-price">€1.73</span>
       </div>
 
@@ -385,8 +385,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* =========================================
       RETRIEVE AND DISPLAY QUIZ RESULTS
   ========================================= */
-  const score = localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore");
-  const answersRaw = localStorage.getItem("mySafeHaven_answers");
+  const score = localStorage.getItem("carbonCredit_score") || localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore");
+  const answersRaw = localStorage.getItem("carbonCredit_answers") || localStorage.getItem("mySafeHaven_answers");
   const summaryBox = document.getElementById("quizSummaryBox");
   const summaryScore = document.getElementById("summaryScore");
   const summaryDetails = document.getElementById("summaryDetails");
@@ -399,10 +399,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     try { answers = JSON.parse(answersRaw) || {}; } catch(e) {}
 
     summaryDetails.innerHTML = `
-      • <strong>Household Size:</strong> ${answers.family || 'Registered'}<br/>
-      • <strong>Water & Food Autonomy:</strong> ${answers.water_food || 'Configured in plan'}<br/>
-      • <strong>Power Backup:</strong> ${answers.power || 'Profiled'}<br/>
-      • <strong>72h Evacuation Readiness:</strong> ${answers.docs_cash || 'Included in recommendations'}
+      • <strong>Assets & Green Purchases:</strong> ${answers.assets || 'Registered'}<br/>
+      • <strong>Estimated CO2 Reduction:</strong> ${answers.co2 || 'Calculated in plan'}<br/>
+      • <strong>Renewable Systems Tracked:</strong> ${answers.systems || 'Profiled'}<br/>
+      • <strong>CashBack Potential:</strong> ${answers.cashback || 'Included in assessment'}
     `;
   }
 
@@ -482,7 +482,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       const variant = localStorage.getItem("abVariant") || "A";
-      const currentScore = localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore") || "50";
+      const currentScore = localStorage.getItem("carbonCredit_score") || localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore") || "50";
 
       /* ROTTA RELATIVA PER L'INTENT DI PAGAMENTO */
       const response = await fetch("/create-initial-payment", {
@@ -597,7 +597,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      const currentScore = localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore") || "50";
+      const currentScore = localStorage.getItem("carbonCredit_score") || localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore") || "50";
 
       const subscriptionResponse = await fetch("/create-subscription", {
         method: "POST",

@@ -1,6 +1,8 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const cors = require("cors");
+const multer = require("multer");
 require("dotenv").config();
 
 const app = express();
@@ -8,14 +10,34 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const db = require("./db");
 
 /* =====================================================
-   CORS & CARTELLA PUBLIC / PROTECTED
+   CONFIGURAZIONE CARTELLA UPLOADS & MULTER
+===================================================== */
+
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
+
+/* =====================================================
+   CORS & CARTELLA PUBLIC / PROTECTED / UPLOADS
 ===================================================== */
 
 app.use(cors());
 
-// Serviamo i file statici dalla cartella public e protected
+// Serviamo i file statici
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/protected", express.static(path.join(__dirname, "protected")));
+app.use("/uploads", express.static(uploadDir));
 
 /* =====================================================
    STRIPE WEBHOOK (DEVE STARE PRIMA DI express.json)
@@ -211,10 +233,11 @@ app.post(
 );
 
 /* =====================================================
-   MIDDLEWARE PARSER JSON PER LE ALTRE ROTTE
+   MIDDLEWARE PARSER JSON & FORM-DATA PER LE ALTRE ROTTE
 ===================================================== */
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 /* =====================================================
    ROTTE PAGINE FRONTEND
@@ -225,9 +248,19 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// Checkout page
+app.get("/checkout", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "checkout.html"));
+});
+
 // Dashboard utenti abbonati
 app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "dashboard.html"));
+});
+
+// Pagina aggiunta bene / foto scontrino
+app.get("/add-asset", (req, res) => {
+  res.sendFile(path.join(__dirname, "protected", "add-asset.html"));
 });
 
 /* =====================================================
@@ -383,7 +416,7 @@ app.get("/api/user", (req, res) => {
 });
 
 /* =====================================================
-   GESTIONE AZIONI ECO & CREDITI DI CARBONIO
+   GESTIONE AZIONI ECO, UPLOAD FOTO & CREDITI
 ===================================================== */
 
 // Recupera le azioni eco registrate dall'utente
@@ -401,8 +434,8 @@ app.get("/api/eco-actions", (req, res) => {
   );
 });
 
-// Registra una nuova azione sostenibile e aggiorna i crediti dell'utente
-app.post("/api/eco-actions", (req, res) => {
+// Registra una nuova azione sostenibile / upload foto scontrino
+app.post("/api/eco-actions", upload.single("photo"), (req, res) => {
   const { email, title, category, creditsEarned, co2SavedKg, source } = req.body;
 
   if (!email || !title || !category) {
@@ -412,6 +445,7 @@ app.post("/api/eco-actions", (req, res) => {
   const credits = parseFloat(creditsEarned) || 1.0;
   const co2 = parseFloat(co2SavedKg) || 0.0;
   const actionSource = source || "manual";
+  const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
   // 1. Inserisce l'azione nella tabella eco_actions
   db.run(
@@ -439,6 +473,7 @@ app.post("/api/eco-actions", (req, res) => {
             success: true,
             id: actionId,
             creditsAdded: credits,
+            photoUrl: photoUrl,
           });
         }
       );

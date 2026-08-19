@@ -1,7 +1,7 @@
 {
-  "name": "mysafehaven-api",
+  "name": "carboncredit-cashback",
   "version": "1.0.0",
-  "description": "Backend API e Checkout per MySafeHaven",
+  "description": "Backend API, Checkout e Area Riservata per CarbonCredit CashBack",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
@@ -17,7 +17,11 @@
     "sqlite3": "^6.0.1",
     "stripe": "^12.18.0"
   },
-  "keywords": [],
+  "keywords": [
+    "carbon-credit",
+    "cashback",
+    "sustainability"
+  ],
   "author": "",
   "license": "ISC"
 }

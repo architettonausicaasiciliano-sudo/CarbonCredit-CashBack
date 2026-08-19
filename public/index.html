@@ -1,160 +1,86 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EcoCredits — CarbonCredit CashBack</title>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="/style.css">
-  <style>
-    :root {
-      --bg-color: #0d1117;
-      --card-bg: #161b22;
-      --accent-green: #10b981;
-      --accent-green-hover: #059669;
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --border-color: #30363d;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .app-container {
-      max-width: 480px;
-      width: 100%;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 28px 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-      text-align: center;
-    }
-
-    .badge {
-      display: inline-block;
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-green);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 12px;
-      color: #ffffff;
-    }
-
-    p.subtitle {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.5;
-      margin-bottom: 28px;
-    }
-
-    .card-feature {
-      background: #21262d;
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      text-align: left;
-    }
-
-    .card-feature h3 {
-      font-size: 1rem;
-      color: var(--accent-green);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .card-feature p {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-    }
-
-    .btn-primary {
-      display: block;
-      width: 100%;
-      background: var(--accent-green);
-      color: #000;
-      font-weight: 700;
-      padding: 14px;
-      border-radius: 12px;
-      text-decoration: none;
-      font-size: 1rem;
-      margin-top: 24px;
-      transition: background 0.2s ease;
-      border: none;
-      cursor: pointer;
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-green-hover);
-    }
-
-    footer {
-      margin-top: 24px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoCredits — CarbonCredit CashBack</title>
+    
+    <!-- PWA & Stili Grafici -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-  <div class="app-container">
-    <span class="badge">🌱 Sostenibilità & Carbon Credits</span>
-    
-    <h1>EcoCredits App</h1>
-    <p class="subtitle">Trasforma le tue abitudini ecologiche quotidiane e la gestione sostenibile in crediti di carbonio e cashback reale.</p>
+    <div class="container app-container">
+        <!-- HEADER / HERO -->
+        <header class="hero">
+            <span class="badge">🌱 EcoCredits & Carbon CashBack</span>
+            <h1>Sai che le tue scelte verdi possono ridarti subito soldi indietro?</h1>
+            <p class="subtitle">Dai passi a piedi al latte vegetale, fino all'efficientamento di casa e ai tuoi terreni: scopri quanti soldi stai lasciando sul tavolo.</p>
+        </header>
 
-    <div class="card-feature">
-      <h3>📊 Traccia le tue Eco-Azioni</h3>
-      <p>Registra ogni scelta sostenibile e calcola subito l'impatto positivo di CO₂ risparmiata.</p>
+        <!-- TEST INTERATTIVO 30 SECONDI -->
+        <section class="card test-box">
+            <h2>⏱️ Test Rapido (30 Secondi)</h2>
+            <p class="subtitle">Seleziona le abitudini e i beni che possiedi per calcolare il tuo Cashback stimato:</p>
+
+            <form id="quizForm">
+                <div class="quiz-step card-feature">
+                    <label><strong>1. Acquisti quotidiani sostenibili:</strong></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="habit" value="120"> Latte vegetale / Prodotti Bio</label>
+                        <label><input type="checkbox" name="habit" value="180"> Spesa a Km 0 / Mercato locale</label>
+                        <label><input type="checkbox" name="habit" value="150"> Mobilità dolce (Bici, Elettrico, Piedi)</label>
+                    </div>
+                </div>
+
+                <div class="quiz-step card-feature">
+                    <label><strong>2. Efficientamento e Casa:</strong></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="habit" value="450"> Pannelli Solari / Pompa di calore</label>
+                        <label><input type="checkbox" name="habit" value="200"> Elettrodomestici A+++ / Smart Heating</label>
+                    </div>
+                </div>
+
+                <div class="quiz-step card-feature">
+                    <label><strong>3. Terreni e Spazi Verdi:</strong></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="habit" value="600"> Possiedo un terreno, giardino ampio o alberi da frutto</label>
+                    </div>
+                </div>
+            </form>
+
+            <!-- RISULTATO CALCOLATORE -->
+            <div class="result-box card-feature" style="text-align: center; margin-top: 20px;">
+                <p>Cashback Annuo Potenziale:</p>
+                <div class="cashback-amount" style="font-size: 2rem; font-weight: bold; color: #10b981; margin: 10px 0;">
+                    € <span id="cashbackVal">0</span> / anno
+                </div>
+                <p class="small" style="font-size: 0.8rem; color: #9ca3af;">*Generabile in Crediti di Carbonio e Rimborsi Diretti</p>
+            </div>
+
+            <!-- CTA VERSO CHECKOUT -->
+            <a href="/checkout" class="btn btn-primary btn-block">Sblocca il tuo Cashback — Abbonati Ora →</a>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 EcoCredits. Tutti i diritti riservati.</p>
+        </footer>
     </div>
 
-    <div class="card-feature">
-      <h3>💶 Carbon Credit & Cashback</h3>
-      <p>Converti i tuoi punti accumulati in crediti negoziabili e richiedi il tuo cashback.</p>
-    </div>
+    <!-- LOGICA CALCOLATORE LANDING -->
+    <script src="/js/landing.js"></script>
 
-    <a href="/checkout.html" class="btn-primary">Inizia Ora — Abbonati</a>
+    <!-- REGISTRAZIONE SERVICE WORKER (PWA) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker:', err));
+            });
+        }
+    </script>
 
-    <footer>
-      <p>&copy; 2026 EcoCredits. Tutti i diritti riservati.</p>
-    </footer>
-  </div>
-
-  <script>
-    // Registrazione del Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('Service Worker registrato con successo:', reg.scope))
-          .catch(err => console.error('Errore registrazione Service Worker:', err));
-      });
-    }
-  </script>
 </body>
 </html>
