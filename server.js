@@ -56,7 +56,7 @@ function generateDmrvHash(action) {
 /* =====================================================
    AI VISION FORENSICS ENGINE (3-Tier Anti-Greenwashing)
 ===================================================== */
-async function verifyActionWithAI(imagePath, actionTitle) {
+async function verifyActionWithAI(imagePath, actionTitle, mimeType = "image/jpeg") {
   if (!ai) {
     console.warn("⚠️ Gemini API Key mancante nel .env. Fallback su Tier Community.");
     return {
@@ -145,7 +145,7 @@ async function sellBatchToMarketplace(batchData) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      mass_g: Math.round(batchData.totalCo2Kg * 1000), // Converte kg in grammi
+      mass_g: Math.round(batchData.totalCo2Kg * 1000),
       metadata: {
         batch_id: batchData.batchId,
         mrv_provider: "AI Vision Gemini Flash Forensics",
@@ -562,7 +562,7 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
     }
 
     // Audit Forense AI Gemini
-    const aiResult = await verifyActionWithAI(req.file.path, title);
+    const aiResult = await verifyActionWithAI(req.file.path, title, req.file.mimetype);
 
     if (!aiResult.valid || aiResult.tier === "REJECT") {
       fs.unlinkSync(req.file.path);
