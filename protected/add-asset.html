@@ -66,6 +66,76 @@
     }
   });
 </script>
+<script>
+// 1. Funzione per calcolare l'hash SHA-256 del file lato client (Costo €0.00)
+async function calculateImageHash(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
+document.querySelector('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const userEmail = localStorage.getItem('userEmail') || 'test@example.com'; // Recupera email sessione
+  const title = document.querySelector('input[placeholder="Nome Bene / Acquisto"]').value || document.querySelectorAll('input')[0].value;
+  const category = document.querySelector('select').value;
+  const amountSpend = document.querySelectorAll('input')[1].value;
+  const fileInput = document.querySelector('input[type="file"]');
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Seleziona una foto dello scontrino o installazione.");
+    return;
+  }
+
+  try {
+    // A. Calcolo Hash SHA-256 locale
+    const imageHash = await calculateImageHash(file);
+
+    // B. Filtro Antiduplicato Client-Side
+    const checkRes = await fetch(`/api/check-duplicate?hash=${imageHash}`);
+    const checkData = await checkRes.json();
+    if (checkData.isDuplicate) {
+      alert("⚠️ Errore: Questa immagine è già stata caricata in precedenza!");
+      return;
+    }
+
+    // C. Preparazione FormData per il Backend
+    const formData = new FormData();
+    formData.append('email', userEmail);
+    formData.append('title', title);
+    formData.append('category', category);
+    formData.append('amountSpend', amountSpend);
+    formData.append('imageHash', imageHash);
+    formData.append('photo', file);
+
+    const submitBtn = e.target.querySelector('button');
+    submitBtn.innerText = "Verifica AI in corso...";
+    submitBtn.disabled = true;
+
+    // D. Invio al server con Gemini AI MRV Engine
+    const res = await fetch('/api/eco-actions', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert(`✅ Azione Approvata dall'AI!\nCO2 Evitata: ${data.co2SavedKg} kg\nCrediti Accreditati: +${data.creditsAdded} CC`);
+      window.location.href = '/dashboard';
+    } else {
+      alert(`❌ Errore: ${data.error}`);
+      submitBtn.innerText = "GENERA CREDITI & CASHBACK ➔";
+      submitBtn.disabled = false;
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Errore di connessione al server.");
+  }
+});
+</script>
 </body>
 </html>
