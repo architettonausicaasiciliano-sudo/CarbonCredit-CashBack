@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoCredits — Active Subscription & Control Center</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="success-header">
+            <div style="font-size: 50px; margin-bottom: 10px;">🎉⚡</div>
+            <span class="status-badge">● Subscription Active & Verified</span>
+            <h1>EcoCredits Control Center</h1>
+            <p>Your subscription is officially active! We calculated your potential earnings and carbon offset based on your test.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="dash-card">
+                <div class="dash-label">Your CashBack Target</div>
+                <div class="dash-val" id="displayCashback">€0.00 / yr</div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-label">Est. CO₂ Offset</div>
+                <div class="dash-val" id="displayCo2">0 kg</div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-label">Account Status</div>
+                <div class="dash-val" style="color: #34d399;">UNLOCKED</div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-label">Verification</div>
+                <div class="dash-val">READY</div>
+            </div>
+        </div>
+
+        <div class="quiz-card" style="margin-top: 20px;">
+            <h2 style="font-size: 16px; margin-bottom: 10px;">📸 Next Step: Start Monetizing</h2>
+            <p style="font-size: 13px; color: #94a3b8; line-height: 1.5;">
+                Upload your grocery receipts, renewable energy bills, or land ownership documents to start receiving your daily carbon cashback payouts.
+            </p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+            <a href="/protected/add-asset.html" class="btn-cta-giant" style="margin-bottom: 0;">
+                📸 UPLOAD RECEIPT / ADD GREEN ASSET →
+            </a>
+
+            <a href="/protected/dashboard.html" class="btn-cta-giant" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: #bae6fd; box-shadow: 0 0 20px rgba(2, 132, 199, 0.4); margin-bottom: 0;">
+                📊 VIEW CONTROL CENTER DASHBOARD
+            </a>
+        </div>
+
+        <footer class="footer-text">
+            © 2026 EcoCredits Inc. Carbon Cashback Clearance Hub.
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cashback = localStorage.getItem('userCashback') || '0.00';
+            const co2 = localStorage.getItem('userCo2') || '0';
+            
+            document.getElementById('displayCashback').textContent = '€' + cashback;
+            document.getElementById('displayCo2').textContent = co2 + ' kg';
+        });
+    </script>
+</body>
+</html>

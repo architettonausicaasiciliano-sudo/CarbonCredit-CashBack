@@ -1,16 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const checkboxes = document.querySelectorAll('#quizForm input[type="checkbox"]');
+    const form = document.getElementById('quizForm');
     const cashbackVal = document.getElementById('cashbackVal');
+    const co2Val = document.getElementById('co2Val');
 
     function updateCalculations() {
-        let total = 0;
-        checkboxes.forEach(cb => {
-            if (cb.checked) {
-                total += parseFloat(cb.value);
-            }
+        let totalCashback = 0;
+        let totalCo2 = 0;
+
+        const checkedBoxes = form.querySelectorAll('input[type="checkbox"]:checked');
+        checkedBoxes.forEach(cb => {
+            totalCashback += parseFloat(cb.value || 0);
+            totalCo2 += parseFloat(cb.dataset.co2 || 0);
         });
-        cashbackVal.textContent = total;
+
+        if (cashbackVal) cashbackVal.textContent = totalCashback.toFixed(2);
+        if (co2Val) co2Val.textContent = totalCo2;
+
+        return { totalCashback, totalCo2 };
     }
 
-    checkboxes.forEach(cb => cb.addEventListener('change', updateCalculations));
+    form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', updateCalculations);
+    });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const totals = updateCalculations();
+
+        // Salva le stime calcolate per mostrarle nella success page
+        localStorage.setItem('userCashback', totals.totalCashback.toFixed(2));
+        localStorage.setItem('userCo2', totals.totalCo2);
+
+        // Reindirizza direttamente al checkout per il pagamento
+        window.location.href = '/checkout.html';
+    });
 });
