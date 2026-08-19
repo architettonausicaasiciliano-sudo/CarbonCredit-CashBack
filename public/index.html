@@ -3,84 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCredits — CarbonCredit CashBack</title>
-    
-    <!-- PWA & Stili Grafici -->
-    <link rel="manifest" href="/manifest.json">
+    <title>EcoCredits — Carbon Credit & CashBack</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-    <div class="container app-container">
-        <!-- HEADER / HERO -->
+    <div class="container">
+        
+        <!-- HERO SECTION -->
         <header class="hero">
             <span class="badge">🌱 EcoCredits & Carbon CashBack</span>
             <h1>Sai che le tue scelte verdi possono ridarti subito soldi indietro?</h1>
-            <p class="subtitle">Dai passi a piedi al latte vegetale, fino all'efficientamento di casa e ai tuoi terreni: scopri quanti soldi stai lasciando sul tavolo.</p>
+            <p>Dai passi a piedi al latte vegetale, fino all'efficientamento di casa e ai tuoi terreni: scopri quanti crediti e rimborso stai lasciando sul tavolo.</p>
+            
+            <!-- PULSANTE DI AZIONE CHE PORTA AL TEST -->
+            <a href="#quizForm" class="btn-action-orange">
+                ⚡ FAI IL TEST RAPIDO (30 SECONDI)
+            </a>
         </header>
 
-        <!-- TEST INTERATTIVO 30 SECONDI -->
-        <section class="card test-box">
-            <h2>⏱️ Test Rapido (30 Secondi)</h2>
-            <p class="subtitle">Seleziona le abitudini e i beni che possiedi per calcolare il tuo Cashback stimato:</p>
+        <!-- CARD QUIZ INTERATTIVA -->
+        <main class="quiz-card">
+            <h2>⏱️ Calcolatore Cashback Stimato</h2>
 
             <form id="quizForm">
-                <div class="quiz-step card-feature">
-                    <label><strong>1. Acquisti quotidiani sostenibili:</strong></label>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" name="habit" value="120"> Latte vegetale / Prodotti Bio</label>
-                        <label><input type="checkbox" name="habit" value="180"> Spesa a Km 0 / Mercato locale</label>
-                        <label><input type="checkbox" name="habit" value="150"> Mobilità dolce (Bici, Elettrico, Piedi)</label>
-                    </div>
+                
+                <div class="category-title">1. Acquisti quotidiani sostenibili</div>
+                <div class="option-group">
+                    <label class="option-label">
+                        <input type="checkbox" value="120" data-co2="180">
+                        <span class="option-text">🥛 Latte vegetale / Prodotti Bio</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" value="150" data-co2="220">
+                        <span class="option-text">🍎 Spesa a Km 0 / Mercato locale</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" value="200" data-co2="350">
+                        <span class="option-text">🚲 Mobilità dolce (Bici, Elettrico, Piedi)</span>
+                    </label>
                 </div>
 
-                <div class="quiz-step card-feature">
-                    <label><strong>2. Efficientamento e Casa:</strong></label>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" name="habit" value="450"> Pannelli Solari / Pompa di calore</label>
-                        <label><input type="checkbox" name="habit" value="200"> Elettrodomestici A+++ / Smart Heating</label>
-                    </div>
+                <div class="category-title">2. Efficientamento e Casa</div>
+                <div class="option-group">
+                    <label class="option-label">
+                        <input type="checkbox" value="450" data-co2="900">
+                        <span class="option-text">☀️ Pannelli Solari / Pompa di calore</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" value="250" data-co2="400">
+                        <span class="option-text">🔌 Elettrodomestici A+++ / Smart Heating</span>
+                    </label>
                 </div>
 
-                <div class="quiz-step card-feature">
-                    <label><strong>3. Terreni e Spazi Verdi:</strong></label>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" name="habit" value="600"> Possiedo un terreno, giardino ampio o alberi da frutto</label>
-                    </div>
+                <div class="category-title">3. Terreni e Spazi Verdi</div>
+                <div class="option-group">
+                    <label class="option-label">
+                        <input type="checkbox" value="600" data-co2="1500">
+                        <span class="option-text">🌳 Possiedo un terreno, giardino ampio o alberi</span>
+                    </label>
                 </div>
+
+                <!-- RISULTATO DINAMICO -->
+                <div class="result-box">
+                    <div class="result-title">Cashback Annuo Potenziale</div>
+                    <div class="cashback-amount">€ <span id="cashbackVal">0,00</span> / anno</div>
+                    <div class="co2-amount">🌱 CO₂ evitata stimata: <strong id="co2Val">0</strong> kg</div>
+                </div>
+
+                <!-- PULSANTE SBLOCCO FINALE -->
+                <button type="submit" class="btn-action-orange" style="margin-bottom: 0;">
+                    🚀 Sblocca il tuo Cashback — Abbonati Ora →
+                </button>
+
             </form>
+        </main>
 
-            <!-- RISULTATO CALCOLATORE -->
-            <div class="result-box card-feature" style="text-align: center; margin-top: 20px;">
-                <p>Cashback Annuo Potenziale:</p>
-                <div class="cashback-amount" style="font-size: 2rem; font-weight: bold; color: #10b981; margin: 10px 0;">
-                    € <span id="cashbackVal">0</span> / anno
-                </div>
-                <p class="small" style="font-size: 0.8rem; color: #9ca3af;">*Generabile in Crediti di Carbonio e Rimborsi Diretti</p>
-            </div>
-
-            <!-- CTA VERSO CHECKOUT -->
-            <a href="/checkout" class="btn btn-primary btn-block">Sblocca il tuo Cashback — Abbonati Ora →</a>
-        </section>
-
-        <footer>
-            <p>&copy; 2026 EcoCredits. Tutti i diritti riservati.</p>
+        <footer class="footer-text">
+            © 2026 EcoCredits. Tutti i diritti riservati.
         </footer>
+
     </div>
 
-    <!-- LOGICA CALCOLATORE LANDING -->
     <script src="/js/landing.js"></script>
-
-    <!-- REGISTRAZIONE SERVICE WORKER (PWA) -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('Service Worker registrato con successo:', reg.scope))
-                    .catch(err => console.error('Errore registrazione Service Worker:', err));
-            });
-        }
-    </script>
-<script src="/js/landing.js"></script>
 </body>
 </html>
