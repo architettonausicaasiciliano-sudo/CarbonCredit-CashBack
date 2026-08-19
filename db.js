@@ -26,7 +26,7 @@ db.serialize(() => {
     )
   `);
 
-  // 2. Tabella Azioni Eco & Abitudini Sostenibili
+  // 2. Tabella Azioni Eco & Abitudini Sostenibili (Supporto 3-Tier dMRV)
   db.run(`
     CREATE TABLE IF NOT EXISTS eco_actions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,9 +36,36 @@ db.serialize(() => {
       credits_earned REAL DEFAULT 0.0,
       co2_saved_kg REAL DEFAULT 0.0,
       source TEXT DEFAULT 'manual',
+      image_hash TEXT,
+      tier TEXT DEFAULT 'COMMUNITY',
+      confidence_score REAL DEFAULT 0.0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Migrazione dinamica: aggiunge le colonne dMRV a database esistenti senza resettare i dati
+  const dMrvColumns = [
+    { name: "image_hash", type: "TEXT" },
+    { name: "tier", type: "TEXT DEFAULT 'COMMUNITY'" },
+    { name: "confidence_score", type: "REAL DEFAULT 0.0" }
+  ];
+
+  db.all("PRAGMA table_info(eco_actions)", [], (err, rows) => {
+    if (!err && rows) {
+      const existingColumns = rows.map((r) => r.name);
+      dMrvColumns.forEach((col) => {
+        if (!existingColumns.includes(col.name)) {
+          db.run(`ALTER TABLE eco_actions ADD COLUMN ${col.name} ${col.type}`, (alterErr) => {
+            if (alterErr) {
+              console.error(`Errore aggiunta colonna ${col.name}:`, alterErr.message);
+            } else {
+              console.log(`✅ Colonna '${col.name}' aggiunta a eco_actions.`);
+            }
+          });
+        }
+      });
+    }
+  });
 
   // 3. Tabella Transazioni / Cashback & Monetizzazione Crediti
   db.run(`

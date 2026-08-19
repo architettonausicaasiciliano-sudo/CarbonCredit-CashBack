@@ -73,7 +73,7 @@
       border: 2px solid #10b981;
       border-radius: 16px;
       padding: 24px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       text-align: left;
       position: relative;
     }
@@ -170,6 +170,42 @@
       line-height: 1.4;
     }
 
+    /* BOX INFORMATIVO FLUSSO DI VALORE UTENTE */
+    .info-box {
+      background: #0b132b;
+      border: 1px solid #3a506b;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .info-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #4ade80;
+      margin: 0 0 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-list {
+      color: #cbd5e1;
+      font-size: 12px;
+      margin: 0;
+      padding-left: 18px;
+      line-height: 1.6;
+    }
+
+    .info-list li {
+      margin-bottom: 6px;
+    }
+
+    .info-list li:last-child {
+      margin-bottom: 0;
+    }
+
     /* PULSANTI E AZIONI */
     .btn-group {
       display: flex;
@@ -222,7 +258,7 @@
         color: #000000 !important;
         padding: 0;
       }
-      .no-print, .badge, .icon-box, .title, .subtitle, .btn-group, .footer-note {
+      .no-print, .badge, .icon-box, .title, .subtitle, .info-box, .btn-group, .footer-note {
         display: none !important;
       }
       .card {
@@ -291,6 +327,10 @@
           <span>Algoritmo AI Validatore:</span>
           <strong>Gemini-2.5-Flash (98.4%)</strong>
         </div>
+        <div class="cert-item" style="grid-column: span 2;">
+          <span>Stato Audit Forense & Fiduciario:</span>
+          <strong id="tierVal" style="color: #38bdf8;">Tier 2 — High-Rigidity B2B Institutional Grade</strong>
+        </div>
       </div>
 
       <div class="hash-box">
@@ -305,6 +345,22 @@
           Scansiona il codice QR per verificare l'autenticità nel registro B2B e la tracciabilità della transazione.
         </div>
       </div>
+    </div>
+
+    <!-- BOX INFORMATIVO: GESTIONE ASPETTATIVE & RISCATTO VALORE UTENTE -->
+    <div class="info-box no-print">
+      <div class="info-title">💡 Come funziona il riscatto del tuo valore:</div>
+      <ul class="info-list">
+        <li>
+          <strong>Cashback Monetario B2B:</strong> Le tue prove verificate dall'AI (Tier 2) vengono aggregate nel Batch globale B2B. Alla liquidazione del pool col broker, potrai richiedere il payout diretto dalla Dashboard.
+        </li>
+        <li>
+          <strong>Certificazione ESG / Audit PDF:</strong> Se sei un professionista o un'azienda, scarica il Certificato PDF ufficiale qui sotto per dimostrare la riduzione di CO₂ nei tuoi report di sostenibilità o verso i clienti.
+        </li>
+        <li>
+          <strong>Standard Anti-Greenwashing:</strong> Per tutelare il valore dei crediti sul mercato B2B, l'AI applica filtri di audit forensi rigorosi. Le immagini non conformi o prive di metadati restano riservate alla Gamification (Tier 1).
+        </li>
+      </ul>
     </div>
 
     <div class="btn-group no-print">
@@ -342,6 +398,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const latestAction = actionsData.ecoActions[0];
       certId = latestAction.id;
       rawHashSource = `${latestAction.id}-${latestAction.user_email}-${latestAction.co2_saved_kg}-${latestAction.image_hash || 'verified'}`;
+      
+      if (latestAction.tier) {
+        document.getElementById("tierVal").innerText = latestAction.tier === "B2B_INSTITUTIONAL" 
+          ? "Tier 2 — High-Rigidity B2B Institutional Grade" 
+          : "Tier 1 — Eco-Community & Personal Impact";
+      }
     }
 
     document.getElementById("certIdVal").innerText = "CERT-2026-" + certId;

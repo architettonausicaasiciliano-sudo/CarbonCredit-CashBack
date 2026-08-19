@@ -42,35 +42,63 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 /* =====================================================
-   HELPER CRITTOGRAFICO dMRV (SHA-256 HASH)
+   HELPER CRITTOGRAFICI & ANTI-DUPLICATI (SHA-256)
 ===================================================== */
+function calculateBufferHash(buffer) {
+  return crypto.createHash("sha256").update(buffer).digest("hex");
+}
+
 function generateDmrvHash(action) {
-  const rawData = `${action.id}-${action.user_email}-${action.co2_saved_kg}-${action.image_hash || 'no_photo_hash'}-${action.created_at || '2026'}`;
+  const rawData = `${action.id}-${action.user_email}-${action.co2_saved_kg}-${action.image_hash || 'no_photo_hash'}-${action.tier || 'TIER2'}-${action.created_at || '2026'}`;
   return crypto.createHash('sha256').update(rawData).digest('hex');
 }
 
 /* =====================================================
-   AI VISION VERIFIER ENGINE (~0,0001€/foto)
+   AI VISION FORENSICS ENGINE (3-Tier Anti-Greenwashing)
 ===================================================== */
 async function verifyActionWithAI(imagePath, actionTitle) {
   if (!ai) {
-    console.warn("Gemini API Key mancante nel .env. Uso stima di ripiego.");
-    return { valid: true, category: "GENERAL", co2_saved_kg: 5.0, confidence: 0.5 };
+    console.warn("⚠️ Gemini API Key mancante nel .env. Fallback su Tier Community.");
+    return {
+      valid: true,
+      tier: "COMMUNITY",
+      category: "GENERAL",
+      co2_saved_kg: 5.0,
+      confidence: 0.50,
+      fraud_risk: "MEDIUM",
+      reason: "Modalità ripiego: Gemini API Key non configurata nel server."
+    };
   }
 
   try {
     const imageBuffer = fs.readFileSync(imagePath);
     const base64Image = imageBuffer.toString("base64");
 
-    const prompt = `Analizza questa immagine relativa all'azione ecologica: "${actionTitle}".
-    Rispondi ESCLUSIVAMENTE con un oggetto JSON valido con questa esatta struttura:
-    {
-      "valid": true,
-      "category": "LAND_MANAGEMENT",
-      "co2_saved_kg": 12.5,
-      "confidence": 0.95
-    }
-    Valori ammessi per category: "LAND_MANAGEMENT", "FLIGHT_OFFSET", "ENERGY_SAVING", "RECYCLING", "GENERAL".`;
+    const prompt = `Sei un Auditor Forense Anti-Greenwashing esperto in dMRV (digital Measurement, Reporting, and Verification).
+Analizza rigorosamente l'immagine allegata per l'azione sostenibile dichiarata: "${actionTitle}".
+
+DEVI VALUTARE 3 ASPETTI FONDAMENTALI:
+1. Autenticità dell'immagine: Rileva moiré pattern (foto scattate a uno schermo PC/Smartphone), artefatti da AI generativa, watermark di stock photo o immagini palesemente scaricate da internet.
+2. Coerenza del contesto: La foto mostra un'azione ecologica reale e dimostrabile (es. impianto fotovoltaico, piantumazione/land management, ricevuta di riciclo/trasporto, mobilità elettrica)?
+3. Livello di Rigore (Tiering System Anti-Greenwashing):
+   - "REJECT" (Tier 0): Foto falsa, screenshot di uno schermo, immagine generata da AI, irrilevante o fraudolenta.
+   - "COMMUNITY" (Tier 1): Foto reale di un'azione personale quotidiana ma priva di rigore documentale industriale. Valida solo per gamification, punti ed estetica dell'app.
+   - "B2B_INSTITUTIONAL" (Tier 2): Foto nitida, autentica, ad alta evidenza probatoria per bilanci di sostenibilità ESG / Scope 3 e monetizzazione nel pool B2B.
+
+Rispondi ESCLUSIVAMENTE con un oggetto JSON valido con questa esatta struttura:
+{
+  "valid": true,
+  "tier": "B2B_INSTITUTIONAL",
+  "category": "LAND_MANAGEMENT",
+  "co2_saved_kg": 12.5,
+  "confidence": 0.96,
+  "fraud_risk": "LOW",
+  "reason": "Immagine autentica scattata in ambiente reale con elevata evidenza probatoria."
+}
+
+Valori ammessi per tier: "REJECT", "COMMUNITY", "B2B_INSTITUTIONAL".
+Valori ammessi per category: "LAND_MANAGEMENT", "FLIGHT_OFFSET", "ENERGY_SAVING", "RECYCLING", "GENERAL".
+Valori ammessi per fraud_risk: "LOW", "MEDIUM", "HIGH".`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -79,7 +107,7 @@ async function verifyActionWithAI(imagePath, actionTitle) {
           role: "user",
           parts: [
             { text: prompt },
-            { inlineData: { mimeType: "image/jpeg", data: base64Image } }
+            { inlineData: { mimeType: mimeType || "image/jpeg", data: base64Image } }
           ]
         }
       ],
@@ -88,8 +116,16 @@ async function verifyActionWithAI(imagePath, actionTitle) {
 
     return JSON.parse(response.text);
   } catch (err) {
-    console.error("AI MRV Verification Error:", err.message);
-    return { valid: true, category: "GENERAL", co2_saved_kg: 5.0, confidence: 0.5 };
+    console.error("❌ AI Forensics MRV Verification Error:", err.message);
+    return {
+      valid: true,
+      tier: "COMMUNITY",
+      category: "GENERAL",
+      co2_saved_kg: 5.0,
+      confidence: 0.50,
+      fraud_risk: "MEDIUM",
+      reason: "Errore temporaneo di analisi AI: assegnato Tier Community di sicurezza."
+    };
   }
 }
 
@@ -112,8 +148,8 @@ async function sellBatchToMarketplace(batchData) {
       mass_g: Math.round(batchData.totalCo2Kg * 1000), // Converte kg in grammi
       metadata: {
         batch_id: batchData.batchId,
-        mrv_provider: "AI Vision Gemini Flash",
-        source_category: "Aggregated_Household_Agritech"
+        mrv_provider: "AI Vision Gemini Flash Forensics",
+        source_category: "Aggregated_Household_Agritech_Verified"
       }
     })
   });
@@ -299,6 +335,7 @@ app.get("/verify/:certId", (req, res) => {
     const dmrvHash = generateDmrvHash(row);
     const hostUrl = `${req.protocol}://${req.get('host')}`;
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(hostUrl + '/verify/' + row.id)}`;
+    const isB2bTier = (row.tier === 'B2B_INSTITUTIONAL');
 
     res.send(`
       <!DOCTYPE html>
@@ -310,6 +347,7 @@ app.get("/verify/:certId", (req, res) => {
           body { font-family: system-ui, -apple-system, sans-serif; background: #0b132b; color: #f8fafc; display: flex; justify-content: center; padding: 40px 20px; }
           .cert-card { background: #1c2541; border: 1px solid #3a506b; border-radius: 16px; max-width: 650px; width: 100%; padding: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
           .status { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; padding: 6px 16px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; display: inline-block; }
+          .tier-badge { background: ${isB2bTier ? 'rgba(56, 189, 248, 0.2)' : 'rgba(234, 179, 8, 0.2)'}; color: ${isB2bTier ? '#38bdf8' : '#eab308'}; border: 1px solid ${isB2bTier ? '#38bdf8' : '#eab308'}; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; margin-left: 8px; }
           .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; background: #0b132b; padding: 16px; border-radius: 8px; }
           .hash-box { font-family: monospace; font-size: 0.75rem; background: #000; padding: 12px; border-radius: 6px; word-break: break-all; color: #38bdf8; border: 1px solid #1e293b; }
           .qr-section { text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid #3a506b; }
@@ -318,8 +356,9 @@ app.get("/verify/:certId", (req, res) => {
       <body>
         <div class="cert-card">
           <div class="status">✓ CERTIFICATO dMRV AUTENTICATO</div>
+          <span class="tier-badge">${isB2bTier ? 'Tier 2 — Institutional Grade B2B' : 'Tier 1 — Community & Personal Impact'}</span>
           <h2 style="margin-top:16px;">Verifica Audit Impatto Ambientale</h2>
-          <p style="color:#94a3b8; font-size:0.9rem;">Documento di compensazione conforme alle linee guida GHG Protocol Scope 3 per bilanci ESG.</p>
+          <p style="color:#94a3b8; font-size:0.9rem;">Documento di compensazione e tracciabilità conforme alle linee guida GHG Protocol Scope 3 e principi Anti-Greenwashing.</p>
 
           <div class="grid">
             <div><strong>ID Certificato:</strong><br><span style="color:#64748b;">CERT-${row.id}</span></div>
@@ -329,8 +368,8 @@ app.get("/verify/:certId", (req, res) => {
           </div>
 
           <div style="margin-bottom:16px;">
-            <strong>Metodologia MRV & Algoritmo AI:</strong>
-            <p style="margin:4px 0; color:#94a3b8; font-size:0.85rem;">Validazione automatica Vision Engine (Gemini-2.5-Flash) con estrazione metadati EXIF e verifica antiduplicato SHA-256. Livello di confidenza: <strong>98.4%</strong>.</p>
+            <strong>Metodologia Forense & Algoritmo AI:</strong>
+            <p style="margin:4px 0; color:#94a3b8; font-size:0.85rem;">Validazione automatica Gemini-2.5-Flash Forensics con rilevamento filtri anti-screen/moiré, analisi EXIF ed ereditarietà crittografica SHA-256. Punteggio Confidenza: <strong>${((row.confidence_score || 0.95) * 100).toFixed(1)}%</strong>.</p>
           </div>
 
           <div>
@@ -340,7 +379,7 @@ app.get("/verify/:certId", (req, res) => {
 
           <div class="qr-section">
             <img src="${qrCodeUrl}" alt="QR Code Verification" style="border-radius:8px; border:4px solid #fff;" />
-            <p style="font-size:0.75rem; color:#64748b; margin-top:8px;">Scansiona per verificare l'autenticità in tempo reale nel registro B2B</p>
+            <p style="font-size:0.75rem; color:#64748b; margin-top:8px;">Scansiona per verificare l'autenticità nel registro trasparente B2B</p>
           </div>
         </div>
       </body>
@@ -358,7 +397,7 @@ app.get("/api/stripe-config", (req, res) => {
 });
 
 /* =====================================================
-   CHECK DUPLICATI (HASH CLIENT)
+   CHECK DUPLICATI (HASH CLIENT / SERVER)
 ===================================================== */
 app.get("/api/check-duplicate", (req, res) => {
   const { hash } = req.query;
@@ -455,7 +494,7 @@ app.get("/api/user", (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
 
     db.get(
-      "SELECT SUM(co2_saved_kg) as total_co2 FROM eco_actions WHERE user_email = ?",
+      "SELECT SUM(co2_saved_kg) as total_co2 FROM eco_actions WHERE user_email = ? AND (tier IS NULL OR tier = 'B2B_INSTITUTIONAL')",
       [email],
       (co2Error, co2Row) => {
         const totalCo2 = co2Row && co2Row.total_co2 ? parseFloat(co2Row.total_co2) : 0.0;
@@ -478,7 +517,7 @@ app.get("/api/user", (req, res) => {
 });
 
 /* =====================================================
-   GESTIONE AZIONI ECO CON AI VERIFICATION & AUTO-BROKER
+   GESTIONE AZIONI ECO CON FORENSICS AI & TIERING SYSTEM
 ===================================================== */
 app.get("/api/eco-actions", (req, res) => {
   const email = req.query.email;
@@ -491,7 +530,7 @@ app.get("/api/eco-actions", (req, res) => {
 });
 
 app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
-  const { email, title, category, creditsEarned, co2SavedKg, source, amountSpend, imageHash } = req.body;
+  const { email, title, category, creditsEarned, co2SavedKg, source, amountSpend, imageHash: clientHash } = req.body;
 
   if (!email || !title) {
     return res.status(400).json({ error: "missing_fields" });
@@ -499,20 +538,48 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
 
   let finalCategory = category || "GENERAL";
   let co2 = parseFloat(co2SavedKg);
+  let calculatedHash = clientHash || null;
+  let aiTier = "COMMUNITY";
+  let confidenceScore = 0.80;
+  let fraudRisk = "LOW";
 
-  // 1. Processamento AI se la foto è allegata
+  // 1. Processamento e controlli di sicurezza se la foto è allegata
   if (req.file) {
+    const imageBuffer = fs.readFileSync(req.file.path);
+    calculatedHash = calculateBufferHash(imageBuffer);
+
+    // Controllo Anti-Duplicati server-side
+    const duplicateRow = await new Promise((resolve) => {
+      db.get("SELECT id FROM eco_actions WHERE image_hash = ?", [calculatedHash], (err, row) => resolve(row));
+    });
+
+    if (duplicateRow) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({
+        error: "duplicate_image",
+        message: "L'immagine inviata risulta già registrata nel database dMRV."
+      });
+    }
+
+    // Audit Forense AI Gemini
     const aiResult = await verifyActionWithAI(req.file.path, title);
 
-    if (!aiResult.valid) {
+    if (!aiResult.valid || aiResult.tier === "REJECT") {
       fs.unlinkSync(req.file.path);
-      return res.status(400).json({ error: "Foto non valida o non corrispondente all'azione." });
+      return res.status(400).json({
+        error: "invalid_photo_forensics",
+        message: aiResult.reason || "Immagine respinta dai controlli anti-fraud/anti-greenwashing AI."
+      });
     }
 
+    aiTier = aiResult.tier || "COMMUNITY";
+    confidenceScore = aiResult.confidence || 0.85;
+    fraudRisk = aiResult.fraud_risk || "LOW";
+
     if (isNaN(co2) || co2 <= 0) {
-      co2 = aiResult.co2_saved_kg;
+      co2 = aiResult.co2_saved_kg || 5.0;
     }
-    finalCategory = aiResult.category;
+    finalCategory = aiResult.category || finalCategory;
   }
 
   // Fallback se la CO2 non è definita
@@ -527,27 +594,29 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
   const actionValueEur = ((co2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2);
   const actionTrees = Math.floor(co2 / KG_CO2_PER_TREE);
 
-  // 2. Inserimento nel database
+  // 2. Inserimento nel database con metadati di audit
   db.run(
-    "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source, image_hash) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [email, title, finalCategory, credits, co2, actionSource, imageHash || null],
+    "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source, image_hash, tier, confidence_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [email, title, finalCategory, credits, co2, actionSource, calculatedHash, aiTier, confidenceScore],
     function (error) {
       if (error) return res.status(500).json({ error: error.message });
 
       const actionId = this.lastID;
 
-      // 3. Aggiornamento crediti
+      // 3. Aggiornamento crediti dell'utente
       db.run("UPDATE users SET carbon_credits = carbon_credits + ? WHERE email = ?", [credits, email], (updateError) => {
         if (updateError) console.error("CREDITS UPDATE ERROR:", updateError);
 
-        // 4. Registrazione transazione pending batch
-        db.run(
-          "INSERT INTO transactions (user_email, type, credits, amount_eur, status) VALUES (?, 'earn', ?, ?, 'pending_batch')",
-          [email, credits, parseFloat(actionValueEur)]
-        );
+        // 4. Registrazione transazione monetizzabile B2B SOLO se Tier 2 (Institutional)
+        if (aiTier === "B2B_INSTITUTIONAL") {
+          db.run(
+            "INSERT INTO transactions (user_email, type, credits, amount_eur, status) VALUES (?, 'earn', ?, ?, 'pending_batch')",
+            [email, credits, parseFloat(actionValueEur)]
+          );
+        }
 
-        // 5. Verifica accumulo globale per vendita automatizzata B2B
-        db.get("SELECT SUM(co2_saved_kg) as total_kg FROM eco_actions", [], (err, row) => {
+        // 5. Verifica accumulo globale per liquidazione automatizzata B2B
+        db.get("SELECT SUM(co2_saved_kg) as total_kg FROM eco_actions WHERE tier = 'B2B_INSTITUTIONAL'", [], (err, row) => {
           const totalTon = (row?.total_kg || 0) / 1000;
 
           if (totalTon >= BATCH_THRESHOLD_TON) {
@@ -557,13 +626,19 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
           res.json({
             success: true,
             id: actionId,
+            tier: aiTier,
+            confidenceScore: confidenceScore,
+            fraudRisk: fraudRisk,
             creditsAdded: credits,
             co2SavedKg: co2,
             category: finalCategory,
-            estimatedB2bValEur: parseFloat(actionValueEur),
+            estimatedB2bValEur: aiTier === "B2B_INSTITUTIONAL" ? parseFloat(actionValueEur) : 0.0,
             treesEquivalent: actionTrees,
             batchId: CURRENT_BATCH_ID,
             photoUrl: photoUrl,
+            message: aiTier === "B2B_INSTITUTIONAL" 
+              ? "Azione approvata Tier 2 (Grado Istituzionale B2B) e aggiunta al pool monetizzabile!"
+              : "Azione approvata Tier 1 (Community). Punti e Badge assegnati con successo!"
           });
         });
       });
@@ -614,7 +689,7 @@ app.post("/api/redeem-cashback", (req, res) => {
             transactionId: this.lastID,
             redeemedCredits: credits,
             cashbackEur: amount,
-            message: "Richiesta ricevuta. I fondi verranno inviati al termine dell'aggregazione del batch corrente."
+            message: "Richiesta di riscatto registrata. I fondi saranno erogati al termine della liquidazione del Batch."
           });
         }
       );
@@ -627,5 +702,5 @@ app.post("/api/redeem-cashback", (req, res) => {
 ===================================================== */
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

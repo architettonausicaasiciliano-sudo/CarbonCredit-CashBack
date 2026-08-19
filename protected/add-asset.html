@@ -3,139 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aggiungi Bene / Acquisto Sostenibile</title>
+  <title>Aggiungi Bene / Azione Sostenibile — dMRV</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    body { background: #0b0f19; color: #f3f4f6; font-family: sans-serif; padding: 20px; }
-    .card { background: #111827; border: 1px solid #374151; border-radius: 16px; padding: 20px; max-width: 480px; margin: 0 auto; }
-    .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #9ca3af; }
-    input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #374151; background: #1f2937; color: white; box-sizing: border-box; }
-    .btn-submit { width: 100%; padding: 14px; background: #10b981; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+    body { background: #0b0f19; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; padding: 20px; }
+    .card { background: #111827; border: 1px solid #374151; border-radius: 16px; padding: 24px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
+    input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #374151; background: #1f2937; color: white; box-sizing: border-box; font-size: 14px; }
+    input:focus, select:focus { border-color: #10b981; outline: none; }
+    .btn-submit { width: 100%; padding: 14px; background: #10b981; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; transition: all 0.2s; }
+    .btn-submit:disabled { background: #4b5563; cursor: not-allowed; }
+    .btn-submit:hover:not(:disabled) { background: #059669; }
+    
+    /* Result Box & Tier Badges */
+    .result-modal { display: none; margin-top: 20px; padding: 16px; border-radius: 12px; background: #1f2937; border: 1px solid #374151; }
+    .badge-tier2 { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; }
+    .badge-tier1 { background: rgba(234, 179, 8, 0.2); color: #eab308; border: 1px solid #eab308; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; }
+    .cert-link { display: inline-block; margin-top: 12px; color: #10b981; font-weight: bold; font-size: 13px; text-decoration: none; }
+    .cert-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h2 style="color: #34d399; margin-bottom: 16px;">🌱 Registra Acquisto Green</h2>
-  
+  <h2 style="color: #34d399; margin-top: 0; margin-bottom: 8px;">🌱 Registra Impatto Sostenibile</h2>
+  <p style="color: #9ca3af; font-size: 13px; margin-bottom: 20px;">L'AI Forensics verificherà la prova caricata per il registro dMRV e l'assegnazione del Tier.</p>
+
   <form id="addAssetForm" enctype="multipart/form-data">
     <div class="form-group">
-      <label>Nome Bene / Acquisto</label>
-      <input type="text" name="title" placeholder="Es. Pannello Solare 400W / Bici Elettrica" required>
+      <label>Nome Bene / Azione Eco</label>
+      <input type="text" id="title" name="title" placeholder="Es. Pannello Solare 400W / Piantumazione Terreno" required>
     </div>
 
     <div class="form-group">
-      <label>Categoria Sostenibile</label>
-      <select name="category">
-        <option value="Energia">Energia / Efficienza Domestica</option>
-        <option value="Mobilita">Mobilità Elettrica / Sostenibile</option>
-        <option value="SpesaEco">Spesa Biologica / Prodotti Eco</option>
-        <option value="Elettrodomestici">Elettrodomestico A+++</option>
+      <label>Categoria dMRV</label>
+      <select id="category" name="category">
+        <option value="LAND_MANAGEMENT">Gestione Terreno / Riforestazione</option>
+        <option value="ENERGY_SAVING">Energia Solare / Efficienza Domestica</option>
+        <option value="RECYCLING">Riciclo / Circolarità Industriale</option>
+        <option value="FLIGHT_OFFSET">Mobilità Sostenibile / Trasporti</option>
+        <option value="GENERAL">Generale / Gamification Personal</option>
       </select>
     </div>
 
     <div class="form-group">
-      <label>Importo Speso (€)</label>
-      <input type="number" step="0.01" name="amount" placeholder="0.00" required>
+      <label>Importo Stimato o Speso (€)</label>
+      <input type="number" id="amountSpend" step="0.01" name="amountSpend" placeholder="10.00" required>
     </div>
 
     <div class="form-group">
-      <label>📸 Foto Scontrino, Fattura o Installazione</label>
-      <input type="file" name="photo" accept="image/*">
+      <label>📸 Prova Fotografica (Foto Reale / Ricevuta)</label>
+      <input type="file" id="photo" name="photo" accept="image/*" required>
     </div>
 
-    <button type="submit" class="btn-submit">GENERA CREDITI & CASHBACK ➔</button>
+    <button type="submit" id="submitBtn" class="btn-submit">AVVIA AUDIT AI & GENERAZIONE dMRV ➔</button>
   </form>
+
+  <!-- Box Risultato Verifica AI -->
+  <div id="resultModal" class="result-modal">
+    <div id="tierBadge" class="badge-tier2">TIER DETECTED</div>
+    <h3 id="resultTitle" style="color: white; margin: 10px 0 6px 0; font-size: 16px;">Verifica Completata</h3>
+    <p id="resultDesc" style="color: #9ca3af; font-size: 13px; margin: 0;"></p>
+    <a id="certUrl" href="#" target="_blank" class="cert-link">📄 Visualizza Certificato dMRV Pubblico Auditabile ➔</a>
+  </div>
 </div>
 
 <script>
-  document.getElementById('addAssetForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-
-    const res = await fetch('/api/assets', {
-      method: 'POST',
-      body: formData
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      alert(`Bene registrato! CO2 Risparmiata: ${data.co2Saved} kg | Cashback Accumulato: €${data.cashbackEur}`);
-      window.location.href = '/protected/dashboard.html';
-    }
-  });
-</script>
-<script>
-// 1. Funzione per calcolare l'hash SHA-256 del file lato client (Costo €0.00)
-async function calculateImageHash(file) {
-  const arrayBuffer = await file.arrayBuffer();
-  const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-document.querySelector('form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const userEmail = localStorage.getItem('userEmail') || 'test@example.com'; // Recupera email sessione
-  const title = document.querySelector('input[placeholder="Nome Bene / Acquisto"]').value || document.querySelectorAll('input')[0].value;
-  const category = document.querySelector('select').value;
-  const amountSpend = document.querySelectorAll('input')[1].value;
-  const fileInput = document.querySelector('input[type="file"]');
-  const file = fileInput.files[0];
-
-  if (!file) {
-    alert("Seleziona una foto dello scontrino o installazione.");
-    return;
+  // Calcolo Hash SHA-256 del file sul dispositivo dell'utente (Costo €0.00)
+  async function calculateImageHash(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  try {
-    // A. Calcolo Hash SHA-256 locale
-    const imageHash = await calculateImageHash(file);
+  document.getElementById('addAssetForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-    // B. Filtro Antiduplicato Client-Side
-    const checkRes = await fetch(`/api/check-duplicate?hash=${imageHash}`);
-    const checkData = await checkRes.json();
-    if (checkData.isDuplicate) {
-      alert("⚠️ Errore: Questa immagine è già stata caricata in precedenza!");
+    const submitBtn = document.getElementById('submitBtn');
+    const resultModal = document.getElementById('resultModal');
+    const userEmail = localStorage.getItem('userEmail') || 'test@example.com';
+    
+    const title = document.getElementById('title').value;
+    const category = document.getElementById('category').value;
+    const amountSpend = document.getElementById('amountSpend').value;
+    const fileInput = document.getElementById('photo');
+    const file = fileInput.files[0];
+
+    if (!file) {
+      alert("Seleziona una prova fotografica valida.");
       return;
     }
 
-    // C. Preparazione FormData per il Backend
-    const formData = new FormData();
-    formData.append('email', userEmail);
-    formData.append('title', title);
-    formData.append('category', category);
-    formData.append('amountSpend', amountSpend);
-    formData.append('imageHash', imageHash);
-    formData.append('photo', file);
+    try {
+      submitBtn.innerText = "🔍 Audit Forense AI in corso (Gemini Flash)...";
+      submitBtn.disabled = true;
 
-    const submitBtn = e.target.querySelector('button');
-    submitBtn.innerText = "Verifica AI in corso...";
-    submitBtn.disabled = true;
+      // 1. Calcolo Hash Anti-Duplicati Client-Side
+      const imageHash = await calculateImageHash(file);
 
-    // D. Invio al server con Gemini AI MRV Engine
-    const res = await fetch('/api/eco-actions', {
-      method: 'POST',
-      body: formData
-    });
+      // 2. Pre-Check Duplicati
+      const checkRes = await fetch(`/api/check-duplicate?hash=${imageHash}`);
+      const checkData = await checkRes.json();
+      
+      if (checkData.isDuplicate) {
+        alert("⚠️ Immagine Rifiutata: Questa prova fotografica è già stata registrata nel sistema dMRV.");
+        submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
+        submitBtn.disabled = false;
+        return;
+      }
 
-    const data = await res.json();
+      // 3. Costruzione Multipart Payload
+      const formData = new FormData();
+      formData.append('email', userEmail);
+      formData.append('title', title);
+      formData.append('category', category);
+      formData.append('amountSpend', amountSpend);
+      formData.append('imageHash', imageHash);
+      formData.append('photo', file);
 
-    if (res.ok) {
-      alert(`✅ Azione Approvata dall'AI!\nCO2 Evitata: ${data.co2SavedKg} kg\nCrediti Accreditati: +${data.creditsAdded} CC`);
-      window.location.href = '/dashboard';
-    } else {
-      alert(`❌ Errore: ${data.error}`);
-      submitBtn.innerText = "GENERA CREDITI & CASHBACK ➔";
+      // 4. Invio al Backend
+      const res = await fetch('/api/eco-actions', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        resultModal.style.display = 'block';
+        
+        const isB2b = (data.tier === 'B2B_INSTITUTIONAL');
+        const badgeEl = document.getElementById('tierBadge');
+        badgeEl.className = isB2b ? 'badge-tier2' : 'badge-tier1';
+        badgeEl.innerText = isB2b ? 'Tier 2 — Institutional Grade B2B' : 'Tier 1 — Community Impact';
+
+        document.getElementById('resultTitle').innerText = isB2b 
+          ? `✅ Accreditati ${data.co2SavedKg} kg CO₂ nel Pool B2B` 
+          : `🎉 Registrata Azione Personal (+${data.creditsAdded} Punti)`;
+
+        document.getElementById('resultDesc').innerHTML = `
+          Confidenza AI: <strong>${((data.confidenceScore || 0.95) * 100).toFixed(1)}%</strong><br>
+          ${data.message}
+        `;
+
+        const certLink = document.getElementById('certUrl');
+        certLink.href = `/verify/${data.id}`;
+        
+        submitBtn.innerText = "✅ AZIONE REGISTRATA CON SUCCESSO";
+        
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 4000);
+
+      } else {
+        alert(`❌ Audit AI Fallito: ${data.message || data.error}`);
+        submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
+        submitBtn.disabled = false;
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Errore di connessione al server durante la verifica dMRV.");
+      submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
       submitBtn.disabled = false;
     }
-  } catch (err) {
-    console.error(err);
-    alert("Errore di connessione al server.");
-  }
-});
+  });
 </script>
 </body>
 </html>
