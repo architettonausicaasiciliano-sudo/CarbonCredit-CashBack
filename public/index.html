@@ -1,86 +1,87 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCredits — Carbon Credit & CashBack</title>
+    <title>EcoCredits — Turn Sustainable Choices Into CashBack</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
     <div class="container">
         
-        <!-- HERO SECTION -->
         <header class="hero">
-            <span class="badge">🌱 EcoCredits & Carbon CashBack</span>
-            <h1>Sai che le tue scelte verdi possono ridarti subito soldi indietro?</h1>
-            <p>Dai passi a piedi al latte vegetale, fino all'efficientamento di casa e ai tuoi terreni: scopri quanti crediti e rimborso stai lasciando sul tavolo.</p>
+            <span class="badge-eco">🌱 EcoCredits & Carbon CashBack</span>
+            <h1>Did you know your green habits can <span>pay you back real cash?</span></h1>
+            <p>From walking and plant-based food to solar panels and land ownership: calculate how much daily cashback you are leaving on the table.</p>
             
-            <!-- PULSANTE DI AZIONE CHE PORTA AL TEST -->
-            <a href="#quizForm" class="btn-action-orange">
-                ⚡ FAI IL TEST RAPIDO (30 SECONDI)
+            <a href="#initial-test" class="btn-cta-giant">
+                ⚡ START INITIAL TEST NOW (30 SEC) ⚡
             </a>
         </header>
 
-        <!-- CARD QUIZ INTERATTIVA -->
-        <main class="quiz-card">
-            <h2>⏱️ Calcolatore Cashback Stimato</h2>
+        <main class="quiz-card" id="initial-test">
+            <h2>⏱️ Initial CashBack Calculator</h2>
 
             <form id="quizForm">
                 
-                <div class="category-title">1. Acquisti quotidiani sostenibili</div>
+                <div class="category-title">1. Daily Sustainable Habits</div>
                 <div class="option-group">
                     <label class="option-label">
                         <input type="checkbox" value="120" data-co2="180">
-                        <span class="option-text">🥛 Latte vegetale / Prodotti Bio</span>
+                        <span class="option-text">🥛 Plant-Based Milk / Organic Food</span>
                     </label>
                     <label class="option-label">
                         <input type="checkbox" value="150" data-co2="220">
-                        <span class="option-text">🍎 Spesa a Km 0 / Mercato locale</span>
+                        <span class="option-text">🍎 Km 0 Grocery / Farmers Market</span>
                     </label>
                     <label class="option-label">
                         <input type="checkbox" value="200" data-co2="350">
-                        <span class="option-text">🚲 Mobilità dolce (Bici, Elettrico, Piedi)</span>
+                        <span class="option-text">🚲 Eco Mobility (Bike, EV, Walking)</span>
                     </label>
                 </div>
 
-                <div class="category-title">2. Efficientamento e Casa</div>
+                <div class="category-title">2. Energy & Home Efficiency</div>
                 <div class="option-group">
                     <label class="option-label">
                         <input type="checkbox" value="450" data-co2="900">
-                        <span class="option-text">☀️ Pannelli Solari / Pompa di calore</span>
+                        <span class="option-text">☀️ Solar Panels / Heat Pump Systems</span>
                     </label>
                     <label class="option-label">
                         <input type="checkbox" value="250" data-co2="400">
-                        <span class="option-text">🔌 Elettrodomestici A+++ / Smart Heating</span>
+                        <span class="option-text">🔌 A+++ Smart Appliances / Smart Heating</span>
                     </label>
                 </div>
 
-                <div class="category-title">3. Terreni e Spazi Verdi</div>
+                <div class="category-title">3. Land & Green Spaces</div>
                 <div class="option-group">
                     <label class="option-label">
                         <input type="checkbox" value="600" data-co2="1500">
-                        <span class="option-text">🌳 Possiedo un terreno, giardino ampio o alberi</span>
+                        <span class="option-text">🌳 Own Land, Large Garden, or Orchards</span>
                     </label>
                 </div>
 
-                <!-- RISULTATO DINAMICO -->
                 <div class="result-box">
-                    <div class="result-title">Cashback Annuo Potenziale</div>
-                    <div class="cashback-amount">€ <span id="cashbackVal">0,00</span> / anno</div>
-                    <div class="co2-amount">🌱 CO₂ evitata stimata: <strong id="co2Val">0</strong> kg</div>
+                    <div class="result-title">Estimated Annual CashBack</div>
+                    <div class="cashback-amount">€ <span id="cashbackVal">0.00</span> / yr</div>
+                    <div class="co2-amount">🌱 Estimated Avoided CO₂: <strong id="co2Val">0</strong> kg</div>
                 </div>
 
-                <!-- PULSANTE SBLOCCO FINALE -->
-                <button type="submit" class="btn-action-orange" style="margin-bottom: 0;">
-                    🚀 Sblocca il tuo Cashback — Abbonati Ora →
+                <button type="submit" class="btn-cta-giant" style="margin-bottom: 0;">
+                    🚀 CLAIM YOUR CASHBACK — SUBSCRIBE NOW →
                 </button>
 
             </form>
         </main>
 
+        <div style="text-align: center; margin-top: 15px;">
+            <a href="#initial-test" class="btn-cta-giant" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #a7f3d0; box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);">
+                📊 RE-RUN INITIAL TEST
+            </a>
+        </div>
+
         <footer class="footer-text">
-            © 2026 EcoCredits. Tutti i diritti riservati.
+            © 2026 EcoCredits Inc. All rights reserved.
         </footer>
 
     </div>
