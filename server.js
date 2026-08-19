@@ -10,9 +10,15 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const db = require("./db");
 
 /* =====================================================
+   PARAMETRI DI MERCATO VCM & ALGORITMO VALUTAZIONE AI
+===================================================== */
+const CO2_PRICE_PER_TON_EUR = 25.00; // Valore di vendita stimato sul mercato B2B (€25/Tonnellata)
+const KG_CO2_PER_TREE = 20;          // 1 Albero equivalente = 20 kg CO2 assorbita/evitata all'anno
+const CURRENT_BATCH_ID = "BATCH-2026-104"; // ID del pool corrente in aggregazione B2B
+
+/* =====================================================
    CONFIGURAZIONE CARTELLA UPLOADS & MULTER
 ===================================================== */
-
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -31,7 +37,6 @@ const upload = multer({ storage: storage });
 /* =====================================================
    CORS & CARTELLA PUBLIC / PROTECTED / UPLOADS
 ===================================================== */
-
 app.use(cors());
 
 // Serviamo i file statici
@@ -42,7 +47,6 @@ app.use("/uploads", express.static(uploadDir));
 /* =====================================================
    STRIPE WEBHOOK (DEVE STARE PRIMA DI express.json)
 ===================================================== */
-
 app.post(
   "/webhook",
   express.raw({ type: "application/json" }),
@@ -66,7 +70,6 @@ app.post(
     /* =================================================
         PAGAMENTO INIZIALE RIUSCITO
     ================================================= */
-
     if (event.type === "payment_intent.succeeded") {
       const paymentIntent = event.data.object;
 
@@ -84,7 +87,6 @@ app.post(
     /* =================================================
         ABBONAMENTO CREATO / AGGIORNATO
     ================================================= */
-
     if (
       event.type === "customer.subscription.created" ||
       event.type === "customer.subscription.updated"
@@ -127,7 +129,6 @@ app.post(
     /* =================================================
         INVOICE PAGATA
     ================================================= */
-
     if (event.type === "invoice.paid") {
       const invoice = event.data.object;
       let email = invoice.customer_email;
@@ -161,7 +162,6 @@ app.post(
     /* =================================================
         INVOICE NON PAGATA
     ================================================= */
-
     if (event.type === "invoice.payment_failed") {
       const invoice = event.data.object;
       let email = invoice.customer_email;
@@ -195,7 +195,6 @@ app.post(
     /* =================================================
         ABBONAMENTO CANCELLATO
     ================================================= */
-
     if (event.type === "customer.subscription.deleted") {
       const subscription = event.data.object;
       let email = subscription.metadata && subscription.metadata.email;
@@ -235,7 +234,6 @@ app.post(
 /* =====================================================
    MIDDLEWARE PARSER JSON & FORM-DATA PER LE ALTRE ROTTE
 ===================================================== */
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -243,27 +241,22 @@ app.use(express.urlencoded({ extended: true }));
    ROTTE PAGINE FRONTEND
 ===================================================== */
 
-// Home page
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Checkout page
 app.get("/checkout", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "checkout.html"));
 });
 
-// Pagina di successo/conferma (area protetta)
 app.get("/success", (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "success.html"));
 });
 
-// Dashboard utenti abbonati
 app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "dashboard.html"));
 });
 
-// Pagina aggiunta bene / foto scontrino
 app.get("/add-asset", (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "add-asset.html"));
 });
@@ -393,7 +386,7 @@ app.post("/create-subscription", async (req, res) => {
 });
 
 /* =====================================================
-   CHECK USER STATUS & CREDITS
+   CHECK USER STATUS, BATCH STANDBY & STATS SIMBOLICHE
 ===================================================== */
 
 app.get("/api/user", (req, res) => {
@@ -403,6 +396,7 @@ app.get("/api/user", (req, res) => {
     return res.status(400).json({ error: "missing_email" });
   }
 
+  // Recupera l'utente
   db.get(
     "SELECT email, premium, carbon_credits FROM users WHERE email = ?",
     [email],
@@ -411,20 +405,40 @@ app.get("/api/user", (req, res) => {
         return res.status(500).json({ error: error.message });
       }
 
-      res.json({
-        email: email,
-        premium: row ? row.premium === 1 : false,
-        carbon_credits: row ? row.carbon_credits : 0.0,
-      });
+      // Aggrega totali di CO2 per calcolare i fondi in attesa nel batch e gli alberi equivalenti
+      db.get(
+        "SELECT SUM(co2_saved_kg) as total_co2 FROM eco_actions WHERE user_email = ?",
+        [email],
+        (co2Error, co2Row) => {
+          const totalCo2 = (co2Row && co2Row.total_co2) ? parseFloat(co2Row.total_co2) : 0.0;
+          
+          // Calcolo dinamico valore B2B in attesa (standby)
+          const pendingB2bEur = ((totalCo2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2);
+          
+          // Calcolo dinamico riscontro simbolico
+          const treesPlanted = Math.floor(totalCo2 / KG_CO2_PER_TREE);
+
+          res.json({
+            email: email,
+            premium: row ? row.premium === 1 : false,
+            carbon_credits: row ? row.carbon_credits : 0.0,
+            // Parametri B2B Aggregation & Impact Simbolico
+            batchId: CURRENT_BATCH_ID,
+            totalCo2Kg: totalCo2,
+            pendingB2bEur: parseFloat(pendingB2bEur),
+            treesEquivalent: treesPlanted,
+            batchStatus: "IN_AGGREGATION_PENDING_SALE"
+          });
+        }
+      );
     }
   );
 });
 
 /* =====================================================
-   GESTIONE AZIONI ECO, UPLOAD FOTO & CREDITI
+   GESTIONE AZIONI ECO, UPLOAD FOTO & AI ENGINE REGISTRATION
 ===================================================== */
 
-// Recupera le azioni eco registrate dall'utente
 app.get("/api/eco-actions", (req, res) => {
   const email = req.query.email;
   if (!email) return res.status(400).json({ error: "missing_email" });
@@ -439,20 +453,29 @@ app.get("/api/eco-actions", (req, res) => {
   );
 });
 
-// Registra una nuova azione sostenibile / upload foto scontrino
 app.post("/api/eco-actions", upload.single("photo"), (req, res) => {
-  const { email, title, category, creditsEarned, co2SavedKg, source } = req.body;
+  const { email, title, category, creditsEarned, co2SavedKg, source, amountSpend } = req.body;
 
   if (!email || !title || !category) {
     return res.status(400).json({ error: "missing_fields" });
   }
 
-  const credits = parseFloat(creditsEarned) || 1.0;
-  const co2 = parseFloat(co2SavedKg) || 0.0;
-  const actionSource = source || "manual";
+  // Se viene passato l'importo speso, l'AI calcola la CO2 risparmiata (es. 1€ speso = 0.5kg CO2 evitati)
+  let co2 = parseFloat(co2SavedKg);
+  if (isNaN(co2) || co2 <= 0) {
+    const spend = parseFloat(amountSpend) || 10.0;
+    co2 = spend * 0.5;
+  }
+
+  const credits = parseFloat(creditsEarned) || Math.max(1.0, Math.round(co2 * 0.1));
+  const actionSource = source || (req.file ? "photo_upload" : "manual");
   const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-  // 1. Inserisce l'azione nella tabella eco_actions
+  // Calcolo valore stimato per questa singola azione
+  const actionValueEur = ((co2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2);
+  const actionTrees = Math.floor(co2 / KG_CO2_PER_TREE);
+
+  // 1. Inserisci azione nel database
   db.run(
     "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source) VALUES (?, ?, ?, ?, ?, ?)",
     [email, title, category, credits, co2, actionSource],
@@ -461,23 +484,27 @@ app.post("/api/eco-actions", upload.single("photo"), (req, res) => {
 
       const actionId = this.lastID;
 
-      // 2. Incrementa il saldo crediti dell'utente
+      // 2. Incrementa saldo crediti utente
       db.run(
         "UPDATE users SET carbon_credits = carbon_credits + ? WHERE email = ?",
         [credits, email],
         (updateError) => {
           if (updateError) console.error("CREDITS UPDATE ERROR:", updateError);
 
-          // 3. Registra la transazione di guadagno crediti
+          // 3. Registra la transazione in stato 'pending_batch' per la monetizzazione B2B
           db.run(
-            "INSERT INTO transactions (user_email, type, credits, amount_eur, status) VALUES (?, 'earn', ?, 0.0, 'completed')",
-            [email, credits]
+            "INSERT INTO transactions (user_email, type, credits, amount_eur, status) VALUES (?, 'earn', ?, ?, 'pending_batch')",
+            [email, credits, parseFloat(actionValueEur)]
           );
 
           res.json({
             success: true,
             id: actionId,
             creditsAdded: credits,
+            co2SavedKg: co2,
+            estimatedB2bValEur: parseFloat(actionValueEur),
+            treesEquivalent: actionTrees,
+            batchId: CURRENT_BATCH_ID,
             photoUrl: photoUrl,
           });
         }
@@ -490,7 +517,6 @@ app.post("/api/eco-actions", upload.single("photo"), (req, res) => {
    TRANSAZIONI & CASHBACK / MONETIZZAZIONE
 ===================================================== */
 
-// Recupera le transazioni dell'utente (guadagni e riscatti cashback)
 app.get("/api/transactions", (req, res) => {
   const email = req.query.email;
   if (!email) return res.status(400).json({ error: "missing_email" });
@@ -505,7 +531,6 @@ app.get("/api/transactions", (req, res) => {
   );
 });
 
-// Richiesta di riscatto cashback in € scambiando crediti di carbonio
 app.post("/api/redeem-cashback", (req, res) => {
   const { email, creditsToRedeem, amountEur } = req.body;
 
@@ -516,7 +541,6 @@ app.post("/api/redeem-cashback", (req, res) => {
   const credits = parseFloat(creditsToRedeem);
   const amount = parseFloat(amountEur);
 
-  // Verifica se l'utente ha abbastanza crediti
   db.get(
     "SELECT carbon_credits FROM users WHERE email = ?",
     [email],
@@ -526,7 +550,6 @@ app.post("/api/redeem-cashback", (req, res) => {
         return res.status(400).json({ error: "insufficient_credits" });
       }
 
-      // Detrae i crediti e registra la transazione cashback
       db.run(
         "UPDATE users SET carbon_credits = carbon_credits - ? WHERE email = ?",
         [credits, email],
@@ -534,7 +557,7 @@ app.post("/api/redeem-cashback", (req, res) => {
           if (updateError) return res.status(500).json({ error: updateError.message });
 
           db.run(
-            "INSERT INTO transactions (user_email, type, credits, amount_eur, status) VALUES (?, 'cashback', ?, ?, 'pending')",
+            "INSERT INTO transactions (user_email, type, credits, amount_eur, status) VALUES (?, 'cashback', ?, ?, 'pending_payout')",
             [email, credits, amount],
             function (txError) {
               if (txError) return res.status(500).json({ error: txError.message });
@@ -544,6 +567,7 @@ app.post("/api/redeem-cashback", (req, res) => {
                 transactionId: this.lastID,
                 redeemedCredits: credits,
                 cashbackEur: amount,
+                message: "Richiesta ricevuta. I fondi verranno inviati al termine dell'aggregazione del batch corrente."
               });
             }
           );
