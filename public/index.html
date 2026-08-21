@@ -10,19 +10,29 @@
 
     <div class="container">
         
-        <!-- INTERO BLOCCO HERO CLICCABILE -->
-        <header class="hero">
+        <!-- INTERO BLOCCO HERO CLICCABILE CON BORDO -->
+        <header class="hero" style="margin-bottom: 24px;">
             <a href="#initial-test" style="text-decoration: none; color: inherit; display: block; cursor: pointer;">
-                <div>
-                    <span class="badge-eco">🌱 EcoCredits & Carbon CashBack</span>
-                </div>
+                <div style="border: 2px solid #10b981; border-radius: 16px; padding: 24px 16px; background: rgba(16, 185, 129, 0.05); text-align: center; box-shadow: 0 0 15px rgba(16, 185, 129, 0.15); transition: transform 0.2s, border-color 0.2s;">
+                    
+                    <div>
+                        <span class="badge-eco" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-bottom: 12px;">
+                            🌱 EcoCredits & Carbon CashBack
+                        </span>
+                    </div>
 
-                <h1>Did you know your green habits can <span>pay you back real cash?</span></h1>
+                    <h1 style="color: #ffffff; font-size: 1.5rem; font-weight: 800; line-height: 1.25; margin: 8px 0; text-transform: uppercase;">
+                        Did you know your green habits can <span style="color: #10b981;">pay you back real cash?</span>
+                    </h1>
 
-                <p>From walking and plant-based food to solar panels and land ownership: calculate how much daily cashback you are leaving on the table.</p>
-                
-                <div class="btn-cta-giant">
-                    ⚡ START INITIAL TEST NOW (30 SEC) ⚡
+                    <p style="color: #94a3b8; font-size: 0.88rem; margin: 10px 0 16px 0; line-height: 1.4;">
+                        From walking and plant-based food to solar panels and land ownership: calculate how much daily cashback you are leaving on the table.
+                    </p>
+                    
+                    <div class="btn-cta-giant" style="margin-top: 8px;">
+                        ⚡ START INITIAL TEST NOW (30 SEC) ⚡
+                    </div>
+
                 </div>
             </a>
         </header>
@@ -71,7 +81,7 @@
                 <!-- CARD RISULTATO CLICCABILE PER ANDARE AL PAGAMENTO -->
                 <div class="result-box" 
                      onclick="document.getElementById('quizForm').requestSubmit()" 
-                     style="cursor: pointer; title: 'Click to claim cashback';">
+                     style="cursor: pointer;" title="Click to claim cashback">
                     <div class="result-title">Estimated Annual CashBack</div>
                     <div class="cashback-amount">€ <span id="cashbackVal">0.00</span> / yr</div>
                     <div class="co2-amount">🌱 Estimated Avoided CO₂: <strong id="co2Val">0</strong> kg</div>
