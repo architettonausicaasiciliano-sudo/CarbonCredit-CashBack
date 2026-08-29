@@ -1,19 +1,19 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
-// Utilizza path.join per evitare problemi di percorso relativo su server come Render
+// Percorso assoluto al file del database SQLite
 const dbPath = path.join(__dirname, "users.db");
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    console.error("DATABASE CONNECTION ERROR:", err.message);
+    console.error("❌ ERRORE CONNESSIONE DATABASE:", err.message);
   } else {
-    console.log("Connected to SQLite database.");
+    console.log("⚡ Connesso al database SQLite (users.db).");
   }
 });
 
 db.serialize(() => {
-  // 1. Tabella Utenti (Abbonamento Stripe, Saldo Crediti Carbonio)
+  // 1. Tabella Utenti (Stripe & Saldo Crediti Carbonio)
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +26,7 @@ db.serialize(() => {
     )
   `);
 
-  // 2. Tabella Azioni Eco & Abitudini Sostenibili (Supporto 3-Tier dMRV)
+  // 2. Tabella Azioni Eco & dMRV Verification Engine
   db.run(`
     CREATE TABLE IF NOT EXISTS eco_actions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +43,7 @@ db.serialize(() => {
     )
   `);
 
-  // Migrazione dinamica: aggiunge le colonne dMRV a database esistenti senza resettare i dati
+  // Migrazione automatica colonne dMRV per database esistenti
   const dMrvColumns = [
     { name: "image_hash", type: "TEXT" },
     { name: "tier", type: "TEXT DEFAULT 'COMMUNITY'" },
@@ -57,7 +57,7 @@ db.serialize(() => {
         if (!existingColumns.includes(col.name)) {
           db.run(`ALTER TABLE eco_actions ADD COLUMN ${col.name} ${col.type}`, (alterErr) => {
             if (alterErr) {
-              console.error(`Errore aggiunta colonna ${col.name}:`, alterErr.message);
+              console.error(`⚠️ Errore aggiunta colonna ${col.name}:`, alterErr.message);
             } else {
               console.log(`✅ Colonna '${col.name}' aggiunta a eco_actions.`);
             }
@@ -67,12 +67,12 @@ db.serialize(() => {
     }
   });
 
-  // 3. Tabella Transazioni / Cashback & Monetizzazione Crediti
+  // 3. Tabella Transazioni, Batch Pools & Payout Cashback
   db.run(`
     CREATE TABLE IF NOT EXISTS transactions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_email TEXT NOT NULL,
-      type TEXT NOT NULL, -- 'earn' (guadagno), 'cashback' (riscatto/cashback), 'payout'
+      type TEXT NOT NULL,
       credits REAL NOT NULL,
       amount_eur REAL DEFAULT 0.0,
       status TEXT DEFAULT 'completed',
