@@ -36,14 +36,14 @@ body {
   margin-bottom: 28px;
 }
 
-/* Badge iniziale in Rosso Corallo Vivo */
+/* Badge iniziale in Rosso Scarlatto Puro */
 .badge-eco {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 42, 42, 0.15);
-  border: 1.5px solid #ff3838;
-  color: #ff5252;
+  background: rgba(230, 0, 35, 0.15);
+  border: 1.5px solid #E60023;
+  color: #FF2E4C;
   font-size: 12px;
   font-weight: 800;
   padding: 8px 16px;
@@ -51,7 +51,7 @@ body {
   letter-spacing: 0.8px;
   text-transform: uppercase;
   margin-bottom: 16px;
-  box-shadow: 0 0 15px rgba(255, 42, 42, 0.3);
+  box-shadow: 0 0 15px rgba(230, 0, 35, 0.35);
 }
 
 .hero h1 {
@@ -64,10 +64,10 @@ body {
   letter-spacing: -0.5px;
 }
 
-/* Testo evidenziato iniziale in Rosso Corallo Intenso */
+/* Testo evidenziato in Rosso Scarlatto Profondo */
 .hero h1 span {
-  color: #ff3838;
-  background: linear-gradient(135deg, #ff4d4d 0%, #ff2a2a 50%, #e60000 100%);
+  color: #E60023;
+  background: linear-gradient(135deg, #FF2E4C 0%, #E60023 50%, #990014 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -79,14 +79,14 @@ body {
   margin-bottom: 22px;
 }
 
-/* --- PULSANTE ROSSO CORALLO PURO AD ALTO IMPATTO --- */
+/* --- PULSANTE ROSSO SCARLATTO / FRAGOLA AD ALTO IMPATTO --- */
 .btn-cta-giant {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   width: 100%;
-  background: linear-gradient(180deg, #ff3838 0%, #e60000 50%, #cc0000 100%) !important;
+  background: linear-gradient(180deg, #E60023 0%, #C4001A 50%, #990014 100%) !important;
   color: #ffffff !important;
   font-size: 17px;
   font-weight: 900;
@@ -94,10 +94,10 @@ body {
   letter-spacing: 0.5px;
   padding: 18px 24px;
   border-radius: 16px;
-  border: 2px solid #ff6b6b !important;
+  border: 1.5px solid #FF2E4C !important;
   cursor: pointer;
   text-decoration: none;
-  box-shadow: 0 0 25px rgba(230, 0, 0, 0.8) !important;
+  box-shadow: 0 0 25px rgba(230, 0, 35, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
   animation: pulseRed 2s infinite;
   transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
   margin-bottom: 24px;
@@ -105,22 +105,22 @@ body {
 
 .btn-cta-giant:hover {
   transform: scale(1.03);
-  background: linear-gradient(180deg, #ff5252 0%, #e60000 100%) !important;
-  box-shadow: 0 0 40px rgba(255, 42, 42, 0.95) !important;
+  background: linear-gradient(180deg, #FF1A3C 0%, #B8001C 100%) !important;
+  box-shadow: 0 0 40px rgba(230, 0, 35, 0.85) !important;
 }
 
 @keyframes pulseRed {
-  0% { box-shadow: 0 0 15px rgba(230, 0, 0, 0.6); }
-  50% { box-shadow: 0 0 35px rgba(255, 42, 42, 0.95); }
-  100% { box-shadow: 0 0 15px rgba(230, 0, 0, 0.6); }
+  0% { box-shadow: 0 0 15px rgba(230, 0, 35, 0.5); }
+  50% { box-shadow: 0 0 35px rgba(230, 0, 35, 0.85); }
+  100% { box-shadow: 0 0 15px rgba(230, 0, 35, 0.5); }
 }
 
 /* Regola generica per qualsiasi altro pulsante rosso nell'applicazione */
 .btn-red, button.btn-red, a.btn-red, .btn-submit {
-  background: linear-gradient(180deg, #ff3838 0%, #e60000 100%) !important;
+  background: linear-gradient(180deg, #E60023 0%, #A30019 100%) !important;
   color: #ffffff !important;
-  border: 1px solid #ff6b6b !important;
-  box-shadow: 0 0 20px rgba(230, 0, 0, 0.7) !important;
+  border: 1px solid #FF2E4C !important;
+  box-shadow: 0 0 20px rgba(230, 0, 35, 0.5) !important;
   cursor: pointer;
   font-weight: bold;
   transition: background 0.2s, transform 0.1s, box-shadow 0.2s;

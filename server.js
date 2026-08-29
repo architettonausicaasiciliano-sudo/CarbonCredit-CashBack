@@ -12,17 +12,34 @@ const db = require("./db");
 const { verifyEcoAction } = require("./src/services/geminiService");
 
 /* =====================================================
-   AUTO-MIGRAZIONE DATABASE & INDICI PER DUP-CHECK VELOCE
+   AUTO-MIGRAZIONE DATABASE, TABELLA DATA_POOLS & INDICI
 ===================================================== */
 db.serialize(() => {
-  // Aggiunta sicura della colonna receipt_hash (se non esiste già)
+  // 1. Creazione tabella data_pools per il clustering B2B
+  db.run(`
+    CREATE TABLE IF NOT EXISTS data_pools (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      category TEXT NOT NULL,
+      status TEXT DEFAULT 'BUILDING',
+      total_co2_kg REAL DEFAULT 0,
+      item_count INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // 2. Aggiunta sicura delle colonne (se non esistono già)
   db.run("ALTER TABLE eco_actions ADD COLUMN receipt_hash TEXT", (err) => {
-    if (!err) console.log("✅ Colonna 'receipt_hash' aggiunta con successo a eco_actions.");
+    if (!err) console.log("✅ Colonna 'receipt_hash' aggiunta a eco_actions.");
   });
 
-  // Indici per velocizzare i controlli anti-duplicato
+  db.run("ALTER TABLE eco_actions ADD COLUMN pool_id INTEGER", (err) => {
+    if (!err) console.log("✅ Colonna 'pool_id' aggiunta a eco_actions.");
+  });
+
+  // 3. Indici per velocizzare controlli e clustering
   db.run("CREATE INDEX IF NOT EXISTS idx_image_hash ON eco_actions(image_hash)");
   db.run("CREATE INDEX IF NOT EXISTS idx_receipt_hash ON eco_actions(receipt_hash)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_pool_id ON eco_actions(pool_id)");
 });
 
 /* =====================================================
@@ -79,6 +96,46 @@ function generateReceiptHash(merchant, dateTime, totalAmount) {
 function generateDmrvHash(action) {
   const rawData = `${action.id}-${action.user_email}-${action.co2_saved_kg}-${action.image_hash || 'no_photo_hash'}-${action.tier || 'TIER2'}-${action.created_at || '2026'}`;
   return crypto.createHash('sha256').update(rawData).digest('hex');
+}
+
+/* =====================================================
+   HELPER CLUSTERING POOL B2B
+===================================================== */
+function getOrCreateDataPool(category) {
+  return new Promise((resolve, reject) => {
+    db.get(
+      "SELECT id FROM data_pools WHERE category = ? AND status = 'BUILDING' ORDER BY id DESC LIMIT 1",
+      [category],
+      (err, pool) => {
+        if (err) return reject(err);
+        if (pool) {
+          resolve(pool.id);
+        } else {
+          db.run(
+            "INSERT INTO data_pools (category, status, total_co2_kg, item_count) VALUES (?, 'BUILDING', 0, 0)",
+            [category],
+            function (createErr) {
+              if (createErr) return reject(createErr);
+              resolve(this.lastID);
+            }
+          );
+        }
+      }
+    );
+  });
+}
+
+function updateDataPoolStats(poolId, co2Kg) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      "UPDATE data_pools SET total_co2_kg = total_co2_kg + ?, item_count = item_count + 1 WHERE id = ?",
+      [co2Kg, poolId],
+      (err) => {
+        if (err) reject(err);
+        else resolve();
+      }
+    );
+  });
 }
 
 /* =====================================================
@@ -157,7 +214,6 @@ app.post(
       return res.status(400).send("Webhook Error: " + error.message);
     }
 
-    // Gestione Eventi Pagamenti e Abbonamenti
     switch (event.type) {
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object;
@@ -206,7 +262,6 @@ app.post(
       }
 
       default:
-        // Evento non gestito direttamente
         break;
     }
 
@@ -215,7 +270,7 @@ app.post(
 );
 
 /* =====================================================
-   BODY PARSER MIDDELWARE
+   BODY PARSER MIDDLEWARE
 ===================================================== */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -526,6 +581,9 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
       co2 = spendAmount > 0 ? spendAmount * 0.5 : 25.0;
     }
 
+    // Identifica o crea il pool B2B di appartenenza per la categoria
+    const poolId = await getOrCreateDataPool(finalCategory);
+
     // CALCOLO 10% PROPORZIONALE SULL'IMPORTO CARICATO
     const actionValueEur = spendAmount > 0 ? (spendAmount * 0.10).toFixed(2) : ((co2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2);
     const credits = parseFloat(creditsEarned) || Math.max(1.0, Math.round(spendAmount * 0.10));
@@ -534,14 +592,17 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
     const actionTrees = Math.max(1, Math.round(co2 / KG_CO2_PER_TREE));
     const kmDrivenEquiv = Math.round(co2 * 5); // 1kg CO2 = ~5km guidati in auto media
 
-    // 2. Inserimento nel database SQLite
+    // 2. Inserimento nel database SQLite (incluso il pool_id)
     db.run(
-      "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source, image_hash, tier, confidence_score, receipt_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [email, title, finalCategory, credits, co2, actionSource, calculatedHash, aiTier, confidenceScore, receiptHash],
-      function (error) {
+      "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source, image_hash, tier, confidence_score, receipt_hash, pool_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [email, title, finalCategory, credits, co2, actionSource, calculatedHash, aiTier, confidenceScore, receiptHash, poolId],
+      async function (error) {
         if (error) return res.status(500).json({ error: error.message });
 
         const actionId = this.lastID;
+
+        // Aggiorna metriche accumulate del data pool di riferimento
+        await updateDataPoolStats(poolId, co2).catch((pErr) => console.error("POOL STATS ERROR:", pErr));
 
         // 3. Aggiornamento crediti utente
         db.run("UPDATE users SET carbon_credits = carbon_credits + ? WHERE email = ?", [credits, email], (updateError) => {
@@ -564,6 +625,7 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
             res.json({
               success: true,
               id: actionId,
+              poolId: poolId,
               tier: aiTier,
               confidenceScore: confidenceScore,
               fraudRisk: fraudRisk,

@@ -2,7 +2,7 @@ const { GoogleGenAI, Type } = require("@google/genai");
 
 const ai = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
 
-// Schema strutturato strict per la risposta JSON dMRV
+// Schema strutturato strict per la risposta JSON dMRV e categorizzazione automatica
 const verificationSchema = {
   type: Type.OBJECT,
   properties: {
@@ -13,7 +13,10 @@ const verificationSchema = {
       enum: ["REJECT", "COMMUNITY", "B2B_INSTITUTIONAL"] 
     },
     co2_saved_kg: { type: Type.NUMBER },
-    category: { type: Type.STRING },
+    category: { 
+      type: Type.STRING,
+      enum: ["E_BIKE", "COMPOSTING", "WALKING_STEPS", "SOLAR_ENERGY", "PUBLIC_TRANSPORT", "GENERAL"]
+    },
     detected_action: { type: Type.STRING },
     is_receipt: { type: Type.BOOLEAN },
     merchant: { type: Type.STRING },
@@ -52,11 +55,7 @@ const verificationSchema = {
 };
 
 /**
- * Effettua la verifica forense dMRV ed estrazione dati scontrino/ricevuta.
- * @param {Buffer} imageBuffer - Buffer dell'immagine caricata
- * @param {string} mimeType - MIME type dell'immagine (es. 'image/jpeg')
- * @param {string} actionTitle - Titolo o descrizione dell'azione dichiarata
- * @param {Object} [exifData={}] - Metadati EXIF opzionali
+ * Effettua la verifica forense dMRV ed estrazione dati con categorizzazione automatica.
  */
 async function verifyEcoAction(imageBuffer, mimeType = "image/jpeg", actionTitle = "", exifData = {}) {
   if (!ai) {
@@ -83,14 +82,21 @@ async function verifyEcoAction(imageBuffer, mimeType = "image/jpeg", actionTitle
 Analizza l'immagine caricata e valuta l'azione dichiarata dall'utente: "${actionTitle}".
 Dati EXIF forniti: ${JSON.stringify(exifData)}.
 
-CRITERI RIGIDI DI AUDIT & ESTRAZIONE DATI:
-1. Determina se l'immagine è uno scontrino, ricevuta o fattura d'acquisto (is_receipt).
-2. Estragli l'esercente (merchant, es. "Carrefour", "Trenitalia"), data/ora (date_time, es. "2026-08-28 14:30") e importo totale speso in Euro (total_amount). Se non visibili o non applicabili, imposta merchant="UNKNOWN", date_time="UNKNOWN", total_amount=0.
-3. Valuta autenticità e frodi:
-   - REJECT: Foto di schermi (pattern Moiré), immagini AI, stock photo, foto sfocate o totalmente irrilevanti.
-   - COMMUNITY: Azione eco reale o scontrino valido per uso personal/gamification.
-   - B2B_INSTITUTIONAL: Ricevuta/scontrino nitido e tracciabile (veicoli elettrici, trasporto pubblico, fotovoltaico, prodotti bio) con confidence >= 0.90.
-4. Calcola la CO2 risparmiata stimata in kg (co2_saved_kg).`;
+CRITERI RIGIDI DI AUDIT, ESTRAZIONE DATI & CLASSIFICAZIONE:
+1. Classifica l'azione categorizzandola tassativamente in una delle seguenti opzioni:
+   - 'E_BIKE': Acquisto/uso bici elettrica, monopattini, accessori ciclabilità.
+   - 'COMPOSTING': Compostaggio, bio-rifiuti, sistemi di riciclo organico.
+   - 'WALKING_STEPS': Log o screenshot di passi/tratti a piedi.
+   - 'SOLAR_ENERGY': Impianti fotovoltaici, pompe di calore, efficienza energetica.
+   - 'PUBLIC_TRANSPORT': Biglietti treno, bus, metro.
+   - 'GENERAL': Altre azioni generiche.
+2. Determina se l'immagine è uno scontrino, ricevuta o fattura d'acquisto (is_receipt).
+3. Estragli l'esercente (merchant), data/ora (date_time) e importo totale speso in Euro (total_amount). Se non visibili, imposta merchant="UNKNOWN", date_time="UNKNOWN", total_amount=0.
+4. Valuta autenticità e frodi:
+   - REJECT: Foto di schermi, immagini AI, stock photo, foto sfocate o irrilevanti.
+   - COMMUNITY: Azione eco reale per uso personal.
+   - B2B_INSTITUTIONAL: Ricevuta/scontrino nitido e tracciabile con confidence >= 0.90.
+5. Calcola la CO2 risparmiata stimata in kg (co2_saved_kg).`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
