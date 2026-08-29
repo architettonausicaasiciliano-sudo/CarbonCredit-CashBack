@@ -12,12 +12,17 @@ const db = require("./db");
 const { verifyEcoAction } = require("./src/services/geminiService");
 
 /* =====================================================
-   AUTO-MIGRAZIONE DATABASE PER RICEVUTE UNICHE
+   AUTO-MIGRAZIONE DATABASE & INDICI PER DUP-CHECK VELOCE
 ===================================================== */
 db.serialize(() => {
+  // Aggiunta sicura della colonna receipt_hash (se non esiste già)
   db.run("ALTER TABLE eco_actions ADD COLUMN receipt_hash TEXT", (err) => {
     if (!err) console.log("✅ Colonna 'receipt_hash' aggiunta con successo a eco_actions.");
   });
+
+  // Indici per velocizzare i controlli anti-duplicato
+  db.run("CREATE INDEX IF NOT EXISTS idx_image_hash ON eco_actions(image_hash)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_receipt_hash ON eco_actions(receipt_hash)");
 });
 
 /* =====================================================
@@ -29,7 +34,7 @@ const CURRENT_BATCH_ID = "BATCH-2026-104"; // ID del pool corrente
 const BATCH_THRESHOLD_TON = 50.0;     // Soglia Tonnellate per liquidazione automatica
 
 /* =====================================================
-   CONFIGURAZIONE CARTELLA UPLOADS & MULTER
+   CONFIGURAZIONE CARTELLA UPLOADS & MULTER SICURO
 ===================================================== */
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -44,7 +49,19 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limite max 10MB per immagine
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|webp|heic/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error("Formato non supportato. Carica solo immagini JPEG, PNG, WEBP o HEIC."));
+  }
+});
 
 /* =====================================================
    HELPER CRITTOGRAFICI & ANTI-DUPLICATI (SHA-256)
@@ -112,7 +129,7 @@ async function triggerAutoBrokerLiquidation(batchId, totalCo2Ton) {
 }
 
 /* =====================================================
-   MIDDLEWARE & CARTELLI PUBLIC / PROTECTED / UPLOADS
+   MIDDLEWARE & STATICI (PUBLIC / PROTECTED / UPLOADS)
 ===================================================== */
 app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
@@ -120,7 +137,7 @@ app.use("/protected", express.static(path.join(__dirname, "protected")));
 app.use("/uploads", express.static(uploadDir));
 
 /* =====================================================
-   STRIPE WEBHOOK (PRIMA DI express.json)
+   STRIPE WEBHOOK (MUST BE BEFORE express.json())
 ===================================================== */
 app.post(
   "/webhook",
@@ -136,40 +153,70 @@ app.post(
         process.env.STRIPE_WEBHOOK_SECRET
       );
     } catch (error) {
-      console.error("WEBHOOK ERROR:", error.message);
+      console.error("❌ WEBHOOK ERROR:", error.message);
       return res.status(400).send("Webhook Error: " + error.message);
     }
 
-    if (event.type === "payment_intent.succeeded") {
-      const paymentIntent = event.data.object;
-      if (paymentIntent.metadata && paymentIntent.metadata.type === "initial_payment") {
-        const email = paymentIntent.metadata.email;
-        if (email) console.log("INITIAL PAYMENT SUCCEEDED:", email);
-      }
-    }
-
-    if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated") {
-      const subscription = event.data.object;
-      let email = subscription.metadata && subscription.metadata.email;
-
-      if (!email && subscription.customer) {
-        try {
-          const customer = await stripe.customers.retrieve(subscription.customer);
-          if (customer && !customer.deleted) email = customer.email;
-        } catch (error) {
-          console.error("CUSTOMER LOOKUP ERROR:", error);
+    // Gestione Eventi Pagamenti e Abbonamenti
+    switch (event.type) {
+      case "payment_intent.succeeded": {
+        const paymentIntent = event.data.object;
+        if (paymentIntent.metadata && paymentIntent.metadata.type === "initial_payment") {
+          const email = paymentIntent.metadata.email;
+          if (email) console.log("💳 Pagamento Iniziale Completato per:", email);
         }
+        break;
       }
 
-      if (email && (subscription.status === "trialing" || subscription.status === "active")) {
-        db.run("UPDATE users SET premium = 1 WHERE email = ?", [email]);
+      case "customer.subscription.created":
+      case "customer.subscription.updated": {
+        const subscription = event.data.object;
+        let email = subscription.metadata && subscription.metadata.email;
+
+        if (!email && subscription.customer) {
+          try {
+            const customer = await stripe.customers.retrieve(subscription.customer);
+            if (customer && !customer.deleted) email = customer.email;
+          } catch (error) {
+            console.error("Errore recupero cliente Stripe:", error);
+          }
+        }
+
+        if (email && (subscription.status === "trialing" || subscription.status === "active")) {
+          db.run("UPDATE users SET premium = 1 WHERE email = ?", [email]);
+          console.log(`✅ Utente ${email} attivato/rinnovato Premium.`);
+        }
+        break;
       }
+
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object;
+        let email = subscription.metadata && subscription.metadata.email;
+        if (email) {
+          db.run("UPDATE users SET premium = 0 WHERE email = ?", [email]);
+          console.log(`⚠️ Abbonamento cancellato per: ${email}`);
+        }
+        break;
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object;
+        console.warn(`⚠️ Pagamento fattura fallito per cliente: ${invoice.customer_email || invoice.customer}`);
+        break;
+      }
+
+      default:
+        // Evento non gestito direttamente
+        break;
     }
 
     res.json({ received: true });
   }
 );
 
+/* =====================================================
+   BODY PARSER MIDDELWARE
+===================================================== */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -193,7 +240,7 @@ app.get("/verify/:certId", (req, res) => {
       return res.status(404).send(`
         <div style="font-family:sans-serif; text-align:center; padding:50px; background:#0f172a; color:#f8fafc; min-height:100vh;">
           <h1 style="color:#ef4444;">❌ Certificato Non Trovato</h1>
-          <p>L'identificativo fornito non corrisponde a nessun record dMRV registrato.</p>
+          <p>L'identificativo fornito non corrisponde a nessun record dMRV registrato nel sistema.</p>
         </div>
       `);
     }
@@ -400,6 +447,7 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
   const { email, title, category, creditsEarned, co2SavedKg, source, amountSpend, imageHash: clientHash } = req.body;
 
   if (!email || !title) {
+    if (req.file) fs.unlinkSync(req.file.path);
     return res.status(400).json({ error: "missing_fields" });
   }
 
@@ -413,133 +461,139 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
 
   const spendAmount = parseFloat(amountSpend) || 0;
 
-  // 1. Processamento se la foto è allegata
-  if (req.file) {
-    const imageBuffer = fs.readFileSync(req.file.path);
-    calculatedHash = calculateBufferHash(imageBuffer);
+  try {
+    // 1. Processamento e verifica se la foto è stata caricata
+    if (req.file) {
+      const imageBuffer = fs.readFileSync(req.file.path);
+      calculatedHash = calculateBufferHash(imageBuffer);
 
-    // Controlla duplicato foto via Hash dell'immagine (Stesso file)
-    const duplicatePhoto = await new Promise((resolve) => {
-      db.get("SELECT id FROM eco_actions WHERE image_hash = ?", [calculatedHash], (err, row) => resolve(row));
-    });
-
-    if (duplicatePhoto) {
-      fs.unlinkSync(req.file.path);
-      return res.status(400).json({
-        error: "duplicate_image",
-        message: "L'immagine inviata risulta già registrata nel sistema dMRV."
+      // Controllo 1: Stesso Identico File (Hash Immagine)
+      const duplicatePhoto = await new Promise((resolve) => {
+        db.get("SELECT id FROM eco_actions WHERE image_hash = ?", [calculatedHash], (err, row) => resolve(row));
       });
-    }
 
-    // Audit Forense IA Gemini
-    const aiResult = await verifyEcoAction(imageBuffer, req.file.mimetype, title);
-
-    if (!aiResult.valid || aiResult.tier === "REJECT") {
-      fs.unlinkSync(req.file.path);
-      return res.status(400).json({
-        error: "invalid_photo_forensics",
-        message: aiResult.reason || "L'immagine caricata non soddisfa i requisiti minimi di leggibilità o coerenza."
-      });
-    }
-
-    // Controllo avanzato duplicato scontrino (Stessa transazione)
-    if (aiResult.is_receipt) {
-      const extractedAmount = aiResult.total_amount > 0 ? aiResult.total_amount : spendAmount;
-      receiptHash = generateReceiptHash(aiResult.merchant, aiResult.date_time, extractedAmount);
-
-      if (receiptHash) {
-        const duplicateReceipt = await new Promise((resolve) => {
-          db.get("SELECT id FROM eco_actions WHERE receipt_hash = ?", [receiptHash], (err, row) => resolve(row));
+      if (duplicatePhoto) {
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({
+          error: "duplicate_image",
+          message: "L'immagine inviata risulta già registrata nel sistema dMRV."
         });
+      }
 
-        if (duplicateReceipt) {
-          fs.unlinkSync(req.file.path);
-          return res.status(400).json({
-            error: "duplicate_receipt",
-            message: `Questo scontrino (${aiResult.merchant}, €${extractedAmount}) è già stato registrato nel sistema!`
+      // Audit Forense IA Gemini
+      const aiResult = await verifyEcoAction(imageBuffer, req.file.mimetype, title);
+
+      if (!aiResult.valid || aiResult.tier === "REJECT") {
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({
+          error: "invalid_photo_forensics",
+          message: aiResult.reason || "L'immagine caricata non soddisfa i requisiti minimi di leggibilità o coerenza."
+        });
+      }
+
+      // Controllo 2: Stessa Transazione/Scontrino (Hash Esercente + Data + Importo)
+      if (aiResult.is_receipt) {
+        const extractedAmount = aiResult.total_amount > 0 ? aiResult.total_amount : spendAmount;
+        receiptHash = generateReceiptHash(aiResult.merchant, aiResult.date_time, extractedAmount);
+
+        if (receiptHash) {
+          const duplicateReceipt = await new Promise((resolve) => {
+            db.get("SELECT id FROM eco_actions WHERE receipt_hash = ?", [receiptHash], (err, row) => resolve(row));
           });
+
+          if (duplicateReceipt) {
+            fs.unlinkSync(req.file.path);
+            return res.status(400).json({
+              error: "duplicate_receipt",
+              message: `Questo scontrino (${aiResult.merchant}, €${extractedAmount}) è già stato registrato nel sistema!`
+            });
+          }
         }
       }
+
+      aiTier = aiResult.tier || "COMMUNITY";
+      confidenceScore = aiResult.confidence || 0.85;
+      fraudRisk = aiResult.fraud_risk || "LOW";
+
+      if (isNaN(co2) || co2 <= 0) {
+        co2 = aiResult.co2_saved_kg || (spendAmount > 0 ? spendAmount * 0.5 : 50.0);
+      }
+      finalCategory = aiResult.category || finalCategory;
     }
 
-    aiTier = aiResult.tier || "COMMUNITY";
-    confidenceScore = aiResult.confidence || 0.85;
-    fraudRisk = aiResult.fraud_risk || "LOW";
-
+    // Fallback stima CO2 se non passata
     if (isNaN(co2) || co2 <= 0) {
-      co2 = aiResult.co2_saved_kg || (spendAmount > 0 ? spendAmount * 0.5 : 50.0);
+      co2 = spendAmount > 0 ? spendAmount * 0.5 : 25.0;
     }
-    finalCategory = aiResult.category || finalCategory;
-  }
 
-  // Fallback stima CO2 se non definita
-  if (isNaN(co2) || co2 <= 0) {
-    co2 = spendAmount > 0 ? spendAmount * 0.5 : 25.0;
-  }
+    // CALCOLO 10% PROPORZIONALE SULL'IMPORTO CARICATO
+    const actionValueEur = spendAmount > 0 ? (spendAmount * 0.10).toFixed(2) : ((co2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2);
+    const credits = parseFloat(creditsEarned) || Math.max(1.0, Math.round(spendAmount * 0.10));
+    const actionSource = source || (req.file ? "ai_verified_photo" : "manual");
+    const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    const actionTrees = Math.max(1, Math.round(co2 / KG_CO2_PER_TREE));
+    const kmDrivenEquiv = Math.round(co2 * 5); // 1kg CO2 = ~5km guidati in auto media
 
-  // CALCOLO 10% PROPORZIONALE SULL'IMPORTO CARICATO
-  const actionValueEur = spendAmount > 0 ? (spendAmount * 0.10).toFixed(2) : ((co2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2);
-  const credits = parseFloat(creditsEarned) || Math.max(1.0, Math.round(spendAmount * 0.10));
-  const actionSource = source || (req.file ? "ai_verified_photo" : "manual");
-  const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
-  const actionTrees = Math.max(1, Math.round(co2 / KG_CO2_PER_TREE));
-  const kmDrivenEquiv = Math.round(co2 * 5); // 1kg CO2 = ~5km guidati in auto media
+    // 2. Inserimento nel database SQLite
+    db.run(
+      "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source, image_hash, tier, confidence_score, receipt_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [email, title, finalCategory, credits, co2, actionSource, calculatedHash, aiTier, confidenceScore, receiptHash],
+      function (error) {
+        if (error) return res.status(500).json({ error: error.message });
 
-  // 2. Inserimento nel database
-  db.run(
-    "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source, image_hash, tier, confidence_score, receipt_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    [email, title, finalCategory, credits, co2, actionSource, calculatedHash, aiTier, confidenceScore, receiptHash],
-    function (error) {
-      if (error) return res.status(500).json({ error: error.message });
+        const actionId = this.lastID;
 
-      const actionId = this.lastID;
+        // 3. Aggiornamento crediti utente
+        db.run("UPDATE users SET carbon_credits = carbon_credits + ? WHERE email = ?", [credits, email], (updateError) => {
+          if (updateError) console.error("CREDITS UPDATE ERROR:", updateError);
 
-      // 3. Aggiornamento crediti utente
-      db.run("UPDATE users SET carbon_credits = carbon_credits + ? WHERE email = ?", [credits, email], (updateError) => {
-        if (updateError) console.error("CREDITS UPDATE ERROR:", updateError);
+          // 4. Registrazione transazione
+          db.run(
+            "INSERT INTO transactions (user_email, type, credits, amount_eur, status) VALUES (?, 'earn', ?, ?, 'pending_batch')",
+            [email, credits, parseFloat(actionValueEur)]
+          );
 
-        // 4. Registrazione transazione
-        db.run(
-          "INSERT INTO transactions (user_email, type, credits, amount_eur, status) VALUES (?, 'earn', ?, ?, 'pending_batch')",
-          [email, credits, parseFloat(actionValueEur)]
-        );
+          // 5. Verifica della soglia per la liquidazione automatica B2B
+          db.get("SELECT SUM(co2_saved_kg) as total_kg FROM eco_actions WHERE tier = 'B2B_INSTITUTIONAL'", [], (err, row) => {
+            const totalTon = (row?.total_kg || 0) / 1000;
 
-        // 5. Verifica soglia per liquidazione automatica
-        db.get("SELECT SUM(co2_saved_kg) as total_kg FROM eco_actions WHERE tier = 'B2B_INSTITUTIONAL'", [], (err, row) => {
-          const totalTon = (row?.total_kg || 0) / 1000;
+            if (totalTon >= BATCH_THRESHOLD_TON) {
+              triggerAutoBrokerLiquidation(CURRENT_BATCH_ID, totalTon);
+            }
 
-          if (totalTon >= BATCH_THRESHOLD_TON) {
-            triggerAutoBrokerLiquidation(CURRENT_BATCH_ID, totalTon);
-          }
-
-          res.json({
-            success: true,
-            id: actionId,
-            tier: aiTier,
-            confidenceScore: confidenceScore,
-            fraudRisk: fraudRisk,
-            creditsAdded: credits,
-            co2SavedKg: co2,
-            category: finalCategory,
-            estimatedB2bValEur: parseFloat(actionValueEur),
-            treesEquivalent: actionTrees,
-            equivalents: {
-              trees: actionTrees,
-              kmDriven: kmDrivenEquiv,
-              estimatedEur: parseFloat(actionValueEur)
-            },
-            batchInfo: {
+            res.json({
+              success: true,
+              id: actionId,
+              tier: aiTier,
+              confidenceScore: confidenceScore,
+              fraudRisk: fraudRisk,
+              creditsAdded: credits,
+              co2SavedKg: co2,
+              category: finalCategory,
+              estimatedB2bValEur: parseFloat(actionValueEur),
+              treesEquivalent: actionTrees,
+              equivalents: {
+                trees: actionTrees,
+                kmDriven: kmDrivenEquiv,
+                estimatedEur: parseFloat(actionValueEur)
+              },
+              batchInfo: {
+                batchId: CURRENT_BATCH_ID,
+                thresholdTon: BATCH_THRESHOLD_TON
+              },
               batchId: CURRENT_BATCH_ID,
-              thresholdTon: BATCH_THRESHOLD_TON
-            },
-            batchId: CURRENT_BATCH_ID,
-            photoUrl: photoUrl,
-            message: `Azione registrata con successo! Il tuo impatto ha il valore stimato di €${actionValueEur} ed equivale a ${actionTrees} alberi piantati.`
+              photoUrl: photoUrl,
+              message: `Azione registrata con successo! Il tuo impatto ha il valore stimato di €${actionValueEur} ed equivale a ${actionTrees} alberi piantati.`
+            });
           });
         });
-      });
-    }
-  );
+      }
+    );
+  } catch (err) {
+    if (req.file) fs.unlinkSync(req.file.path);
+    console.error("❌ ERRORE PROCESSAMENTO AZIONE ECO:", err.message);
+    res.status(500).json({ error: "server_error", message: err.message });
+  }
 });
 
 /* =====================================================
@@ -591,6 +645,21 @@ app.post("/api/redeem-cashback", (req, res) => {
       );
     });
   });
+});
+
+/* =====================================================
+   MIDDLEWARE GESTIONE ERRORI GLOBALE & ROUTE NON TROVATE
+===================================================== */
+app.use((err, req, res, next) => {
+  console.error("❌ ERRORE SERVER NON GESTITO:", err.stack);
+  res.status(500).json({
+    error: "internal_server_error",
+    message: err.message || "Si è verificato un errore inatteso nel server."
+  });
+});
+
+app.use((req, res) => {
+  res.status(404).json({ error: "not_found", message: "La rotta richiesta non esiste." });
 });
 
 /* =====================================================
