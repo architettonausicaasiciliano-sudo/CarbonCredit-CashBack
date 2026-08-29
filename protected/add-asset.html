@@ -435,7 +435,7 @@
 
     const submitBtn = document.getElementById('submitBtn');
     const resultModal = document.getElementById('resultModal');
-    const userEmail = localStorage.getItem('userEmail') || 'test@example.com';
+    const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail') || 'user@example.com';
     
     const title = document.getElementById('title').value;
     const category = document.getElementById('category').value;
@@ -455,13 +455,14 @@
 
       // Controllo preventivo duplicati via API
       const checkRes = await fetch(`/api/check-duplicate?hash=${encodeURIComponent(imageHash)}`);
-      const checkData = await checkRes.json();
-      
-      if (checkData.isDuplicate) {
-        showError("⚠️ Prova fotografica già registrata: Questa immagine è presente nel sistema dMRV e non può essere riutilizzata.");
-        submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
-        submitBtn.disabled = false;
-        return;
+      if (checkRes.ok) {
+        const checkData = await checkRes.json();
+        if (checkData.isDuplicate) {
+          showError("⚠️ Prova fotografica già registrata: Questa immagine è presente nel sistema dMRV e non può essere riutilizzata.");
+          submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
+          submitBtn.disabled = false;
+          return;
+        }
       }
 
       const formData = new FormData();
@@ -479,7 +480,7 @@
 
       const data = await res.json();
 
-      if (res.ok) {
+      if (res.ok && (data.success || data.id)) {
         document.getElementById('addAssetForm').style.display = 'none';
         resultModal.style.display = 'block';
         
@@ -496,8 +497,8 @@
         document.getElementById('bonusTargetText').innerText = `DEL VALORE DI €${bonus10Percent.toFixed(2)}`;
 
         // Contatori
-        const treesVal = data.equivalents?.trees ?? data.treesEquivalent ?? 6;
-        const kmVal = data.equivalents?.kmDriven ?? Math.round((data.co2SavedKg || 120) * 5) ?? 600;
+        const treesVal = data.equivalents?.trees ?? data.treesEquivalent ?? Math.round((data.co2SavedKg || 120) / 20);
+        const kmVal = data.equivalents?.kmDriven ?? Math.round((data.co2SavedKg || 120) * 5);
 
         document.getElementById('equivTrees').innerText = `+${treesVal}`;
         document.getElementById('equivKm').innerText = `-${kmVal} km`;
