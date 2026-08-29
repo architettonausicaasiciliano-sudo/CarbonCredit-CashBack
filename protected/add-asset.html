@@ -173,7 +173,7 @@
       display: inline-block;
     }
 
-    /* Gamification & Highlight 50€ */
+    /* Gamification & Highlight Valore 10% Dinamico */
     .milestone-container {
       background: rgba(139, 92, 246, 0.12);
       border: 1px solid rgba(139, 92, 246, 0.4);
@@ -211,18 +211,18 @@
       background: rgba(16, 185, 129, 0.15);
       border: 1px solid rgba(16, 185, 129, 0.4);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 12px;
       text-align: center;
       margin-top: 8px;
     }
 
     .bonus-amount-large {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 900;
       color: #34d399;
       letter-spacing: 0.5px;
       display: inline-block;
-      margin: 2px 0;
+      margin: 4px 0;
       text-shadow: 0 0 12px rgba(52, 211, 153, 0.3);
     }
 
@@ -312,7 +312,7 @@
 
     <div class="form-group">
       <label for="amountSpend">Importo Stimato o Speso (€)</label>
-      <input type="number" id="amountSpend" step="0.01" name="amountSpend" placeholder="500.00" required>
+      <input type="number" id="amountSpend" step="0.01" name="amountSpend" placeholder="100.00" required>
     </div>
 
     <div class="form-group">
@@ -345,10 +345,10 @@
       +500 Punti Eco ⚡
     </div>
 
-    <!-- Milestone Super Bonus Valore 50€ (Grande Impatto Visivo) -->
+    <!-- Milestone Super Bonus 10% Dinamico -->
     <div class="milestone-container">
       <div class="milestone-header">
-        <span>🎯 Traguardo Super Bonus</span>
+        <span>🎯 Traguardo Super Bonus 10%</span>
         <span style="color: #a78bfa;">1 di 3 Azioni</span>
       </div>
       <div class="progress-track">
@@ -358,7 +358,7 @@
         <div style="font-size: 11px; color: #d1d5db; text-transform: uppercase; letter-spacing: 0.5px;">
           Sblocca un beneficio totale
         </div>
-        <div id="bonusTargetText" class="bonus-amount-large">DEL VALORE DI €50.00</div>
+        <div id="bonusTargetText" class="bonus-amount-large">DEL VALORE DI €0.00</div>
         <div style="font-size: 11px; color: #9ca3af;">
           Carica altre 2 azioni valide per completare il traguardo
         </div>
@@ -491,9 +491,9 @@
         const addedPts = data.creditsAdded || 500;
         document.getElementById('pointsGained').innerText = `+${addedPts} Punti Eco ⚡`;
 
-        // Formattazione dinamica valore 50€
-        const targetBonus = Math.max(50, Math.round(amountSpend * 0.10));
-        document.getElementById('bonusTargetText').innerText = `DEL VALORE DI €${targetBonus.toFixed(2)}`;
+        // CALCOLO REALE DEL 10% SENZA MINIMI
+        const bonus10Percent = (amountSpend * 0.10);
+        document.getElementById('bonusTargetText').innerText = `DEL VALORE DI €${bonus10Percent.toFixed(2)}`;
 
         // Contatori
         const treesVal = data.equivalents?.trees ?? data.treesEquivalent ?? 6;

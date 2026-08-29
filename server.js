@@ -325,14 +325,14 @@ app.get("/api/stripe-config", (req, res) => {
 });
 
 /* =====================================================
-   CHECK DUPLICATI (HASH CLIENT / SERVER)
+   CHECK DUPLICATI (HASH CLIENT / SERVER SQLITE)
 ===================================================== */
 app.get("/api/check-duplicate", (req, res) => {
   const { hash } = req.query;
   if (!hash) return res.json({ isDuplicate: false });
 
   db.get("SELECT id FROM eco_actions WHERE image_hash = ?", [hash], (err, row) => {
-    if (err) return res.json({ isDuplicate: false });
+    if (err) return res.json({ isDuplicate: false, error: err.message });
     res.json({ isDuplicate: !!row });
   });
 });
@@ -472,12 +472,14 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
   let confidenceScore = 0.85;
   let fraudRisk = "LOW";
 
+  const spendAmount = parseFloat(amountSpend) || 0;
+
   // 1. Processamento e verifica se la foto è allegata
   if (req.file) {
     const imageBuffer = fs.readFileSync(req.file.path);
     calculatedHash = calculateBufferHash(imageBuffer);
 
-    // Controllo Anti-Duplicati server-side
+    // Controllo Anti-Duplicati server-side via SQLite
     const duplicateRow = await new Promise((resolve) => {
       db.get("SELECT id FROM eco_actions WHERE image_hash = ?", [calculatedHash], (err, row) => resolve(row));
     });
@@ -506,21 +508,21 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
     fraudRisk = aiResult.fraud_risk || "LOW";
 
     if (isNaN(co2) || co2 <= 0) {
-      co2 = aiResult.co2_saved_kg || 50.0;
+      co2 = aiResult.co2_saved_kg || (spendAmount > 0 ? spendAmount * 0.5 : 50.0);
     }
     finalCategory = aiResult.category || finalCategory;
   }
 
-  // Fallback stima se la CO2 non è definita
+  // Fallback stima CO2 se non definita
   if (isNaN(co2) || co2 <= 0) {
-    const spend = parseFloat(amountSpend) || 50.0;
-    co2 = spend * 0.5;
+    co2 = spendAmount > 0 ? spendAmount * 0.5 : 25.0;
   }
 
-  const credits = parseFloat(creditsEarned) || Math.max(1.0, Math.round(co2 * 0.1));
+  // CALCOLO 10% PROPORZIONALE SULL'IMPORTO CARICATO
+  const actionValueEur = spendAmount > 0 ? (spendAmount * 0.10).toFixed(2) : ((co2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2);
+  const credits = parseFloat(creditsEarned) || Math.max(1.0, Math.round(spendAmount * 0.10));
   const actionSource = source || (req.file ? "ai_verified_photo" : "manual");
   const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
-  const actionValueEur = ((co2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2);
   const actionTrees = Math.max(1, Math.round(co2 / KG_CO2_PER_TREE));
   const kmDrivenEquiv = Math.round(co2 * 5); // 1kg CO2 = ~5km guidati in auto media
 
