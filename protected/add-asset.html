@@ -173,21 +173,23 @@
       display: inline-block;
     }
 
+    /* Gamification & Highlight 50€ */
     .milestone-container {
-      background: rgba(139, 92, 246, 0.1);
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      border-radius: 10px;
-      padding: 14px;
-      margin: 14px 0;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
     }
 
     .milestone-header {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 13px;
       font-weight: bold;
       color: #e9d5ff;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .progress-track {
@@ -195,7 +197,7 @@
       height: 10px;
       border-radius: 5px;
       overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
 
     .progress-fill {
@@ -203,6 +205,25 @@
       height: 100%;
       width: 33.33%;
       transition: width 0.5s ease;
+    }
+
+    .bonus-highlight-box {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .bonus-amount-large {
+      font-size: 26px;
+      font-weight: 900;
+      color: #34d399;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      margin: 2px 0;
+      text-shadow: 0 0 12px rgba(52, 211, 153, 0.3);
     }
 
     .equiv-grid {
@@ -324,17 +345,23 @@
       +500 Punti Eco ⚡
     </div>
 
-    <!-- Milestone Super Bonus 10% -->
+    <!-- Milestone Super Bonus Valore 50€ (Grande Impatto Visivo) -->
     <div class="milestone-container">
       <div class="milestone-header">
-        <span>🎯 Traguardo Super Bonus 10%</span>
+        <span>🎯 Traguardo Super Bonus</span>
         <span style="color: #a78bfa;">1 di 3 Azioni</span>
       </div>
       <div class="progress-track">
         <div class="progress-fill"></div>
       </div>
-      <div style="font-size: 11px; color: #c084fc; line-height: 1.4;">
-        Carica altre 2 azioni valide per sbloccare il tuo rimborso totale di <strong id="bonusTargetText">€50.00</strong>.
+      <div class="bonus-highlight-box">
+        <div style="font-size: 11px; color: #d1d5db; text-transform: uppercase; letter-spacing: 0.5px;">
+          Sblocca un beneficio totale
+        </div>
+        <div id="bonusTargetText" class="bonus-amount-large">DEL VALORE DI €50.00</div>
+        <div style="font-size: 11px; color: #9ca3af;">
+          Carica altre 2 azioni valide per completare il traguardo
+        </div>
       </div>
     </div>
 
@@ -426,11 +453,12 @@
 
       const imageHash = await calculateImageHash(file);
 
-      const checkRes = await fetch(`/api/check-duplicate?hash=${imageHash}`);
+      // Controllo preventivo duplicati via API
+      const checkRes = await fetch(`/api/check-duplicate?hash=${encodeURIComponent(imageHash)}`);
       const checkData = await checkRes.json();
       
       if (checkData.isDuplicate) {
-        showError("⚠️ Immagine Rifiutata: Questa prova fotografica è già stata registrata nel sistema dMRV.");
+        showError("⚠️ Prova fotografica già registrata: Questa immagine è presente nel sistema dMRV e non può essere riutilizzata.");
         submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
         submitBtn.disabled = false;
         return;
@@ -463,11 +491,11 @@
         const addedPts = data.creditsAdded || 500;
         document.getElementById('pointsGained').innerText = `+${addedPts} Punti Eco ⚡`;
 
-        // Calcolo dinamico del bonus 10%
+        // Formattazione dinamica valore 50€
         const targetBonus = Math.max(50, Math.round(amountSpend * 0.10));
-        document.getElementById('bonusTargetText').innerText = `€${targetBonus.toFixed(2)}`;
+        document.getElementById('bonusTargetText').innerText = `DEL VALORE DI €${targetBonus.toFixed(2)}`;
 
-        // Metriche contatori
+        // Contatori
         const treesVal = data.equivalents?.trees ?? data.treesEquivalent ?? 6;
         const kmVal = data.equivalents?.kmDriven ?? Math.round((data.co2SavedKg || 120) * 5) ?? 600;
 
@@ -475,7 +503,7 @@
         document.getElementById('equivKm').innerText = `-${kmVal} km`;
         document.getElementById('equivKwh').innerText = `3.00 kWh`;
 
-        // Footer Tecnico
+        // Dettaglio Audit
         const confidenceVal = data.confidenceScore ?? data.confidence ?? 0.85;
         const confidencePercentage = (confidenceVal <= 1 ? confidenceVal * 100 : confidenceVal).toFixed(1);
         const batchId = data.batchInfo?.batchId || data.batchId || 'BATCH-2026-104';
