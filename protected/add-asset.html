@@ -134,7 +134,7 @@
     .result-modal {
       display: none;
       margin-top: 20px;
-      padding: 18px;
+      padding: 20px;
       border-radius: 12px;
       background: #1f2937;
       border: 1px solid var(--border-color);
@@ -172,6 +172,18 @@
       font-size: 11px;
       font-weight: bold;
       display: inline-block;
+    }
+
+    .equiv-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+      background: #111827;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      text-align: center;
     }
 
     .actions-row {
@@ -268,13 +280,34 @@
   <!-- Box Errore Dinamico -->
   <div id="errorBox" class="error-box"></div>
 
-  <!-- Box Risultato Verifica AI -->
+  <!-- Box Risultato Verifica AI con Tripla Equivalenza -->
   <div id="resultModal" class="result-modal">
     <div id="tierBadge" class="badge-tier2">TIER DETECTED</div>
-    <h3 id="resultTitle" style="color: white; margin: 10px 0 6px 0; font-size: 16px;">Verifica Completata</h3>
-    <p id="resultDesc" style="color: var(--text-muted); font-size: 13px; margin: 0 0 16px 0; line-height: 1.4;"></p>
-    
-    <a id="certUrl" href="#" target="_blank" class="cert-link">📄 Visualizza Certificato dMRV Pubblico ➔</a>
+    <h3 id="resultTitle" style="color: white; margin: 12px 0 6px 0; font-size: 17px;">Verifica Completata</h3>
+
+    <!-- Grid Tripla Equivalenza -->
+    <div class="equiv-grid">
+      <div style="padding: 4px;">
+        <span style="font-size: 20px; display: block; margin-bottom: 2px;">🌳</span>
+        <strong id="equivTrees" style="color: var(--accent-green); font-size: 15px; display: block;">+0</strong>
+        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Alberi eq./anno</span>
+      </div>
+      <div style="padding: 4px;">
+        <span style="font-size: 20px; display: block; margin-bottom: 2px;">🚗</span>
+        <strong id="equivKm" style="color: var(--accent-blue); font-size: 15px; display: block;">~0 km</strong>
+        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Km auto evitati</span>
+      </div>
+      <div style="padding: 4px;">
+        <span style="font-size: 20px; display: block; margin-bottom: 2px;">💶</span>
+        <strong id="equivEur" style="color: var(--accent-yellow); font-size: 15px; display: block;">€0.00</strong>
+        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Stima Riserva B2B</span>
+      </div>
+    </div>
+
+    <!-- Info Dettaglio AI & Batch Pool -->
+    <div id="resultDesc" style="color: var(--text-muted); font-size: 13px; margin: 0 0 16px 0; line-height: 1.5; background: #0b0f19; padding: 12px; border-radius: 8px; border: 1px solid #1f2937;"></div>
+
+    <a id="certUrl" href="#" target="_blank" class="cert-link" style="margin-bottom: 12px;">📄 Visualizza Certificato dMRV Pubblico ➔</a>
 
     <div class="actions-row">
       <a href="/dashboard" class="btn-secondary">Vai alla Dashboard</a>
@@ -390,13 +423,29 @@
           ? `✅ Accreditati ${data.co2SavedKg} kg CO₂ nel Pool B2B` 
           : `🎉 Registrata Azione Personal (+${data.creditsAdded} Punti)`;
 
+        // Popola la Tripla Equivalenza
+        const treesVal = data.equivalents?.trees || data.treesEquivalent || 1;
+        const kmVal = data.equivalents?.kmDriven || Math.round(data.co2SavedKg * 5) || 0;
+        const eurVal = data.equivalents?.estimatedEur ?? data.estimatedB2bValEur ?? 0.00;
+
+        document.getElementById('equivTrees').innerText = `+${treesVal}`;
+        document.getElementById('equivKm').innerText = `~${kmVal} km`;
+        document.getElementById('equivEur').innerText = `€${parseFloat(eurVal).toFixed(2)}`;
+
+        // Formattazione confidenza AI e metadati Batch
         const confidenceVal = data.confidenceScore || data.confidence || 0.95;
         const confidencePercentage = (confidenceVal <= 1 ? confidenceVal * 100 : confidenceVal).toFixed(1);
+        const batchId = data.batchInfo?.batchId || data.batchId || 'BATCH-2026-104';
 
         document.getElementById('resultDesc').innerHTML = `
-          <strong>Confidenza AI:</strong> ${confidencePercentage}%<br>
-          <strong>Risparmio CO₂:</strong> ${data.co2SavedKg} kg<br>
-          ${data.message || 'L\'impatto è stato registrato ed è consultabile nel registro trasparente.'}
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span><strong>Confidenza AI:</strong> ${confidencePercentage}%</span>
+            <span><strong>Impatto CO₂:</strong> ${data.co2SavedKg} kg</span>
+          </div>
+          <div style="color: #9ca3af; font-size: 11px; border-top: 1px dashed #374151; padding-top: 6px; margin-top: 6px;">
+            <strong>Batch Aggregato:</strong> ${batchId} | <strong>Stato:</strong> Accreditato per riserva cashback
+          </div>
+          <p style="margin: 6px 0 0 0; color: #d1d5db; font-size: 12px;">${data.message || ''}</p>
         `;
 
         const certLink = document.getElementById('certUrl');
