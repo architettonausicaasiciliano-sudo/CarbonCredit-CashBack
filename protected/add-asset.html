@@ -89,17 +89,38 @@
       outline: none;
     }
 
-    .file-drop-zone {
-      border: 2px dashed var(--border-color);
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-      background: rgba(31, 41, 55, 0.4);
-      cursor: pointer;
-      transition: border-color 0.2s;
+    /* ANIMAZIONE LAMPEGGIANTE BOX VERDE */
+    @keyframes pulse-green-border {
+      0%, 100% {
+        border-color: #10b981;
+        box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+        background: rgba(16, 185, 129, 0.08);
+      }
+      50% {
+        border-color: #34d399;
+        box-shadow: 0 0 22px rgba(52, 211, 153, 0.85);
+        background: rgba(16, 185, 129, 0.22);
+      }
     }
-    .file-drop-zone:hover { border-color: var(--accent-green); }
+
+    .file-drop-zone {
+      border: 3px dashed #10b981;
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+      background: rgba(16, 185, 129, 0.08);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      animation: pulse-green-border 1.4s infinite ease-in-out;
+    }
     
+    .file-drop-zone.has-file {
+      animation: none;
+      border: 2px solid #10b981;
+      background: rgba(16, 185, 129, 0.15);
+      box-shadow: none;
+    }
+
     #previewContainer {
       display: none;
       margin-top: 12px;
@@ -113,32 +134,42 @@
       object-fit: cover;
     }
 
-    /* Pulsante Rosso Corallo Uniforme */
+    /* PULSANTE ROSSO: Inizialmente spento, si accende solo dopo l'upload */
     .btn-submit {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(180deg, #ff3838 0%, #e60000 100%) !important;
-      color: #ffffff !important;
-      border: 1px solid #ff6b6b !important;
+      background: #374151;
+      color: #9ca3af;
+      border: 1px solid #4b5563;
       border-radius: 10px;
       font-weight: bold;
       font-size: 15px;
       cursor: pointer;
-      box-shadow: 0 0 20px rgba(230, 0, 0, 0.7) !important;
-      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      transition: all 0.3s ease;
       margin-top: 10px;
+      box-shadow: none;
     }
+
+    .btn-submit.ready {
+      background: linear-gradient(180deg, #ff3838 0%, #e60000 100%) !important;
+      color: #ffffff !important;
+      border: 1px solid #ff6b6b !important;
+      box-shadow: 0 0 25px rgba(230, 0, 0, 0.85) !important;
+      animation: pulse-red 1.6s infinite ease-in-out;
+    }
+
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 15px rgba(230, 0, 0, 0.7); }
+      50% { box-shadow: 0 0 30px rgba(255, 42, 42, 0.95); }
+    }
+
     .btn-submit:disabled {
       background: #4b5563 !important;
       box-shadow: none !important;
       border-color: transparent !important;
       cursor: not-allowed;
+      animation: none !important;
     }
-    .btn-submit:hover:not(:disabled) {
-      background: linear-gradient(180deg, #ff5252 0%, #cc0000 100%) !important;
-      box-shadow: 0 0 30px rgba(255, 42, 42, 0.95) !important;
-    }
-    .btn-submit:active:not(:disabled) { transform: scale(0.99); }
 
     .result-modal {
       display: none;
@@ -183,57 +214,22 @@
       display: inline-block;
     }
 
-    /* Gamification & Highlight Valore 10% Dinamico */
-    .milestone-container {
-      background: rgba(139, 92, 246, 0.12);
-      border: 1px solid rgba(139, 92, 246, 0.4);
-      border-radius: 12px;
-      padding: 16px;
-      margin: 16px 0;
-    }
-
-    .milestone-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      font-weight: bold;
-      color: #e9d5ff;
-      margin-bottom: 10px;
-    }
-
-    .progress-track {
-      background: #374151;
-      height: 10px;
-      border-radius: 5px;
-      overflow: hidden;
-      margin-bottom: 12px;
-    }
-
-    .progress-fill {
-      background: linear-gradient(90deg, #a78bfa, #8b5cf6);
-      height: 100%;
-      width: 0%;
-      transition: width 0.5s ease;
-    }
-
-    .bonus-highlight-box {
-      background: rgba(16, 185, 129, 0.15);
+    .reward-box {
+      background: rgba(16, 185, 129, 0.12);
       border: 1px solid rgba(16, 185, 129, 0.4);
-      border-radius: 8px;
-      padding: 12px;
+      border-radius: 12px;
+      padding: 18px;
       text-align: center;
-      margin-top: 8px;
+      margin: 14px 0 16px 0;
     }
 
-    .bonus-amount-large {
-      font-size: 24px;
+    .reward-amount-hero {
+      font-size: 34px;
       font-weight: 900;
       color: #34d399;
       letter-spacing: 0.5px;
-      display: inline-block;
       margin: 4px 0;
-      text-shadow: 0 0 12px rgba(52, 211, 153, 0.3);
+      text-shadow: 0 0 15px rgba(52, 211, 153, 0.35);
     }
 
     .equiv-grid {
@@ -251,14 +247,9 @@
       border: 1px solid var(--border-color);
     }
 
-    .actions-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-    }
-
     .btn-secondary {
-      flex: 1;
+      display: block;
+      width: 100%;
       padding: 10px;
       background: #374151;
       color: white;
@@ -267,7 +258,9 @@
       text-decoration: none;
       font-size: 13px;
       font-weight: 600;
+      box-sizing: border-box;
       transition: background 0.2s;
+      margin-top: 10px;
     }
     .btn-secondary:hover { background: #4b5563; }
 
@@ -326,10 +319,10 @@
     </div>
 
     <div class="form-group">
-      <label>📸 Prova Fotografica (Scontrino / Ricevuta / Installazione)</label>
-      <div class="file-drop-zone" onclick="document.getElementById('photo').click()">
-        <span id="filePromptText" style="font-size: 13px; color: var(--text-muted);">
-          Clicca per selezionare o scattare una foto
+      <label style="color: #34d399; font-weight: 800;">📸 PROVA FOTOGRAFICA (OBBLIGATORIA)</label>
+      <div id="dropZone" class="file-drop-zone" onclick="document.getElementById('photo').click()">
+        <span id="filePromptText" style="font-size: 13px; color: #34d399; font-weight: bold;">
+          ⚡ CLICCA QUI PER CARICARE LO SCONTRINO / RICEVUTA ⚡
         </span>
         <input type="file" id="photo" name="photo" accept="image/*" style="display: none;" required>
       </div>
@@ -346,36 +339,25 @@
 
   <!-- Modale Risultati -->
   <div id="resultModal" class="result-modal">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
       <span style="font-weight: bold; color: #34d399; font-size: 14px;">Azione Registrata con Successo!</span>
       <span id="tierBadge" class="badge-tier1">Tier 1 — Community</span>
     </div>
 
-    <div id="pointsGained" style="color: #34d399; font-size: 18px; font-weight: 800; margin-bottom: 12px;">
-      +500 Punti Eco ⚡
-    </div>
-
-    <!-- Milestone Super Bonus 10% Dinamico -->
-    <div class="milestone-container">
-      <div class="milestone-header">
-        <span>🎯 Traguardo Super Bonus 10%</span>
-        <span id="milestoneStepText" style="color: #a78bfa;">1 di 3 Azioni</span>
+    <div class="reward-box">
+      <div style="font-size: 11px; color: #d1d5db; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">
+        Valore Generato / Bonus Maturato
       </div>
-      <div class="progress-track">
-        <div id="progressFill" class="progress-fill"></div>
-      </div>
-      <div class="bonus-highlight-box">
-        <div style="font-size: 11px; color: #d1d5db; text-transform: uppercase; letter-spacing: 0.5px;">
-          Sblocca un beneficio totale
-        </div>
-        <div id="bonusTargetText" class="bonus-amount-large">DEL VALORE DI €0.00</div>
-        <div id="milestoneSubtext" style="font-size: 11px; color: #9ca3af;">
-          Carica altre 2 azioni valide per completare il traguardo
-        </div>
+      <div id="rewardAmountHero" class="reward-amount-hero">€50.00</div>
+      <div id="pointsGained" style="color: #a78bfa; font-size: 13px; font-weight: 700;">
+        +500 Punti Eco ⚡
       </div>
     </div>
 
-    <!-- Grid Contatori -->
+    <button type="button" class="btn-submit ready" style="margin-top: 0; margin-bottom: 16px;" onclick="location.reload();">
+      ➕ CARICA SUBITO UN ALTRO BENE ➔
+    </button>
+
     <div class="equiv-grid">
       <div class="equiv-card">
         <div id="equivTrees" style="font-size: 15px; font-weight: bold; margin-bottom: 4px; color: #34d399;">+6</div>
@@ -391,15 +373,11 @@
       </div>
     </div>
 
-    <!-- Metriche Tecniche & Riserva Rete -->
     <div id="resultDesc"></div>
 
     <a id="certUrl" href="#" target="_blank" class="cert-link" style="margin: 12px 0;">📄 Visualizza Certificato dMRV Pubblico ➔</a>
 
-    <div class="actions-row">
-      <a href="/dashboard" class="btn-secondary">Vai alla Dashboard</a>
-      <a href="/add-asset" class="btn-secondary" onclick="location.reload(); return false;">+ Altro Bene</a>
-    </div>
+    <a href="/dashboard" class="btn-secondary">Vai alla Dashboard</a>
   </div>
 </div>
 
@@ -408,6 +386,8 @@
   const previewContainer = document.getElementById('previewContainer');
   const imagePreview = document.getElementById('imagePreview');
   const filePromptText = document.getElementById('filePromptText');
+  const dropZone = document.getElementById('dropZone');
+  const submitBtn = document.getElementById('submitBtn');
 
   photoInput.addEventListener('change', function () {
     const file = this.files[0];
@@ -416,7 +396,13 @@
       reader.onload = function (e) {
         imagePreview.src = e.target.result;
         previewContainer.style.display = 'block';
-        filePromptText.innerText = `📸 File selezionato: ${file.name}`;
+        filePromptText.innerText = `✅ Foto caricata: ${file.name}`;
+        
+        // 1. Ferma il lampeggio verde e assegna stato "caricato"
+        dropZone.classList.add('has-file');
+
+        // 2. Accendi il pulsante rosso di invio
+        submitBtn.classList.add('ready');
       };
       reader.readAsDataURL(file);
     }
@@ -443,8 +429,6 @@
     e.preventDefault();
     hideError();
 
-    const submitBtn = document.getElementById('submitBtn');
-    const resultModal = document.getElementById('resultModal');
     const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail') || 'user@example.com';
     
     const title = document.getElementById('title').value;
@@ -453,7 +437,7 @@
     const file = photoInput.files[0];
 
     if (!file) {
-      showError("Seleziona una prova fotografica valida per procedere.");
+      showError("⚠️ Prima di procedere devi caricare la foto dello scontrino o prova.");
       return;
     }
 
@@ -463,7 +447,6 @@
 
       const imageHash = await calculateImageHash(file);
 
-      // Controllo preventivo duplicati via API
       const checkRes = await fetch(`/api/check-duplicate?hash=${encodeURIComponent(imageHash)}`);
       if (checkRes.ok) {
         const checkData = await checkRes.json();
@@ -492,42 +475,22 @@
 
       if (res.ok && (data.success || data.id)) {
         document.getElementById('addAssetForm').style.display = 'none';
-        resultModal.style.display = 'block';
+        document.getElementById('resultModal').style.display = 'block';
         
         const isB2b = (data.tier === 'B2B_INSTITUTIONAL');
         const badgeEl = document.getElementById('tierBadge');
         badgeEl.className = isB2b ? 'badge-tier2' : 'badge-tier1';
         badgeEl.innerText = isB2b ? 'Tier 2 — B2B' : 'Tier 1 — Community';
 
+        const bonusValue = data.bonusAmount || (amountSpend * 0.10);
+        document.getElementById('rewardAmountHero').innerText = `€${bonusValue.toFixed(2)}`;
+
         const addedPts = data.creditsAdded || 500;
         document.getElementById('pointsGained').innerText = `+${addedPts} Punti Eco ⚡`;
 
-        // LOGICA DINAMICA AVANZAMENTO AZIONI & CUMULO 10%
         let assetCount = parseInt(localStorage.getItem('dmrv_user_asset_count') || '0', 10) + 1;
-        let accumBonus = parseFloat(localStorage.getItem('dmrv_accumulated_bonus') || '0');
-
-        const currentBonus = amountSpend * 0.10;
-        accumBonus += currentBonus;
-
         localStorage.setItem('dmrv_user_asset_count', assetCount);
-        localStorage.setItem('dmrv_accumulated_bonus', accumBonus.toFixed(2));
 
-        const displayStep = Math.min(assetCount, 3);
-        const progressPct = (displayStep / 3) * 100;
-
-        document.getElementById('progressFill').style.width = `${progressPct}%`;
-        document.getElementById('milestoneStepText').innerText = `${displayStep} di 3 Azioni`;
-
-        if (displayStep >= 3) {
-          document.getElementById('bonusTargetText').innerText = `🎉 TRAGUARDO SBLOCCATO! VALORE: €${accumBonus.toFixed(2)}`;
-          document.getElementById('milestoneSubtext').innerText = `Complimenti! Hai registrato 3 azioni e sbloccato il bonus massimo.`;
-        } else {
-          const remaining = 3 - displayStep;
-          document.getElementById('bonusTargetText').innerText = `DEL VALORE DI €${accumBonus.toFixed(2)}`;
-          document.getElementById('milestoneSubtext').innerText = `Carica altre ${remaining} azion${remaining === 1 ? 'e' : 'i'} valid${remaining === 1 ? 'a' : 'e'} per completare il traguardo`;
-        }
-
-        // Contatori
         const treesVal = data.equivalents?.trees ?? data.treesEquivalent ?? Math.round((data.co2SavedKg || 120) / 20);
         const kmVal = data.equivalents?.kmDriven ?? Math.round((data.co2SavedKg || 120) * 5);
 
@@ -535,7 +498,6 @@
         document.getElementById('equivKm').innerText = `-${kmVal} km`;
         document.getElementById('equivKwh').innerText = `3.00 kWh`;
 
-        // Dettaglio Audit
         const confidenceVal = data.confidenceScore ?? data.confidence ?? 0.85;
         const confidencePercentage = (confidenceVal <= 1 ? confidenceVal * 100 : confidenceVal).toFixed(1);
         const batchId = data.batchInfo?.batchId || data.batchId || 'BATCH-2026-104';
