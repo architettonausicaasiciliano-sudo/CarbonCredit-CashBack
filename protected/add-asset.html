@@ -113,21 +113,31 @@
       object-fit: cover;
     }
 
+    /* Pulsante Rosso Corallo Uniforme */
     .btn-submit {
       width: 100%;
       padding: 14px;
-      background: var(--accent-green);
-      color: white;
-      border: none;
+      background: linear-gradient(180deg, #ff3838 0%, #e60000 100%) !important;
+      color: #ffffff !important;
+      border: 1px solid #ff6b6b !important;
       border-radius: 10px;
       font-weight: bold;
       font-size: 15px;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 0 20px rgba(230, 0, 0, 0.7) !important;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
       margin-top: 10px;
     }
-    .btn-submit:disabled { background: #4b5563; cursor: not-allowed; }
-    .btn-submit:hover:not(:disabled) { background: var(--accent-green-hover); }
+    .btn-submit:disabled {
+      background: #4b5563 !important;
+      box-shadow: none !important;
+      border-color: transparent !important;
+      cursor: not-allowed;
+    }
+    .btn-submit:hover:not(:disabled) {
+      background: linear-gradient(180deg, #ff5252 0%, #cc0000 100%) !important;
+      box-shadow: 0 0 30px rgba(255, 42, 42, 0.95) !important;
+    }
     .btn-submit:active:not(:disabled) { transform: scale(0.99); }
 
     .result-modal {
@@ -203,7 +213,7 @@
     .progress-fill {
       background: linear-gradient(90deg, #a78bfa, #8b5cf6);
       height: 100%;
-      width: 33.33%;
+      width: 0%;
       transition: width 0.5s ease;
     }
 
@@ -349,17 +359,17 @@
     <div class="milestone-container">
       <div class="milestone-header">
         <span>🎯 Traguardo Super Bonus 10%</span>
-        <span style="color: #a78bfa;">1 di 3 Azioni</span>
+        <span id="milestoneStepText" style="color: #a78bfa;">1 di 3 Azioni</span>
       </div>
       <div class="progress-track">
-        <div class="progress-fill"></div>
+        <div id="progressFill" class="progress-fill"></div>
       </div>
       <div class="bonus-highlight-box">
         <div style="font-size: 11px; color: #d1d5db; text-transform: uppercase; letter-spacing: 0.5px;">
           Sblocca un beneficio totale
         </div>
         <div id="bonusTargetText" class="bonus-amount-large">DEL VALORE DI €0.00</div>
-        <div style="font-size: 11px; color: #9ca3af;">
+        <div id="milestoneSubtext" style="font-size: 11px; color: #9ca3af;">
           Carica altre 2 azioni valide per completare il traguardo
         </div>
       </div>
@@ -492,9 +502,30 @@
         const addedPts = data.creditsAdded || 500;
         document.getElementById('pointsGained').innerText = `+${addedPts} Punti Eco ⚡`;
 
-        // CALCOLO REALE DEL 10% SENZA MINIMI
-        const bonus10Percent = (amountSpend * 0.10);
-        document.getElementById('bonusTargetText').innerText = `DEL VALORE DI €${bonus10Percent.toFixed(2)}`;
+        // LOGICA DINAMICA AVANZAMENTO AZIONI & CUMULO 10%
+        let assetCount = parseInt(localStorage.getItem('dmrv_user_asset_count') || '0', 10) + 1;
+        let accumBonus = parseFloat(localStorage.getItem('dmrv_accumulated_bonus') || '0');
+
+        const currentBonus = amountSpend * 0.10;
+        accumBonus += currentBonus;
+
+        localStorage.setItem('dmrv_user_asset_count', assetCount);
+        localStorage.setItem('dmrv_accumulated_bonus', accumBonus.toFixed(2));
+
+        const displayStep = Math.min(assetCount, 3);
+        const progressPct = (displayStep / 3) * 100;
+
+        document.getElementById('progressFill').style.width = `${progressPct}%`;
+        document.getElementById('milestoneStepText').innerText = `${displayStep} di 3 Azioni`;
+
+        if (displayStep >= 3) {
+          document.getElementById('bonusTargetText').innerText = `🎉 TRAGUARDO SBLOCCATO! VALORE: €${accumBonus.toFixed(2)}`;
+          document.getElementById('milestoneSubtext').innerText = `Complimenti! Hai registrato 3 azioni e sbloccato il bonus massimo.`;
+        } else {
+          const remaining = 3 - displayStep;
+          document.getElementById('bonusTargetText').innerText = `DEL VALORE DI €${accumBonus.toFixed(2)}`;
+          document.getElementById('milestoneSubtext').innerText = `Carica altre ${remaining} azion${remaining === 1 ? 'e' : 'i'} valid${remaining === 1 ? 'a' : 'e'} per completare il traguardo`;
+        }
 
         // Contatori
         const treesVal = data.equivalents?.trees ?? data.treesEquivalent ?? Math.round((data.co2SavedKg || 120) / 20);

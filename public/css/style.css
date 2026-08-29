@@ -116,11 +116,14 @@ body {
 }
 
 /* Regola generica per qualsiasi altro pulsante rosso nell'applicazione */
-.btn-red, button.btn-red, a.btn-red {
+.btn-red, button.btn-red, a.btn-red, .btn-submit {
   background: linear-gradient(180deg, #ff3838 0%, #e60000 100%) !important;
   color: #ffffff !important;
   border: 1px solid #ff6b6b !important;
   box-shadow: 0 0 20px rgba(230, 0, 0, 0.7) !important;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
 }
 
 .quiz-card {
