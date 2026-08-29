@@ -413,7 +413,6 @@ app.post("/create-subscription", async (req, res) => {
 
 /* =====================================================
    CHECK USER STATUS, BATCH STANDBY & STATS AMBIENTALI
-   (Include subito TUTTE le azioni valide per evitare 0.0)
 ===================================================== */
 app.get("/api/user", (req, res) => {
   const email = req.query.email;
@@ -422,7 +421,6 @@ app.get("/api/user", (req, res) => {
   db.get("SELECT email, premium, carbon_credits FROM users WHERE email = ?", [email], (error, row) => {
     if (error) return res.status(500).json({ error: error.message });
 
-    // Raccoglie la CO2 di TUTTE le azioni valide registrate dall'utente
     db.get(
       "SELECT SUM(co2_saved_kg) as total_co2, COUNT(id) as total_items FROM eco_actions WHERE user_email = ? AND (tier IS NULL OR tier != 'REJECT')",
       [email],
@@ -523,7 +521,8 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
   const actionSource = source || (req.file ? "ai_verified_photo" : "manual");
   const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
   const actionValueEur = ((co2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2);
-  const actionTrees = Math.floor(co2 / KG_CO2_PER_TREE);
+  const actionTrees = Math.max(1, Math.round(co2 / KG_CO2_PER_TREE));
+  const kmDrivenEquiv = Math.round(co2 * 5); // 1kg CO2 = ~5km guidati in auto media
 
   // 2. Inserimento nel database
   db.run(
@@ -563,9 +562,18 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
             category: finalCategory,
             estimatedB2bValEur: parseFloat(actionValueEur),
             treesEquivalent: actionTrees,
+            equivalents: {
+              trees: actionTrees,
+              kmDriven: kmDrivenEquiv,
+              estimatedEur: parseFloat(actionValueEur)
+            },
+            batchInfo: {
+              batchId: CURRENT_BATCH_ID,
+              thresholdTon: BATCH_THRESHOLD_TON
+            },
             batchId: CURRENT_BATCH_ID,
             photoUrl: photoUrl,
-            message: "Acquisto/Bene registrato con successo! Il tuo impatto è stato calcolato e aggiunto alla dashboard."
+            message: `Azione registrata con successo! Il tuo impatto ha il valore stimato di €${actionValueEur} ed equivale a ${actionTrees} alberi piantati.`
           });
         });
       });
