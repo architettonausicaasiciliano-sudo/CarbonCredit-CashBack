@@ -1,32 +1,105 @@
-async function calculateImageHash(file) {
-  const arrayBuffer = await file.arrayBuffer();
-  const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
+document.addEventListener("DOMContentLoaded", () => {
+  const ecoForm = document.getElementById("ecoActionForm");
 
-// Integrazione nel form di caricamento
-document.getElementById('uploadForm')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const fileInput = document.getElementById('photoInput');
-  const file = fileInput.files[0];
+  if (!ecoForm) return;
 
-  if (file) {
-    const fileHash = await calculateImageHash(file);
+  ecoForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-    // Verifico sul server se l'hash esiste già
-    const checkRes = await fetch(`/api/check-duplicate?hash=${fileHash}`);
-    const checkData = await checkRes.json();
-
-    if (checkData.isDuplicate) {
-      alert("⚠️ Questa foto è già stata utilizzata o registrata nel sistema.");
-      return;
+    const submitBtn = ecoForm.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Analisi IA in corso...";
     }
 
-    // Aggiungo l'hash al FormData ed eseguo l'invio
-    const formData = new FormData(e.target);
-    formData.append('imageHash', fileHash);
-    
-    await submitAssetForm(formData);
-  }
+    const formData = new FormData(ecoForm);
+
+    // Recupera l'email salvata nel session/localStorage se non inserita direttamente
+    const storedEmail = localStorage.getItem("userEmail") || sessionStorage.getItem("userEmail");
+    if (storedEmail && !formData.get("email")) {
+      formData.set("email", storedEmail);
+    }
+
+    try {
+      const response = await fetch("/api/eco-actions", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || data.error || "Errore nella verifica dell'azione.");
+      }
+
+      // Popola ed evidenzia il modale/esito dinamico
+      showSuccessModal(data);
+      ecoForm.reset();
+
+    } catch (error) {
+      alert(`❌ Errore Audit: ${error.message}`);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Invia ed Analizza Azione";
+      }
+    }
+  });
 });
+
+/**
+ * Aggiorna gli elementi HTML del modale con i dati restituiti dal server dMRV
+ */
+function showSuccessModal(data) {
+  // 1. Messaggio principale dell'Audit Gemini & Badge Tier
+  const msgEl = document.getElementById("modalMessage");
+  const tierEl = document.getElementById("modalTierBadge");
+  if (msgEl) msgEl.innerText = data.message;
+  if (tierEl) {
+    const isB2B = data.tier === "B2B_INSTITUTIONAL";
+    tierEl.innerText = isB2B ? "Tier 2 — Grado Istituzionale" : "Tier 1 — Impatto Community";
+    tierEl.style.color = isB2B ? "#38bdf8" : "#eab308";
+  }
+
+  // 2. Metriche Ambientali ed Equivalenti Calcolati
+  const co2El = document.getElementById("modalCo2Saved");
+  const treesEl = document.getElementById("modalTreesEquiv");
+  const kmEl = document.getElementById("modalKmDriven");
+  const b2bValEl = document.getElementById("modalB2bValue");
+
+  if (co2El) co2El.innerText = `${data.co2SavedKg} kg`;
+  if (treesEl) treesEl.innerText = `${data.treesEquivalent} 🌲`;
+  if (kmEl) kmEl.innerText = `${data.equivalents?.kmDriven || 0} km`;
+  if (b2bValEl) b2bValEl.innerText = `€ ${data.estimatedB2bValEur.toFixed(2)}`;
+
+  // 3. Crediti Aggiunti & ID Batch
+  const creditsEl = document.getElementById("modalCreditsEarned");
+  const batchEl = document.getElementById("modalBatchId");
+  if (creditsEl) creditsEl.innerText = `+${data.creditsAdded} Crediti`;
+  if (batchEl) batchEl.innerText = data.batchId;
+
+  // 4. Anteprima Immagine Caricata (se presente)
+  const imgPreview = document.getElementById("modalPhotoPreview");
+  if (imgPreview && data.photoUrl) {
+    imgPreview.src = data.photoUrl;
+    imgPreview.style.display = "block";
+  }
+
+  // 5. Visibilità Modale
+  const modal = document.getElementById("resultModal");
+  if (modal) {
+    modal.classList.add("active");
+    modal.style.display = "flex";
+  }
+}
+
+/**
+ * Funzione di chiusura modale richiamabile dal bottone "Chiudi" o "Vai alla Dashboard"
+ */
+function closeModal() {
+  const modal = document.getElementById("resultModal");
+  if (modal) {
+    modal.classList.remove("active");
+    modal.style.display = "none";
+  }
+}
