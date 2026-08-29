@@ -462,26 +462,50 @@
         const kmVal = data.equivalents?.kmDriven ?? Math.round((data.co2SavedKg || 0) * 5) ?? 0;
         const eurBase = parseFloat(data.equivalents?.estimatedEur ?? data.estimatedB2bValEur ?? 3.00).toFixed(2);
 
-        document.getElementById('equivTrees').innerText = `+${treesVal}`;
-        document.getElementById('equivKm').innerText = `~${kmVal} km`;
-        document.getElementById('equivEur').innerText = `€${eurBase}`;
+  <!-- MODALE RISULTATI: Cerca questa sezione nel tuo file originale (Rif. screenshot righe 465-485) -->
+  <div id="resultModal" class="result-modal">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <span style="font-weight: bold; color: #34d399; font-size: 14px;">Azione Registrata!</span>
+      <span class="badge-tier1">+12 Punti Eco Guadagnati ⚡</span>
+    </div>
 
-        const confidenceVal = data.confidenceScore ?? data.confidence ?? 0.95;
-        const confidencePercentage = (confidenceVal <= 1 ? confidenceVal * 100 : confidenceVal).toFixed(1);
-        const batchId = data.batchInfo?.batchId || data.batchId || 'BATCH-2026-104';
+    <!-- SEZIONE MILESTONE: Scalata alla soglia psicologica del 10% (50€) staccandola dai 3€ -->
+    <div class="milestone-container" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 10px; padding: 14px; margin: 14px 0;">
+      <div class="milestone-header" style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; color: #e9d5ff; margin-bottom: 8px;">
+        <span>🎯 Traguardo Super Bonus 10%</span>
+        <span style="color: #a78bfa;">1 di 3 Azioni</span>
+      </div>
+      <div class="progress-track" style="background: #374151; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 8px;">
+        <div class="progress-fill" style="background: linear-gradient(90deg, #a78bfa, #8b5cf6); height: 100%; width: 33.33%;"></div>
+      </div>
+      <div style="font-size: 11px; color: #c084fc; line-height: 1.4;">
+        Carica altre 2 azioni valide per sbloccare il tuo rimborso totale di <strong>€50.00</strong>.
+      </div>
+    </div>
 
-        document.getElementById('resultDesc').innerHTML = `
-          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-            <span><strong>Confidenza AI:</strong> ${confidencePercentage}%</span>
-            <span><strong>Impatto CO₂:</strong> ${data.co2SavedKg || 0} kg</span>
-          </div>
-          <div style="color: #9ca3af; font-size: 11px; border-top: 1px dashed #374151; padding-top: 6px; margin-top: 6px;">
-            <strong>Riserva Garantita:</strong> €3.00 | <strong>Potenziale Pool B2B:</strong> fino a €15.00
-          </div>
-          <div style="color: #6b7280; font-size: 10px; margin-top: 4px;">
-            <strong>Batch Aggregato:</strong> ${batchId}
-          </div>
-        `;
+    <!-- GRID CONTATORI: Valuta rimossa dal terzo badge e convertita nell'unità di rete (3.00 kWh) -->
+    <div class="equiv-grid">
+      <div style="background: #1f2937; padding: 10px 4px; border-radius: 8px; border: 1px solid var(--border-color);">
+        <div style="font-size: 15px; font-weight: bold; margin-bottom: 4px; color: #34d399;">+6</div>
+        <div style="font-size: 10px; color: var(--text-muted);">Alberi Equivalenti</div>
+      </div>
+      <div style="background: #1f2937; padding: 10px 4px; border-radius: 8px; border: 1px solid var(--border-color);">
+        <div style="font-size: 15px; font-weight: bold; margin-bottom: 4px; color: #38bdf8;">-600 km</div>
+        <div style="font-size: 10px; color: var(--text-muted);">Auto Evitata</div>
+      </div>
+      <div style="background: #1f2937; padding: 10px 4px; border-radius: 8px; border: 1px solid var(--border-color);">
+        <div style="font-size: 15px; font-weight: bold; margin-bottom: 4px; color: #eab308;">3.00 kWh</div>
+        <div style="font-size: 10px; color: var(--text-muted);">Risparmio Est. Rete</div>
+      </div>
+    </div>
+
+    <!-- METRICHE DI SERVIZIO: Spostamento dell'indicazione monetaria tecnica nel footer -->
+    <div style="color: #9ca3af; font-size: 11px; border-top: 1px dashed #374151; padding-top: 6px; margin-top: 6px;">
+      <strong>Confidenza AI:</strong> 85.0% | <strong>Impatto CO₂:</strong> ${data.co2savedKg || 0} kg
+    </div>
+    <div style="color: #6b7280; font-size: 10px; margin-top: 4px;">
+      <strong>Riserva Tecnica Rete:</strong> Valore equivalente stimato in €3.00 | <strong>Batch Aggregato:</strong> ${batchId}
+    </div>
 
         const certLink = document.getElementById('certUrl');
         certLink.href = `/verify/${data.id}`;
