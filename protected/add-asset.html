@@ -6,71 +6,304 @@
   <title>Aggiungi Bene / Azione Sostenibile — dMRV</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    body { background: #0b0f19; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; padding: 20px; }
-    .card { background: #111827; border: 1px solid #374151; border-radius: 16px; padding: 24px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    :root {
+      --bg-dark: #0b0f19;
+      --card-bg: #111827;
+      --input-bg: #1f2937;
+      --border-color: #374151;
+      --accent-green: #10b981;
+      --accent-green-hover: #059669;
+      --accent-blue: #38bdf8;
+      --accent-yellow: #eab308;
+      --danger-red: #ef4444;
+      --text-muted: #9ca3af;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: #f3f4f6;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 20px;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      box-sizing: border-box;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
     .form-group { margin-bottom: 18px; }
-    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
-    input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #374151; background: #1f2937; color: white; box-sizing: border-box; font-size: 14px; }
-    input:focus, select:focus { border-color: #10b981; outline: none; }
-    .btn-submit { width: 100%; padding: 14px; background: #10b981; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; transition: all 0.2s; }
-    .btn-submit:disabled { background: #4b5563; cursor: not-allowed; }
-    .btn-submit:hover:not(:disabled) { background: #059669; }
     
-    /* Result Box & Tier Badges */
-    .result-modal { display: none; margin-top: 20px; padding: 16px; border-radius: 12px; background: #1f2937; border: 1px solid #374151; }
-    .badge-tier2 { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; }
-    .badge-tier1 { background: rgba(234, 179, 8, 0.2); color: #eab308; border: 1px solid #eab308; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; }
-    .cert-link { display: inline-block; margin-top: 12px; color: #10b981; font-weight: bold; font-size: 13px; text-decoration: none; }
-    .cert-link:hover { text-decoration: underline; }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--input-bg);
+      color: white;
+      box-sizing: border-box;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent-green);
+      outline: none;
+    }
+
+    /* Input File Custom & Image Preview */
+    .file-drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      background: rgba(31, 41, 55, 0.4);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .file-drop-zone:hover { border-color: var(--accent-green); }
+    
+    #previewContainer {
+      display: none;
+      margin-top: 12px;
+      text-align: center;
+    }
+    #imagePreview {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      object-fit: cover;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent-green);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 10px;
+    }
+    .btn-submit:disabled { background: #4b5563; cursor: not-allowed; }
+    .btn-submit:hover:not(:disabled) { background: var(--accent-green-hover); }
+    .btn-submit:active:not(:disabled) { transform: scale(0.99); }
+
+    /* Modal / Result Box */
+    .result-modal {
+      display: none;
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 12px;
+      background: #1f2937;
+      border: 1px solid var(--border-color);
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .error-box {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--danger-red);
+      color: #fca5a5;
+      font-size: 13px;
+    }
+
+    .badge-tier2 {
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--accent-blue);
+      border: 1px solid var(--accent-blue);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .badge-tier1 {
+      background: rgba(234, 179, 8, 0.2);
+      color: var(--accent-yellow);
+      border: 1px solid var(--accent-yellow);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 10px;
+      background: #374151;
+      color: white;
+      text-align: center;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: #4b5563; }
+
+    .cert-link {
+      display: block;
+      text-align: center;
+      color: var(--accent-green);
+      font-weight: bold;
+      font-size: 13px;
+      text-decoration: none;
+      padding: 10px;
+      border: 1px solid var(--accent-green);
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .cert-link:hover { background: rgba(16, 185, 129, 0.1); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h2 style="color: #34d399; margin-top: 0; margin-bottom: 8px;">🌱 Registra Impatto Sostenibile</h2>
-  <p style="color: #9ca3af; font-size: 13px; margin-bottom: 20px;">L'AI Forensics verificherà la prova caricata per il registro dMRV e l'assegnazione del Tier.</p>
+  <div class="header-bar">
+    <h2 style="color: #34d399; margin: 0; font-size: 1.25rem;">🌱 Registra Impatto dMRV</h2>
+    <a href="/dashboard" class="back-link">← Dashboard</a>
+  </div>
+
+  <p style="color: var(--text-muted); font-size: 13px; margin-top: 0; margin-bottom: 20px;">
+    L'AI Forensics verificherà la prova caricata per il registro dMRV e l'assegnazione del Tier di compensazione.
+  </p>
 
   <form id="addAssetForm" enctype="multipart/form-data">
     <div class="form-group">
-      <label>Nome Bene / Azione Eco</label>
-      <input type="text" id="title" name="title" placeholder="Es. Pannello Solare 400W / Piantumazione Terreno" required>
+      <label for="title">Nome Bene / Azione Eco</label>
+      <input type="text" id="title" name="title" placeholder="Es. Pannello Solare 400W / Bici Elettrica / Scontrino Mezzi" required>
     </div>
 
     <div class="form-group">
-      <label>Categoria dMRV</label>
+      <label for="category">Categoria dMRV</label>
       <select id="category" name="category">
-        <option value="LAND_MANAGEMENT">Gestione Terreno / Riforestazione</option>
         <option value="ENERGY_SAVING">Energia Solare / Efficienza Domestica</option>
-        <option value="RECYCLING">Riciclo / Circolarità Industriale</option>
         <option value="FLIGHT_OFFSET">Mobilità Sostenibile / Trasporti</option>
+        <option value="LAND_MANAGEMENT">Gestione Terreno / Riforestazione</option>
+        <option value="RECYCLING">Riciclo / Circolarità Industriale</option>
         <option value="GENERAL">Generale / Gamification Personal</option>
       </select>
     </div>
 
     <div class="form-group">
-      <label>Importo Stimato o Speso (€)</label>
-      <input type="number" id="amountSpend" step="0.01" name="amountSpend" placeholder="10.00" required>
+      <label for="amountSpend">Importo Stimato o Speso (€)</label>
+      <input type="number" id="amountSpend" step="0.01" name="amountSpend" placeholder="50.00" required>
     </div>
 
     <div class="form-group">
-      <label>📸 Prova Fotografica (Foto Reale / Ricevuta)</label>
-      <input type="file" id="photo" name="photo" accept="image/*" required>
+      <label>📸 Prova Fotografica (Scontrino / Ricevuta / Installazione)</label>
+      <div class="file-drop-zone" onclick="document.getElementById('photo').click()">
+        <span id="filePromptText" style="font-size: 13px; color: var(--text-muted);">
+          Clicca per selezionare o scattare una foto
+        </span>
+        <input type="file" id="photo" name="photo" accept="image/*" style="display: none;" required>
+      </div>
+
+      <div id="previewContainer">
+        <img id="imagePreview" src="" alt="Anteprima Prova">
+      </div>
     </div>
 
     <button type="submit" id="submitBtn" class="btn-submit">AVVIA AUDIT AI & GENERAZIONE dMRV ➔</button>
   </form>
 
+  <!-- Box Errore Dinamico -->
+  <div id="errorBox" class="error-box"></div>
+
   <!-- Box Risultato Verifica AI -->
   <div id="resultModal" class="result-modal">
     <div id="tierBadge" class="badge-tier2">TIER DETECTED</div>
     <h3 id="resultTitle" style="color: white; margin: 10px 0 6px 0; font-size: 16px;">Verifica Completata</h3>
-    <p id="resultDesc" style="color: #9ca3af; font-size: 13px; margin: 0;"></p>
-    <a id="certUrl" href="#" target="_blank" class="cert-link">📄 Visualizza Certificato dMRV Pubblico Auditabile ➔</a>
+    <p id="resultDesc" style="color: var(--text-muted); font-size: 13px; margin: 0 0 16px 0; line-height: 1.4;"></p>
+    
+    <a id="certUrl" href="#" target="_blank" class="cert-link">📄 Visualizza Certificato dMRV Pubblico ➔</a>
+
+    <div class="actions-row">
+      <a href="/dashboard" class="btn-secondary">Vai alla Dashboard</a>
+      <a href="/add-asset" class="btn-secondary" onclick="location.reload(); return false;">+ Altro Bene</a>
+    </div>
   </div>
 </div>
 
 <script>
-  // Calcolo Hash SHA-256 del file sul dispositivo dell'utente (Costo €0.00)
+  // Gestione anteprima immagine
+  const photoInput = document.getElementById('photo');
+  const previewContainer = document.getElementById('previewContainer');
+  const imagePreview = document.getElementById('imagePreview');
+  const filePromptText = document.getElementById('filePromptText');
+
+  photoInput.addEventListener('change', function () {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        imagePreview.src = e.target.result;
+        previewContainer.style.display = 'block';
+        filePromptText.innerText = `📸 File selezionato: ${file.name}`;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Calcolo Hash SHA-256 del file lato client (Anti-Duplicati)
   async function calculateImageHash(file) {
     const arrayBuffer = await file.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
@@ -78,8 +311,22 @@
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
+  // Helper gestione errori in-page
+  function showError(message) {
+    const errorBox = document.getElementById('errorBox');
+    errorBox.innerText = message;
+    errorBox.style.display = 'block';
+  }
+
+  function hideError() {
+    const errorBox = document.getElementById('errorBox');
+    errorBox.style.display = 'none';
+  }
+
+  // Form Submit Handler
   document.getElementById('addAssetForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    hideError();
 
     const submitBtn = document.getElementById('submitBtn');
     const resultModal = document.getElementById('resultModal');
@@ -88,11 +335,10 @@
     const title = document.getElementById('title').value;
     const category = document.getElementById('category').value;
     const amountSpend = document.getElementById('amountSpend').value;
-    const fileInput = document.getElementById('photo');
-    const file = fileInput.files[0];
+    const file = photoInput.files[0];
 
     if (!file) {
-      alert("Seleziona una prova fotografica valida.");
+      showError("Seleziona una prova fotografica valida per procedere.");
       return;
     }
 
@@ -103,18 +349,18 @@
       // 1. Calcolo Hash Anti-Duplicati Client-Side
       const imageHash = await calculateImageHash(file);
 
-      // 2. Pre-Check Duplicati
+      // 2. Pre-Check Duplicati nel Database
       const checkRes = await fetch(`/api/check-duplicate?hash=${imageHash}`);
       const checkData = await checkRes.json();
       
       if (checkData.isDuplicate) {
-        alert("⚠️ Immagine Rifiutata: Questa prova fotografica è già stata registrata nel sistema dMRV.");
+        showError("⚠️ Immagine Rifiutata: Questa prova fotografica è già stata registrata nel sistema dMRV.");
         submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
         submitBtn.disabled = false;
         return;
       }
 
-      // 3. Costruzione Multipart Payload
+      // 3. Costruzione Multipart Payload per il Backend
       const formData = new FormData();
       formData.append('email', userEmail);
       formData.append('title', title);
@@ -123,7 +369,7 @@
       formData.append('imageHash', imageHash);
       formData.append('photo', file);
 
-      // 4. Invio al Backend
+      // 4. Invio alla rotta POST /api/eco-actions
       const res = await fetch('/api/eco-actions', {
         method: 'POST',
         body: formData
@@ -132,6 +378,7 @@
       const data = await res.json();
 
       if (res.ok) {
+        document.getElementById('addAssetForm').style.display = 'none';
         resultModal.style.display = 'block';
         
         const isB2b = (data.tier === 'B2B_INSTITUTIONAL');
@@ -143,29 +390,27 @@
           ? `✅ Accreditati ${data.co2SavedKg} kg CO₂ nel Pool B2B` 
           : `🎉 Registrata Azione Personal (+${data.creditsAdded} Punti)`;
 
+        const confidenceVal = data.confidenceScore || data.confidence || 0.95;
+        const confidencePercentage = (confidenceVal <= 1 ? confidenceVal * 100 : confidenceVal).toFixed(1);
+
         document.getElementById('resultDesc').innerHTML = `
-          Confidenza AI: <strong>${((data.confidenceScore || 0.95) * 100).toFixed(1)}%</strong><br>
-          ${data.message}
+          <strong>Confidenza AI:</strong> ${confidencePercentage}%<br>
+          <strong>Risparmio CO₂:</strong> ${data.co2SavedKg} kg<br>
+          ${data.message || 'L\'impatto è stato registrato ed è consultabile nel registro trasparente.'}
         `;
 
         const certLink = document.getElementById('certUrl');
         certLink.href = `/verify/${data.id}`;
-        
-        submitBtn.innerText = "✅ AZIONE REGISTRATA CON SUCCESSO";
-        
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 4000);
 
       } else {
-        alert(`❌ Audit AI Fallito: ${data.message || data.error}`);
+        showError(`❌ Audit AI Fallito: ${data.message || data.error || 'Errore durante la verifica.'}`);
         submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
         submitBtn.disabled = false;
       }
 
     } catch (err) {
       console.error(err);
-      alert("Errore di connessione al server durante la verifica dMRV.");
+      showError("Errore di connessione al server durante l'invio della verifica dMRV.");
       submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
       submitBtn.disabled = false;
     }

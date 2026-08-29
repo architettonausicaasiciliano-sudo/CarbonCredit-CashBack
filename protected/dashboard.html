@@ -8,79 +8,101 @@
 </head>
 <body>
     <div class="container">
-        <header class="dashboard-header">
-            <h1>🏆 La tua Area Riservata</h1>
-            <a href="/add-asset" class="btn btn-primary">+ Registra Nuovo Bene / Acquisto</a>
+        <header class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+            <h1 style="margin: 0; font-size: 1.8rem;">🏆 La tua Area Riservata</h1>
+            <a href="/add-asset" class="btn btn-primary" style="background: #10b981; color: #022c22; font-weight: 800; text-decoration: none; padding: 12px 20px; border-radius: 10px; box-shadow: 0 4px 14px rgba(16,185,129,0.3);">
+                📸 Registra Nuovo Bene / Acquisto
+            </a>
         </header>
 
-        <!-- STATISTICHE GENERALI -->
-        <div class="stats-grid">
-            <div class="card stat-card">
-                <h3>Saldo Crediti</h3>
-                <p class="stat-value" id="userCredits">0.0 CC</p>
+        <!-- STATISTICHE GENERALI CON STIMA IMMEDIATA IN STANDBY -->
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+            <div class="card stat-card" style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px;">
+                <h3 style="color: #94a3b8; font-size: 0.85rem; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px;">Saldo Crediti Convalidati</h3>
+                <p class="stat-value" id="userCredits" style="font-size: 1.8rem; font-weight: 800; color: #ffffff; margin: 0;">0.0 CC</p>
+                <small id="userCreditsPending" style="color: #f59e0b; font-size: 0.78rem; font-weight: 600; display: block; margin-top: 6px;">
+                    ⏳ In elaborazione AI: <span id="pendingCcVal">-- CC</span>
+                </small>
             </div>
-            <div class="card stat-card">
-                <h3>CO₂ Evitata</h3>
-                <p class="stat-value" id="totalCo2">0.0 kg</p>
+
+            <div class="card stat-card" style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px;">
+                <h3 style="color: #94a3b8; font-size: 0.85rem; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px;">CO₂ Evitata Stimata</h3>
+                <p class="stat-value" id="totalCo2" style="font-size: 1.8rem; font-weight: 800; color: #4ade80; margin: 0;">0.0 kg</p>
+                <small id="totalCo2Pending" style="color: #38bdf8; font-size: 0.78rem; font-weight: 600; display: block; margin-top: 6px;">
+                    🌱 +Stima provvisoria attiva
+                </small>
             </div>
-            <div class="card stat-card">
-                <h3>Alberi Equivalenti</h3>
-                <p class="stat-value" id="totalTrees">0 🌳</p>
+
+            <div class="card stat-card" style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px;">
+                <h3 style="color: #94a3b8; font-size: 0.85rem; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px;">Alberi Equivalenti</h3>
+                <p class="stat-value" id="totalTrees" style="font-size: 1.8rem; font-weight: 800; color: #38bdf8; margin: 0;">0 🌳</p>
+                <small id="treesPending" style="color: #cbd5e1; font-size: 0.78rem; display: block; margin-top: 6px;">
+                    🌲 Proiezione di impatto in corso
+                </small>
             </div>
         </div>
 
-        <!-- SEZIONE 1: MONETIZZAZIONE B2B & CASHBACK IN STANDBY -->
-        <section class="card b2b-card" style="border: 1px solid #00ff88; background: #111d28; margin-top: 20px;">
+        <!-- SEZIONE 1: POOL CASHBACK & CERTIFICAZIONE dMRV (REVISIONATO IN CHIAVE RISERVATEZZA B2B) -->
+        <section class="card b2b-card" style="border: 1px solid #10b981; background: rgba(16, 185, 129, 0.05); border-radius: 16px; margin-top: 24px; padding: 22px;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
-                    <h2 style="color: #00ff88; margin: 0;">📊 Aggregazione B2B & Cashback (AI Engine)</h2>
-                    <p style="color: #a0aec0; margin-top: 5px; font-size: 0.95em;">
-                        I tuoi crediti vengono verificati e raggruppati dall'AI in lotti per la vendita alle aziende partner.
+                    <h2 style="color: #4ade80; margin: 0; font-size: 1.3rem;">🟢 Pool Cashback & Certificazione dMRV</h2>
+                    <p style="color: #cbd5e1; margin-top: 6px; font-size: 0.9rem; line-height: 1.4;">
+                        Le tue prove d'acquisto sono in fase di verifica automatizzata dMRV. L'impatto generato viene integrato nel pool di sostenibilità per calcolare ed erogare il tuo cashback.
                     </p>
                 </div>
-                <button id="btnRedeem" class="btn btn-primary" style="background: #00ff88; color: #0b131e; border: none; font-weight: bold; padding: 10px 18px; border-radius: 6px; cursor: pointer;">
-                    Richiedi Cashback
+                <button id="btnRedeem" class="btn btn-primary" style="background: #10b981; color: #022c22; border: none; font-weight: 800; padding: 12px 22px; border-radius: 10px; cursor: pointer; transition: transform 0.2s;">
+                    Richiedi Payout Cashback
                 </button>
             </div>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-top: 18px; background: #0f172a; padding: 16px; border-radius: 12px; border: 1px solid #1e293b;">
                 <div>
-                    <span style="font-size: 0.85em; color: #a0aec0;">Lotto Corrente B2B:</span>
-                    <h4 id="batchId" style="color: #00ff88; margin: 5px 0 0 0; font-size: 1.1em;">BATCH-2026-104</h4>
+                    <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Ticket Lavorazione / Batch:</span>
+                    <h4 id="batchId" style="color: #38bdf8; margin: 4px 0 0 0; font-size: 1.05rem; font-family: monospace;">BATCH-2026-104</h4>
                 </div>
                 <div>
-                    <span style="font-size: 0.85em; color: #a0aec0;">Valore Stimato in Standby:</span>
-                    <h4 id="pendingEur" style="color: #ffb703; margin: 5px 0 0 0; font-size: 1.1em;">€ 0,00</h4>
+                    <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Valore Stimato in Standby:</span>
+                    <h4 id="pendingEur" style="color: #f59e0b; margin: 4px 0 0 0; font-size: 1.05rem;">€ 0,00</h4>
                 </div>
                 <div>
-                    <span style="font-size: 0.85em; color: #a0aec0;">Stato Liquidazione:</span>
-                    <h4 id="batchStatus" style="color: #00b4d8; margin: 5px 0 0 0; font-size: 0.95em;">⏳ In aggregazione B2B</h4>
+                    <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Stato Audit & Processamento:</span>
+                    <h4 id="batchStatus" style="color: #38bdf8; margin: 4px 0 0 0; font-size: 0.9rem; font-weight: 600;">⏳ Acquisizione Metadati & Verification AI</h4>
                 </div>
             </div>
         </section>
 
-        <!-- SEZIONE 2: RICONOSCIMENTO SIMBOLICO / AMBIENTALE -->
-        <section class="card eco-card" style="border: 1px solid #00b4d8; background: #0f251d; margin-top: 20px;">
-            <h2 style="color: #00b4d8; margin: 0;">🌳 Il tuo Impatto Ecologico Certificato</h2>
-            <p style="color: #a0aec0; margin-top: 5px; font-size: 0.95em;">
-                Ogni azione green sostenibile genera un riscontro ambientale tangibile e certificato.
+        <!-- SEZIONE 2: RICONOSCIMENTO AMBIENTALE -->
+        <section class="card eco-card" style="border: 1px solid #334155; background: #1e293b; border-radius: 16px; margin-top: 24px; padding: 22px;">
+            <h2 style="color: #38bdf8; margin: 0; font-size: 1.2rem;">🌲 Il tuo Impatto Ecologico Certificato</h2>
+            <p style="color: #94a3b8; margin-top: 6px; font-size: 0.88rem;">
+                Ogni azione green registrata genera un riscontro quantificabile secondo gli standard internazionali GHG Protocol Scope 3.
             </p>
-            <div style="display: flex; align-items: center; gap: 20px; margin-top: 15px; flex-wrap: wrap;">
-                <div style="font-size: 2.8em;">🌲</div>
+            <div style="display: flex; align-items: center; gap: 18px; margin-top: 16px; background: #0f172a; padding: 14px 18px; border-radius: 12px; border: 1px solid #334155;">
+                <div style="font-size: 2.5rem;">🌱</div>
                 <div>
-                    <h3 id="treeBannerText" style="color: #00ff88; margin: 0; font-size: 1.3em;">0 Alberi Piantati Equivalenti</h3>
-                    <p style="margin: 5px 0 0 0; color: #cbd5e0; font-size: 0.9em;">
-                        Assorbimento CO₂ garantito tramite progetti di riforestazione partner.
+                    <h3 id="treeBannerText" style="color: #4ade80; margin: 0; font-size: 1.15rem;">0 Alberi Piantati Equivalenti</h3>
+                    <p style="margin: 4px 0 0 0; color: #cbd5e1; font-size: 0.85rem;">
+                        Assorbimento CO₂ verificato con sistema dMRV Forensics e tracciabilità crittografica.
                     </p>
                 </div>
             </div>
         </section>
 
-        <!-- SEZIONE 3: LISTA BENI E ACQUISTI REGISTRATI -->
-        <section class="card" style="margin-top: 20px;">
-            <h2>i Miei Beni & Acquisti Registrati</h2>
+        <!-- SEZIONE 3: LISTA BENI ED ACQUISTI REGISTRATI -->
+        <section class="card" style="background: #1e293b; border: 1px solid #334155; border-radius: 16px; margin-top: 24px; padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="margin: 0; font-size: 1.2rem; color: #f8fafc;">📋 I Miei Beni & Acquisti Registrati</h2>
+                <span style="font-size: 0.75rem; color: #94a3b8;">Aggiornamento in tempo reale</span>
+            </div>
+            
             <div id="assetsList" class="assets-list">
-                <p class="empty-msg">Nessun bene o acquisto ancora registrato. Clicca sul pulsante in alto per iniziare!</p>
+                <p class="empty-msg" style="color: #94a3b8; text-align: center; padding: 30px 10px; font-size: 0.9rem; background: #0f172a; border-radius: 10px; border: 1px dashed #334155;">
+                    Nessun bene o acquisto ancora registrato.<br>
+                    <a href="/add-asset" style="color: #10b981; font-weight: 700; text-decoration: underline; margin-top: 8px; display: inline-block;">
+                        Clicca qui per registrare la tua prima prova d'acquisto →
+                    </a>
+                </p>
             </div>
         </section>
     </div>
