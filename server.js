@@ -6,14 +6,19 @@ const multer = require("multer");
 const crypto = require("crypto");
 require("dotenv").config();
 
-const { GoogleGenAI } = require("@google/genai");
-
 const app = express();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const db = require("./db");
+const { verifyEcoAction } = require("./src/services/geminiService");
 
-// Inizializzazione Gemini AI Engine
-const ai = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
+/* =====================================================
+   AUTO-MIGRAZIONE DATABASE PER RICEVUTE UNICHE
+===================================================== */
+db.serialize(() => {
+  db.run("ALTER TABLE eco_actions ADD COLUMN receipt_hash TEXT", (err) => {
+    if (!err) console.log("✅ Colonna 'receipt_hash' aggiunta con successo a eco_actions.");
+  });
+});
 
 /* =====================================================
    PARAMETRI DI MERCATO VCM & ALGORITMO VALUTAZIONE AI
@@ -48,82 +53,15 @@ function calculateBufferHash(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
 }
 
+function generateReceiptHash(merchant, dateTime, totalAmount) {
+  if (!merchant || merchant === "UNKNOWN" || !totalAmount || totalAmount <= 0) return null;
+  const rawKey = `${merchant.toLowerCase().trim()}_${(dateTime || 'no_date').trim()}_${parseFloat(totalAmount).toFixed(2)}`;
+  return crypto.createHash("sha256").update(rawKey).digest("hex");
+}
+
 function generateDmrvHash(action) {
   const rawData = `${action.id}-${action.user_email}-${action.co2_saved_kg}-${action.image_hash || 'no_photo_hash'}-${action.tier || 'TIER2'}-${action.created_at || '2026'}`;
   return crypto.createHash('sha256').update(rawData).digest('hex');
-}
-
-/* =====================================================
-   AI VISION FORENSICS ENGINE (dMRV & Anti-Greenwashing)
-===================================================== */
-async function verifyActionWithAI(imagePath, actionTitle, mimeType = "image/jpeg") {
-  if (!ai) {
-    console.warn("⚠️ Gemini API Key mancante nel .env. Fallback su stima immediata.");
-    return {
-      valid: true,
-      tier: "COMMUNITY",
-      category: "MOBILITY",
-      co2_saved_kg: 120.0,
-      confidence: 0.85,
-      fraud_risk: "LOW",
-      reason: "Validazione dMRV completata con stima standard per la categoria."
-    };
-  }
-
-  try {
-    const imageBuffer = fs.readFileSync(imagePath);
-    const base64Image = imageBuffer.toString("base64");
-
-    const prompt = `Sei un Auditor Forense per la verifica automatica dMRV (digital Measurement, Reporting, and Verification) di impatti ambientali.
-Analizza l'immagine allegata abbinata all'azione dichiarata: "${actionTitle}".
-
-VALUTA:
-1. Autenticità dell'immagine o della ricevuta/scontrino/fattura (evita fermamente solo immagini riprese da uno schermo con moiré evidente o watermark di stock).
-2. Coerenza: La foto dimostra un acquisto o un'azione green (es. scontrino e-bike/bici, abbonamento mezzi, pannelli fotovoltaici, dispositivo ad alta efficienza, ricevuta riciclo)?
-3. Assegna una stima congrua di CO2 risparmiata all'anno (es. Bici/E-bike: 100-250 kg CO2; Pannelli: 300-1000 kg CO2; Mezzi pubblici: 50-150 kg CO2).
-4. Tiering System:
-   - "REJECT": Immagine totalmente irrilevante o palesemente ingannevole.
-   - "COMMUNITY": Foto di azione o scontrino valido per riscontro personale e gamification.
-   - "B2B_INSTITUTIONAL": Documento nitido (scontrino, fattura, cert.) idoneo al pool di cashback certificato.
-
-Rispondi ESCLUSIVAMENTE con un JSON valido con questa struttura:
-{
-  "valid": true,
-  "tier": "B2B_INSTITUTIONAL",
-  "category": "MOBILITY",
-  "co2_saved_kg": 150.0,
-  "confidence": 0.92,
-  "fraud_risk": "LOW",
-  "reason": "Scontrino/Documento di acquisto bici/veicolo green verificato con successo."
-}`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: prompt },
-            { inlineData: { mimeType: mimeType || "image/jpeg", data: base64Image } }
-          ]
-        }
-      ],
-      config: { responseMimeType: "application/json" }
-    });
-
-    return JSON.parse(response.text);
-  } catch (err) {
-    console.error("❌ AI Forensics MRV Verification Error:", err.message);
-    return {
-      valid: true,
-      tier: "COMMUNITY",
-      category: "GENERAL",
-      co2_saved_kg: 80.0,
-      confidence: 0.80,
-      fraud_risk: "LOW",
-      reason: "Ricevuta registrata correttamente. Elaborazione stima dMRV completata."
-    };
-  }
 }
 
 /* =====================================================
@@ -468,23 +406,24 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
   let finalCategory = category || "GENERAL";
   let co2 = parseFloat(co2SavedKg);
   let calculatedHash = clientHash || null;
+  let receiptHash = null;
   let aiTier = "COMMUNITY";
   let confidenceScore = 0.85;
   let fraudRisk = "LOW";
 
   const spendAmount = parseFloat(amountSpend) || 0;
 
-  // 1. Processamento e verifica se la foto è allegata
+  // 1. Processamento se la foto è allegata
   if (req.file) {
     const imageBuffer = fs.readFileSync(req.file.path);
     calculatedHash = calculateBufferHash(imageBuffer);
 
-    // Controllo Anti-Duplicati server-side via SQLite
-    const duplicateRow = await new Promise((resolve) => {
+    // Controlla duplicato foto via Hash dell'immagine (Stesso file)
+    const duplicatePhoto = await new Promise((resolve) => {
       db.get("SELECT id FROM eco_actions WHERE image_hash = ?", [calculatedHash], (err, row) => resolve(row));
     });
 
-    if (duplicateRow) {
+    if (duplicatePhoto) {
       fs.unlinkSync(req.file.path);
       return res.status(400).json({
         error: "duplicate_image",
@@ -492,8 +431,8 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
       });
     }
 
-    // Audit AI Gemini
-    const aiResult = await verifyActionWithAI(req.file.path, title, req.file.mimetype);
+    // Audit Forense IA Gemini
+    const aiResult = await verifyEcoAction(imageBuffer, req.file.mimetype, title);
 
     if (!aiResult.valid || aiResult.tier === "REJECT") {
       fs.unlinkSync(req.file.path);
@@ -501,6 +440,26 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
         error: "invalid_photo_forensics",
         message: aiResult.reason || "L'immagine caricata non soddisfa i requisiti minimi di leggibilità o coerenza."
       });
+    }
+
+    // Controllo avanzato duplicato scontrino (Stessa transazione)
+    if (aiResult.is_receipt) {
+      const extractedAmount = aiResult.total_amount > 0 ? aiResult.total_amount : spendAmount;
+      receiptHash = generateReceiptHash(aiResult.merchant, aiResult.date_time, extractedAmount);
+
+      if (receiptHash) {
+        const duplicateReceipt = await new Promise((resolve) => {
+          db.get("SELECT id FROM eco_actions WHERE receipt_hash = ?", [receiptHash], (err, row) => resolve(row));
+        });
+
+        if (duplicateReceipt) {
+          fs.unlinkSync(req.file.path);
+          return res.status(400).json({
+            error: "duplicate_receipt",
+            message: `Questo scontrino (${aiResult.merchant}, €${extractedAmount}) è già stato registrato nel sistema!`
+          });
+        }
+      }
     }
 
     aiTier = aiResult.tier || "COMMUNITY";
@@ -528,8 +487,8 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
 
   // 2. Inserimento nel database
   db.run(
-    "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source, image_hash, tier, confidence_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    [email, title, finalCategory, credits, co2, actionSource, calculatedHash, aiTier, confidenceScore],
+    "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source, image_hash, tier, confidence_score, receipt_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [email, title, finalCategory, credits, co2, actionSource, calculatedHash, aiTier, confidenceScore, receiptHash],
     function (error) {
       if (error) return res.status(500).json({ error: error.message });
 
