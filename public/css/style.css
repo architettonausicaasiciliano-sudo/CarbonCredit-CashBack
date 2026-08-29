@@ -36,13 +36,13 @@ body {
   margin-bottom: 28px;
 }
 
-/* Badge iniziale in Rosso Scarlatto Puro */
+/* Badge iniziale in Rosso Scarlatto Landing Page */
 .badge-eco {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   background: rgba(230, 0, 35, 0.15);
-  border: 1.5px solid #E60023;
+  border: 1.5px solid #FF2E4C;
   color: #FF2E4C;
   font-size: 12px;
   font-weight: 800;
@@ -64,7 +64,7 @@ body {
   letter-spacing: -0.5px;
 }
 
-/* Testo evidenziato in Rosso Scarlatto Profondo */
+/* Testo evidenziato in Rosso Scarlatto della Landing Page */
 .hero h1 span {
   color: #E60023;
   background: linear-gradient(135deg, #FF2E4C 0%, #E60023 50%, #990014 100%);
@@ -79,7 +79,7 @@ body {
   margin-bottom: 22px;
 }
 
-/* --- PULSANTE ROSSO SCARLATTO / FRAGOLA AD ALTO IMPATTO --- */
+/* --- PULSANTE ROSSO SCARLATTO ORIGINALE LANDING PAGE --- */
 .btn-cta-giant {
   display: flex;
   align-items: center;
@@ -98,7 +98,7 @@ body {
   cursor: pointer;
   text-decoration: none;
   box-shadow: 0 0 25px rgba(230, 0, 35, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-  animation: pulseRed 2s infinite;
+  animation: pulseScarletRed 2s infinite;
   transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
   margin-bottom: 24px;
 }
@@ -106,24 +106,30 @@ body {
 .btn-cta-giant:hover {
   transform: scale(1.03);
   background: linear-gradient(180deg, #FF1A3C 0%, #B8001C 100%) !important;
-  box-shadow: 0 0 40px rgba(230, 0, 35, 0.85) !important;
+  box-shadow: 0 0 35px rgba(230, 0, 35, 0.85) !important;
 }
 
-@keyframes pulseRed {
-  0% { box-shadow: 0 0 15px rgba(230, 0, 35, 0.5); }
-  50% { box-shadow: 0 0 35px rgba(230, 0, 35, 0.85); }
-  100% { box-shadow: 0 0 15px rgba(230, 0, 35, 0.5); }
+@keyframes pulseScarletRed {
+  0% { box-shadow: 0 0 15px rgba(230, 0, 35, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(255, 46, 76, 0.75); }
+  100% { box-shadow: 0 0 15px rgba(230, 0, 35, 0.4); }
 }
 
-/* Regola generica per qualsiasi altro pulsante rosso nell'applicazione */
-.btn-red, button.btn-red, a.btn-red, .btn-submit {
-  background: linear-gradient(180deg, #E60023 0%, #A30019 100%) !important;
+/* Regola generica per tutti i pulsanti rossi nell'applicazione */
+.btn-red, button.btn-red, a.btn-red, .btn-submit, #btnRedeem {
+  background: linear-gradient(180deg, #E60023 0%, #C4001A 50%, #990014 100%) !important;
   color: #ffffff !important;
-  border: 1px solid #FF2E4C !important;
-  box-shadow: 0 0 20px rgba(230, 0, 35, 0.5) !important;
+  border: 1.5px solid #FF2E4C !important;
+  box-shadow: 0 0 20px rgba(230, 0, 35, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
   cursor: pointer;
   font-weight: bold;
   transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+.btn-red:hover, button.btn-red:hover, a.btn-red:hover, .btn-submit:hover, #btnRedeem:hover {
+  transform: scale(1.02);
+  background: linear-gradient(180deg, #FF1A3C 0%, #B8001C 100%) !important;
+  box-shadow: 0 0 30px rgba(230, 0, 35, 0.8) !important;
 }
 
 .quiz-card {
@@ -281,4 +287,67 @@ body {
   color: #64748b;
   text-align: center;
   margin-top: 24px;
+}
+
+/* --- CARD TRAGUARDO & BARRA CICLICA / MILESTONE --- */
+.traguardo-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.header-traguardo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.badge-ciclo {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.step-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.progress-bar-bg {
+  background: #0f172a;
+  border-radius: 10px;
+  height: 14px;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #334155;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  border-radius: 10px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+}
+
+.status-info {
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-top: 12px;
+}
+
+.status-info strong {
+  color: #34d399;
 }
