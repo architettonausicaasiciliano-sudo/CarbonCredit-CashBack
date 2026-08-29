@@ -88,7 +88,6 @@
       outline: none;
     }
 
-    /* Input File Custom & Image Preview */
     .file-drop-zone {
       border: 2px dashed var(--border-color);
       border-radius: 10px;
@@ -130,7 +129,6 @@
     .btn-submit:hover:not(:disabled) { background: var(--accent-green-hover); }
     .btn-submit:active:not(:disabled) { transform: scale(0.99); }
 
-    /* Modal / Result Box */
     .result-modal {
       display: none;
       margin-top: 20px;
@@ -172,6 +170,39 @@
       font-size: 11px;
       font-weight: bold;
       display: inline-block;
+    }
+
+    /* Gamification & Milestone Progress Bar */
+    .milestone-container {
+      background: #111827;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 14px 0;
+    }
+
+    .milestone-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: bold;
+      color: #d1d5db;
+      margin-bottom: 6px;
+    }
+
+    .progress-track {
+      background: #374151;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #10b981, #34d399);
+      height: 100%;
+      width: 33%; /* 1 di 3 azioni completate */
+      transition: width 0.5s ease;
     }
 
     .equiv-grid {
@@ -277,15 +308,29 @@
     <button type="submit" id="submitBtn" class="btn-submit">AVVIA AUDIT AI & GENERAZIONE dMRV ➔</button>
   </form>
 
-  <!-- Box Errore Dinamico -->
   <div id="errorBox" class="error-box"></div>
 
-  <!-- Box Risultato Verifica AI con Tripla Equivalenza -->
+  <!-- Risultato con Gamification, Punti e Milestone -->
   <div id="resultModal" class="result-modal">
     <div id="tierBadge" class="badge-tier2">TIER DETECTED</div>
-    <h3 id="resultTitle" style="color: white; margin: 12px 0 6px 0; font-size: 17px;">Verifica Completata</h3>
+    <h3 id="resultTitle" style="color: white; margin: 12px 0 4px 0; font-size: 18px;">Azione Registrata!</h3>
+    <div id="pointsGained" style="color: #34d399; font-size: 20px; font-weight: 800; margin-bottom: 12px;">+500 Punti Eco Guadagnati ⚡</div>
 
-    <!-- Grid Tripla Equivalenza -->
+    <!-- Barra di avanzamento Milestone -->
+    <div class="milestone-container">
+      <div class="milestone-header">
+        <span>🎯 Traguardo Bonus Cashback</span>
+        <span style="color: var(--accent-yellow);">1 di 3 Azioni</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+      <div style="font-size: 11px; color: var(--text-muted);">
+        Carica altre 2 azioni valide per sbloccare il <strong>Bonus Immediato da 15,00 €</strong>!
+      </div>
+    </div>
+
+    <!-- Tripla Equivalenza -->
     <div class="equiv-grid">
       <div style="padding: 4px;">
         <span style="font-size: 20px; display: block; margin-bottom: 2px;">🌳</span>
@@ -299,12 +344,12 @@
       </div>
       <div style="padding: 4px;">
         <span style="font-size: 20px; display: block; margin-bottom: 2px;">💶</span>
-        <strong id="equivEur" style="color: var(--accent-yellow); font-size: 15px; display: block;">€0.00</strong>
-        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Stima Riserva B2B</span>
+        <strong id="equivEur" style="color: var(--accent-yellow); font-size: 15px; display: block;">€3.00</strong>
+        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Base + Est. B2B</span>
       </div>
     </div>
 
-    <!-- Info Dettaglio AI & Batch Pool -->
+    <!-- Dettagli Tecnico-Audit -->
     <div id="resultDesc" style="color: var(--text-muted); font-size: 13px; margin: 0 0 16px 0; line-height: 1.5; background: #0b0f19; padding: 12px; border-radius: 8px; border: 1px solid #1f2937;"></div>
 
     <a id="certUrl" href="#" target="_blank" class="cert-link" style="margin-bottom: 12px;">📄 Visualizza Certificato dMRV Pubblico ➔</a>
@@ -317,7 +362,6 @@
 </div>
 
 <script>
-  // Gestione anteprima immagine
   const photoInput = document.getElementById('photo');
   const previewContainer = document.getElementById('previewContainer');
   const imagePreview = document.getElementById('imagePreview');
@@ -336,7 +380,6 @@
     }
   });
 
-  // Calcolo Hash SHA-256 del file lato client (Anti-Duplicati)
   async function calculateImageHash(file) {
     const arrayBuffer = await file.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
@@ -344,7 +387,6 @@
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // Helper gestione errori in-page
   function showError(message) {
     const errorBox = document.getElementById('errorBox');
     errorBox.innerText = message;
@@ -352,11 +394,9 @@
   }
 
   function hideError() {
-    const errorBox = document.getElementById('errorBox');
-    errorBox.style.display = 'none';
+    document.getElementById('errorBox').style.display = 'none';
   }
 
-  // Form Submit Handler
   document.getElementById('addAssetForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     hideError();
@@ -379,10 +419,8 @@
       submitBtn.innerText = "🔍 Audit Forense AI in corso (Gemini Flash)...";
       submitBtn.disabled = true;
 
-      // 1. Calcolo Hash Anti-Duplicati Client-Side
       const imageHash = await calculateImageHash(file);
 
-      // 2. Pre-Check Duplicati nel Database
       const checkRes = await fetch(`/api/check-duplicate?hash=${imageHash}`);
       const checkData = await checkRes.json();
       
@@ -393,7 +431,6 @@
         return;
       }
 
-      // 3. Costruzione Multipart Payload per il Backend
       const formData = new FormData();
       formData.append('email', userEmail);
       formData.append('title', title);
@@ -402,7 +439,6 @@
       formData.append('imageHash', imageHash);
       formData.append('photo', file);
 
-      // 4. Invio alla rotta POST /api/eco-actions
       const res = await fetch('/api/eco-actions', {
         method: 'POST',
         body: formData
@@ -419,33 +455,32 @@
         badgeEl.className = isB2b ? 'badge-tier2' : 'badge-tier1';
         badgeEl.innerText = isB2b ? 'Tier 2 — Institutional Grade B2B' : 'Tier 1 — Community Impact';
 
-        document.getElementById('resultTitle').innerText = isB2b 
-          ? `✅ Accreditati ${data.co2SavedKg} kg CO₂ nel Pool B2B` 
-          : `🎉 Registrata Azione Personal (+${data.creditsAdded} Punti)`;
+        const addedPts = data.creditsAdded || 500;
+        document.getElementById('pointsGained').innerText = `+${addedPts} Punti Eco Guadagnati ⚡`;
 
-        // Popola la Tripla Equivalenza
-        const treesVal = data.equivalents?.trees || data.treesEquivalent || 1;
-        const kmVal = data.equivalents?.kmDriven || Math.round(data.co2SavedKg * 5) || 0;
-        const eurVal = data.equivalents?.estimatedEur ?? data.estimatedB2bValEur ?? 0.00;
+        const treesVal = data.equivalents?.trees ?? data.treesEquivalent ?? 1;
+        const kmVal = data.equivalents?.kmDriven ?? Math.round((data.co2SavedKg || 0) * 5) ?? 0;
+        const eurBase = parseFloat(data.equivalents?.estimatedEur ?? data.estimatedB2bValEur ?? 3.00).toFixed(2);
 
         document.getElementById('equivTrees').innerText = `+${treesVal}`;
         document.getElementById('equivKm').innerText = `~${kmVal} km`;
-        document.getElementById('equivEur').innerText = `€${parseFloat(eurVal).toFixed(2)}`;
+        document.getElementById('equivEur').innerText = `€${eurBase}`;
 
-        // Formattazione confidenza AI e metadati Batch
-        const confidenceVal = data.confidenceScore || data.confidence || 0.95;
+        const confidenceVal = data.confidenceScore ?? data.confidence ?? 0.95;
         const confidencePercentage = (confidenceVal <= 1 ? confidenceVal * 100 : confidenceVal).toFixed(1);
         const batchId = data.batchInfo?.batchId || data.batchId || 'BATCH-2026-104';
 
         document.getElementById('resultDesc').innerHTML = `
           <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
             <span><strong>Confidenza AI:</strong> ${confidencePercentage}%</span>
-            <span><strong>Impatto CO₂:</strong> ${data.co2SavedKg} kg</span>
+            <span><strong>Impatto CO₂:</strong> ${data.co2SavedKg || 0} kg</span>
           </div>
           <div style="color: #9ca3af; font-size: 11px; border-top: 1px dashed #374151; padding-top: 6px; margin-top: 6px;">
-            <strong>Batch Aggregato:</strong> ${batchId} | <strong>Stato:</strong> Accreditato per riserva cashback
+            <strong>Riserva Garantita:</strong> €3.00 | <strong>Potenziale Pool B2B:</strong> fino a €15.00
           </div>
-          <p style="margin: 6px 0 0 0; color: #d1d5db; font-size: 12px;">${data.message || ''}</p>
+          <div style="color: #6b7280; font-size: 10px; margin-top: 4px;">
+            <strong>Batch Aggregato:</strong> ${batchId}
+          </div>
         `;
 
         const certLink = document.getElementById('certUrl');
