@@ -12,10 +12,8 @@
       --input-bg: #1f2937;
       --border-color: #374151;
       --accent-green: #10b981;
-      --accent-green-hover: #059669;
       --accent-blue: #38bdf8;
       --accent-yellow: #eab308;
-      --accent-purple: #a78bfa;
       --danger-red: #ef4444;
       --text-muted: #9ca3af;
     }
@@ -145,7 +143,6 @@
       cursor: pointer;
       transition: all 0.3s ease;
       margin-top: 10px;
-      box-shadow: none;
     }
 
     .btn-submit.ready {
@@ -164,7 +161,6 @@
     .btn-submit:disabled {
       background: #4b5563 !important;
       box-shadow: none !important;
-      border-color: transparent !important;
       cursor: not-allowed;
       animation: none !important;
     }
@@ -198,7 +194,6 @@
       border-radius: 20px;
       font-size: 11px;
       font-weight: bold;
-      display: inline-block;
     }
 
     .badge-tier1 {
@@ -209,7 +204,6 @@
       border-radius: 20px;
       font-size: 11px;
       font-weight: bold;
-      display: inline-block;
     }
 
     .reward-box {
@@ -225,12 +219,9 @@
       font-size: 34px;
       font-weight: 900;
       color: #34d399;
-      letter-spacing: 0.5px;
       margin: 4px 0;
-      text-shadow: 0 0 15px rgba(52, 211, 153, 0.35);
     }
 
-    /* Barra Progressiva Cashback */
     .progress-section {
       background: #111827;
       border: 1px solid #374151;
@@ -265,21 +256,6 @@
       box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
     }
 
-    .equiv-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin: 16px 0;
-      text-align: center;
-    }
-
-    .equiv-card {
-      background: #1f2937;
-      padding: 10px 4px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-
     .btn-secondary {
       display: block;
       width: 100%;
@@ -292,10 +268,8 @@
       font-size: 13px;
       font-weight: 600;
       box-sizing: border-box;
-      transition: background 0.2s;
       margin-top: 10px;
     }
-    .btn-secondary:hover { background: #4b5563; }
 
     .cert-link {
       display: block;
@@ -307,9 +281,7 @@
       padding: 10px;
       border: 1px solid var(--accent-green);
       border-radius: 8px;
-      transition: background 0.2s;
     }
-    .cert-link:hover { background: rgba(16, 185, 129, 0.1); }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
@@ -326,7 +298,7 @@
   </div>
 
   <p style="color: var(--text-muted); font-size: 13px; margin-top: 0; margin-bottom: 20px;">
-    L'AI Forensics verificherà la prova caricata per il registro dMRV e l'assegnazione del Tier di compensazione.
+    L'AI Forensics verificherà la prova caricata per il registro dMRV e il valore di cashback spettante.
   </p>
 
   <form id="addAssetForm" enctype="multipart/form-data">
@@ -347,8 +319,11 @@
     </div>
 
     <div class="form-group">
-      <label for="amountSpend">Importo Stimato o Speso (€)</label>
-      <input type="number" id="amountSpend" step="0.01" name="amountSpend" placeholder="100.00" required>
+      <label for="amountSpend">Valore Acquisto / Spesa del Bene (€)</label>
+      <input type="number" id="amountSpend" step="0.01" name="amountSpend" placeholder="Es. 500.00" required>
+      <span style="font-size: 11px; color: #9ca3af; display: block; margin-top: 4px;">
+        💡 Genera il <strong>10% di Cashback</strong> (es. €500 spesi = €50 di valore accumulato).
+      </span>
     </div>
 
     <div class="form-group">
@@ -379,13 +354,10 @@
 
     <div class="reward-box">
       <div style="font-size: 11px; color: #d1d5db; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">
-        Valore Totale Cumulato Beni Registrati
+        Valore Totale Credito Cashback Accumulato
       </div>
       <div id="rewardAmountHero" class="reward-amount-hero">€0.00</div>
       <div id="rewardSubtext" style="font-size: 12px; color: #34d399; font-weight: 700; margin-bottom: 6px;"></div>
-      <div id="pointsGained" style="color: #a78bfa; font-size: 13px; font-weight: 700;">
-        +0 Punti Eco ⚡
-      </div>
     </div>
 
     <!-- Barra Progressiva Riscatto Cashback -->
@@ -399,33 +371,17 @@
       </div>
     </div>
 
-    <button type="button" class="btn-submit ready" style="margin-top: 0; margin-bottom: 4px;" onclick="location.reload();">
-      ➕ CARICA SUBITO UN ALTRO BENE PER RISCUOTERE IL TUO CREDITO ➔
+    <button type="button" class="btn-submit ready" style="margin-top: 0; margin-bottom: 6px;" onclick="location.reload();">
+      ➕ CARICA SUBITO UN ALTRO BENE ➔
     </button>
     <div style="font-size: 11px; color: #9ca3af; text-align: center; margin-bottom: 16px; font-style: italic;">
       * Devi arrivare a 1.000,00 € di valore per poter avere il cashback.
     </div>
 
-    <div class="equiv-grid">
-      <div class="equiv-card">
-        <div id="equivTrees" style="font-size: 15px; font-weight: bold; margin-bottom: 4px; color: #34d399;">+0</div>
-        <div style="font-size: 10px; color: var(--text-muted);">Alberi Equivalenti</div>
-      </div>
-      <div class="equiv-card">
-        <div id="equivKm" style="font-size: 15px; font-weight: bold; margin-bottom: 4px; color: #38bdf8;">-0 km</div>
-        <div style="font-size: 10px; color: var(--text-muted);">Auto Evitata</div>
-      </div>
-      <div class="equiv-card">
-        <div id="equivKwh" style="font-size: 15px; font-weight: bold; margin-bottom: 4px; color: #eab308;">3.00 kWh</div>
-        <div style="font-size: 10px; color: var(--text-muted);">Risparmio Est. Rete</div>
-      </div>
-    </div>
-
     <div id="resultDesc"></div>
 
     <a id="certUrl" href="#" target="_blank" class="cert-link" style="margin: 12px 0;">📄 Visualizza Certificato dMRV Pubblico ➔</a>
-
-    <a href="/dashboard" class="btn-secondary">Vai alla Dashboard</a>
+    <a href="/dashboard" class="btn-secondary">Vai alla Dashboard Gestione Beni</a>
   </div>
 </div>
 
@@ -445,7 +401,6 @@
         imagePreview.src = e.target.result;
         previewContainer.style.display = 'block';
         filePromptText.innerText = `✅ Foto caricata: ${file.name}`;
-        
         dropZone.classList.add('has-file');
         submitBtn.classList.add('ready');
       };
@@ -460,26 +415,24 @@
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  function showError(message) {
+  function showError(msg) {
     const errorBox = document.getElementById('errorBox');
-    errorBox.innerText = message;
+    errorBox.innerText = msg;
     errorBox.style.display = 'block';
-  }
-
-  function hideError() {
-    document.getElementById('errorBox').style.display = 'none';
   }
 
   document.getElementById('addAssetForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    hideError();
+    document.getElementById('errorBox').style.display = 'none';
 
     const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail') || 'user@example.com';
-    
     const title = document.getElementById('title').value;
     const category = document.getElementById('category').value;
     const amountSpend = parseFloat(document.getElementById('amountSpend').value) || 0;
     const file = photoInput.files[0];
+
+    // CALCOLO EFFETTIVO CASHBACK 10%
+    const cashbackCredit = amountSpend * 0.10;
 
     if (!file) {
       showError("⚠️ Prima di procedere devi caricare la foto dello scontrino o prova.");
@@ -491,23 +444,12 @@
       submitBtn.disabled = true;
 
       const imageHash = await calculateImageHash(file);
-
-      const checkRes = await fetch(`/api/check-duplicate?hash=${encodeURIComponent(imageHash)}`);
-      if (checkRes.ok) {
-        const checkData = await checkRes.json();
-        if (checkData.isDuplicate) {
-          showError("⚠️ Prova fotografica già registrata: Questa immagine è presente nel sistema dMRV e non può essere riutilizzata.");
-          submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
-          submitBtn.disabled = false;
-          return;
-        }
-      }
-
       const formData = new FormData();
       formData.append('email', userEmail);
       formData.append('title', title);
       formData.append('category', category);
       formData.append('amountSpend', amountSpend);
+      formData.append('cashbackCredit', cashbackCredit);
       formData.append('imageHash', imageHash);
       formData.append('photo', file);
 
@@ -521,55 +463,31 @@
       if (res.ok && (data.success || data.id)) {
         document.getElementById('addAssetForm').style.display = 'none';
         document.getElementById('resultModal').style.display = 'block';
-        
-        const isB2b = (data.tier === 'B2B_INSTITUTIONAL');
-        const badgeEl = document.getElementById('tierBadge');
-        badgeEl.className = isB2b ? 'badge-tier2' : 'badge-tier1';
-        badgeEl.innerText = isB2b ? 'Tier 2 — B2B' : 'Tier 1 — Community';
 
-        // Somma cumulativa dell'importo dei beni registrati
-        let currentTotalValue = parseFloat(localStorage.getItem('dmrv_user_accumulated_total_value') || '0');
-        currentTotalValue += amountSpend;
-        localStorage.setItem('dmrv_user_accumulated_total_value', currentTotalValue.toFixed(2));
+        // Salvataggio lista beni locale (per consentire rimozione futura)
+        let assets = JSON.parse(localStorage.getItem('dmrv_user_assets_list') || '[]');
+        const newAsset = {
+          id: data.id || 'ASSET-' + Date.now(),
+          title: title,
+          spend: amountSpend,
+          credit: cashbackCredit,
+          date: new Date().toLocaleDateString()
+        };
+        assets.push(newAsset);
+        localStorage.setItem('dmrv_user_assets_list', JSON.stringify(assets));
 
-        document.getElementById('rewardAmountHero').innerText = `€${currentTotalValue.toFixed(2)}`;
-        document.getElementById('rewardSubtext').innerText = `(+€${amountSpend.toFixed(2)} aggiunti con questa azione)`;
+        // Aggiornamento Credito Cumulativo Totale (Somma dei 10%)
+        let currentAccumulatedCredit = assets.reduce((sum, item) => sum + item.credit, 0);
+        localStorage.setItem('dmrv_user_accumulated_total_value', currentAccumulatedCredit.toFixed(2));
 
-        // Calcolo e aggiornamento della Barra Progressiva (Soglia 1.000 €)
+        document.getElementById('rewardAmountHero').innerText = `€${currentAccumulatedCredit.toFixed(2)}`;
+        document.getElementById('rewardSubtext').innerText = `(+€${cashbackCredit.toFixed(2)} dal 10% del bene di €${amountSpend.toFixed(2)})`;
+
+        // Barra Progressiva verso 1.000 €
         const targetThreshold = 1000.0;
-        const progressPct = Math.min((currentTotalValue / targetThreshold) * 100, 100);
+        const progressPct = Math.min((currentAccumulatedCredit / targetThreshold) * 100, 100);
         document.getElementById('progressBarFill').style.width = `${progressPct}%`;
-        document.getElementById('progressText').innerText = `€${currentTotalValue.toFixed(2)} / €1.000,00 (${progressPct.toFixed(1)}%)`;
-
-        // Gestione Punti Eco
-        const addedPts = data.creditsAdded || 500;
-        let accumulatedPoints = parseInt(localStorage.getItem('dmrv_user_accumulated_points') || '0', 10) + addedPts;
-        localStorage.setItem('dmrv_user_accumulated_points', accumulatedPoints);
-        document.getElementById('pointsGained').innerText = `+${addedPts} Punti Eco ⚡ (Totale: ${accumulatedPoints})`;
-
-        // Conteggio Beni
-        let assetCount = parseInt(localStorage.getItem('dmrv_user_asset_count') || '0', 10) + 1;
-        localStorage.setItem('dmrv_user_asset_count', assetCount);
-
-        const treesVal = data.equivalents?.trees ?? data.treesEquivalent ?? Math.round((data.co2SavedKg || 120) / 20);
-        const kmVal = data.equivalents?.kmDriven ?? Math.round((data.co2SavedKg || 120) * 5);
-
-        document.getElementById('equivTrees').innerText = `+${treesVal}`;
-        document.getElementById('equivKm').innerText = `-${kmVal} km`;
-        document.getElementById('equivKwh').innerText = `3.00 kWh`;
-
-        const confidenceVal = data.confidenceScore ?? data.confidence ?? 0.85;
-        const confidencePercentage = (confidenceVal <= 1 ? confidenceVal * 100 : confidenceVal).toFixed(1);
-        const batchId = data.batchInfo?.batchId || data.batchId || 'BATCH-2026-104';
-
-        document.getElementById('resultDesc').innerHTML = `
-          <div style="color: #9ca3af; font-size: 11px; border-top: 1px dashed #374151; padding-top: 8px; margin-top: 8px;">
-            <strong>Confidenza AI:</strong> ${confidencePercentage}% | <strong>Impatto CO₂:</strong> ${data.co2SavedKg || 0} kg
-          </div>
-          <div style="color: #6b7280; font-size: 10px; margin-top: 4px;">
-            <strong>Riserva Tecnica Rete:</strong> Valore equivalente stimato in €3.00 | <strong>Batch Aggregato:</strong> ${batchId}
-          </div>
-        `;
+        document.getElementById('progressText').innerText = `€${currentAccumulatedCredit.toFixed(2)} / €1.000,00 (${progressPct.toFixed(1)}%)`;
 
         const certLink = document.getElementById('certUrl');
         certLink.href = `/verify/${data.id || 1}`;
@@ -582,7 +500,7 @@
 
     } catch (err) {
       console.error(err);
-      showError("Errore di connessione al server durante l'invio della verifica dMRV.");
+      showError("Errore di connessione durante l'invio.");
       submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
       submitBtn.disabled = false;
     }

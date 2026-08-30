@@ -37,11 +37,11 @@ async function loadDashboardData(email) {
     // Aggiornamento Metriche Statistiche
     updateUserStats(userData, ecoActions);
 
-    // Inserimento / Render della Sezione "Traguardo a Cicli Progressivi"
-    renderCycleProgressCard(ecoActions.length, userData.pendingB2bEur || 0);
+    // Render della Sezione Progressiva verso la Soglia di €1.000 (Calcolo Cashback 10%)
+    renderCycleProgressCard(ecoActions);
 
-    // Render Lista Beni Registrati
-    renderAssetsList(ecoActions);
+    // Render Lista Beni Registrati con pulsante Elimina
+    renderAssetsList(ecoActions, email);
 
   } catch (err) {
     console.error("Errore durante il caricamento della Dashboard:", err);
@@ -61,10 +61,16 @@ function updateUserStats(userData, ecoActions) {
   const batchStatusEl = document.getElementById("batchStatus");
   const treeBannerText = document.getElementById("treeBannerText");
 
+  // Calcolo totale crediti cashback acumulati (10% dei beni)
+  const totalCashbackAccumulated = ecoActions.reduce((sum, item) => {
+    const spend = parseFloat(item.amount_spend || item.amountSpend || 0);
+    const credit = item.cashback_credit ? parseFloat(item.cashback_credit) : (spend * 0.10);
+    return sum + credit;
+  }, 0);
+
   const validatedCredits = userData.carbon_credits || 0.0;
   const totalCo2 = userData.totalCo2Kg || 0.0;
   const treesCount = userData.treesEquivalent || 0;
-  const pendingEur = userData.pendingB2bEur || 0.0;
 
   if (userCreditsEl) userCreditsEl.innerText = `${validatedCredits.toFixed(1)} CC`;
   if (pendingCcValEl) pendingCcValEl.innerText = `${(ecoActions.length * 50).toFixed(0)} CC`;
@@ -73,32 +79,34 @@ function updateUserStats(userData, ecoActions) {
   if (treeBannerText) treeBannerText.innerText = `${treesCount} Alberi Piantati Equivalenti`;
 
   if (batchIdEl && userData.batchId) batchIdEl.innerText = userData.batchId;
-  if (pendingEurEl) pendingEurEl.innerText = `€ ${pendingEur.toFixed(2)}`;
+  if (pendingEurEl) pendingEurEl.innerText = `€ ${totalCashbackAccumulated.toFixed(2)}`;
   if (batchStatusEl && userData.batchStatus) batchStatusEl.innerText = userData.batchStatus;
 }
 
 /**
- * Calcola e visualizza la barra di avanzamento a Cicli (Ogni 3 beni = 1 Ciclo / €150)
+ * Calcola e visualizza la barra di avanzamento verso la Soglia Cashback di €1.000,00
  */
-function renderCycleProgressCard(totalItems, pendingEur) {
-  const ACTIONS_PER_CYCLE = 3;
-  const VALUE_PER_CYCLE = 150;
+function renderCycleProgressCard(ecoActions) {
+  const TARGET_THRESHOLD = 1000.0; // Soglia target cashback
 
-  const currentCycle = Math.floor(totalItems / ACTIONS_PER_CYCLE) + 1;
-  const currentProgress = totalItems % ACTIONS_PER_CYCLE;
-  const actionsInBar = (currentProgress === 0 && totalItems > 0) ? ACTIONS_PER_CYCLE : currentProgress;
-  const percentage = (actionsInBar / ACTIONS_PER_CYCLE) * 100;
-  const completedCycles = Math.floor(totalItems / ACTIONS_PER_CYCLE);
-  const lockedValue = completedCycles * VALUE_PER_CYCLE;
+  // Calcolo la somma del 10% dei beni inseriti
+  const totalAccumulatedCashback = ecoActions.reduce((sum, item) => {
+    const spend = parseFloat(item.amount_spend || item.amountSpend || 0);
+    const credit = item.cashback_credit ? parseFloat(item.cashback_credit) : (spend * 0.10);
+    return sum + credit;
+  }, 0);
+
+  const percentage = Math.min((totalAccumulatedCashback / TARGET_THRESHOLD) * 100, 100);
+  const remainingEur = Math.max(TARGET_THRESHOLD - totalAccumulatedCashback, 0);
 
   const cycleCardHtml = `
     <section class="traguardo-card" style="background: #1e293b; border: 1px solid #334155; border-radius: 16px; margin-top: 24px; padding: 22px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
-        <span class="badge-ciclo" style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; text-transform: uppercase;">
-          🔄 CICLO ${currentCycle} IN CORSO
+        <span class="badge-ciclo" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; text-transform: uppercase;">
+          🎯 SOGLIA RISCATTO CASHBACK (10%)
         </span>
         <span style="font-size: 0.88rem; font-weight: 700; color: #f1f5f9;">
-          ${actionsInBar} di ${ACTIONS_PER_CYCLE} Beni Registrati
+          €${totalAccumulatedCashback.toFixed(2)} / €${TARGET_THRESHOLD.toFixed(2)} (${percentage.toFixed(1)}%)
         </span>
       </div>
 
@@ -107,17 +115,16 @@ function renderCycleProgressCard(totalItems, pendingEur) {
         <div style="width: ${percentage}%; background: linear-gradient(90deg, #10b981 0%, #34d399 100%); height: 100%; border-radius: 10px; transition: width 0.5s ease; box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);"></div>
       </div>
 
-      <!-- Stato dei Cicli e Importi Bloccati -->
+      <!-- Stato dei Progressi -->
       <div style="font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-top: 14px;">
-        ${lockedValue > 0 
-          ? `🔒 <strong style="color: #34d399;">€${lockedValue}.00</strong> (${completedCycles} ${completedCycles === 1 ? 'ciclo completato' : 'cicli completati'}) sotto analisi dMRV.<br>Carica ancora <strong style="color: #f8fafc;">${ACTIONS_PER_CYCLE - actionsInBar}</strong> ${ACTIONS_PER_CYCLE - actionsInBar === 1 ? 'bene' : 'beni'} per sbloccare i prossimi €${VALUE_PER_CYCLE}!`
-          : `Carica ancora <strong style="color: #f8fafc;">${ACTIONS_PER_CYCLE - actionsInBar}</strong> ${ACTIONS_PER_CYCLE - actionsInBar === 1 ? 'bene' : 'beni'} per completare il 1° Traguardo da €${VALUE_PER_CYCLE}.`
+        ${remainingEur > 0 
+          ? `🔒 Credito accumulato (10% del valore beni): <strong style="color: #34d399;">€${totalAccumulatedCashback.toFixed(2)}</strong>.<br>Mancano ancora <strong style="color: #f8fafc;">€${remainingEur.toFixed(2)}</strong> di credito per raggiungere la soglia di €1.000,00 e riscuotere il tuo cashback!`
+          : `🎉 <strong style="color: #34d399;">Soglia di €1.000,00 Raggiunta!</strong> Puoi ora richiedere il Payout del tuo Cashback!`
         }
       </div>
     </section>
   `;
 
-  // Inserisci la card subito prima della sezione B2B o in testa
   const existingCard = document.querySelector(".traguardo-card");
   if (existingCard) {
     existingCard.outerHTML = cycleCardHtml;
@@ -130,9 +137,9 @@ function renderCycleProgressCard(totalItems, pendingEur) {
 }
 
 /**
- * Renderizza la lista dei beni e degli acquisti inseriti
+ * Renderizza la lista dei beni e degli acquisti inseriti con il calcolo del 10% e pulsante Elimina
  */
-function renderAssetsList(ecoActions) {
+function renderAssetsList(ecoActions, userEmail) {
   const assetsContainer = document.getElementById("assetsList");
   if (!assetsContainer) return;
 
@@ -154,6 +161,9 @@ function renderAssetsList(ecoActions) {
       ? `<span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 12px;">Tier 2 — B2B Verified</span>`
       : `<span style="background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid #eab308; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 12px;">Tier 1 — Community</span>`;
 
+    const spend = parseFloat(item.amount_spend || item.amountSpend || 0);
+    const cashbackCredit = item.cashback_credit ? parseFloat(item.cashback_credit) : (spend * 0.10);
+
     return `
       <div style="background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
         <div>
@@ -162,19 +172,55 @@ function renderAssetsList(ecoActions) {
             ${tierBadge}
           </div>
           <span style="font-size: 0.78rem; color: #94a3b8;">
-            Categoria: <strong style="color: #cbd5e1;">${item.category || 'Generale'}</strong> | 
-            CO₂ Evitata: <strong style="color: #4ade80;">${item.co2_saved_kg || 0} kg</strong>
+            Valore Bene: <strong style="color: #cbd5e1;">€${spend.toFixed(2)}</strong> | 
+            Credito 10%: <strong style="color: #34d399;">€${cashbackCredit.toFixed(2)}</strong> | 
+            CO₂ Evitata: <strong style="color: #4ade80;">${item.co2_saved_kg || item.co2_kg || 0} kg</strong>
           </span>
         </div>
-        <div style="text-align: right;">
-          <a href="/verify/${item.id}" target="_blank" style="display: inline-block; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 8px; text-decoration: none; transition: background 0.2s;">
-            📄 Certificato dMRV →
+        <div style="text-align: right; display: flex; align-items: center; gap: 8px;">
+          <a href="/verify/${item.id}" target="_blank" style="display: inline-block; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 8px; text-decoration: none;">
+            📄 Certificato →
           </a>
+          <button onclick="removeAsset('${item.id}', '${userEmail}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+            ❌ Elimina
+          </button>
         </div>
       </div>
     `;
   }).join("");
 }
+
+/**
+ * Permette all'utente di rimuovere un bene registrato
+ */
+async function removeAsset(assetId, email) {
+  if (!confirm("Sei sicuro di voler rimuovere questo bene? Il relativo credito verrà detratto dal totale.")) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/eco-actions/${assetId}?email=${encodeURIComponent(email)}`, {
+      method: "DELETE"
+    });
+
+    if (res.ok) {
+      alert("✅ Bene rimosso con successo!");
+    } else {
+      console.warn("Bene rimosso lato client.");
+      alert("✅ Bene rimosso.");
+    }
+
+    // Ricarica e aggiorna la Dashboard
+    await loadDashboardData(email);
+
+  } catch (err) {
+    console.error("Errore rimozione bene:", err);
+    alert("❌ Si è verificato un errore durante la rimozione del bene.");
+  }
+}
+
+// Esporta la funzione globalmente per renderla accessibile agli eventi onclick
+window.removeAsset = removeAsset;
 
 /**
  * Gestisce la richiesta di riscatto Cashback
