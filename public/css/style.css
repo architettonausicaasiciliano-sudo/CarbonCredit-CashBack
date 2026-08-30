@@ -64,12 +64,14 @@ body {
   letter-spacing: -0.5px;
 }
 
-/* Testo evidenziato in Rosso Scarlatto della Landing Page */
-.hero h1 span {
-  color: #E60023;
-  background: linear-gradient(135deg, #FF2E4C 0%, #E60023 50%, #990014 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Testo evidenziato in Rosso Scarlatto della Landing Page (RISOLTO: Senza ombre scure per massima visibilità) */
+.hero h1 span, .cash-highlight, .highlight-red {
+  color: #FF3B30 !important;
+  background: none !important;
+  -webkit-text-fill-color: #FF3B30 !important;
+  text-shadow: none !important;
+  font-weight: 900;
+  letter-spacing: 0.5px;
 }
 
 .hero p {
@@ -116,7 +118,7 @@ body {
 }
 
 /* Regola generica per tutti i pulsanti rossi nell'applicazione */
-.btn-red, button.btn-red, a.btn-red, .btn-submit, #btnRedeem {
+.btn-red, button.btn-red, a.btn-red, .btn-submit, #btnRedeem, .btn-primary-red {
   background: linear-gradient(180deg, #E60023 0%, #C4001A 50%, #990014 100%) !important;
   color: #ffffff !important;
   border: 1.5px solid #FF2E4C !important;
@@ -126,7 +128,7 @@ body {
   transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
 }
 
-.btn-red:hover, button.btn-red:hover, a.btn-red:hover, .btn-submit:hover, #btnRedeem:hover {
+.btn-red:hover, button.btn-red:hover, a.btn-red:hover, .btn-submit:hover, #btnRedeem:hover, .btn-primary-red:hover {
   transform: scale(1.02);
   background: linear-gradient(180deg, #FF1A3C 0%, #B8001C 100%) !important;
   box-shadow: 0 0 30px rgba(230, 0, 35, 0.8) !important;
@@ -350,4 +352,43 @@ body {
 
 .status-info strong {
   color: #34d399;
+}
+
+/* --- CARD PROGRESSO RISCATTO & SOGLIA 1.000€ (WHOLESALE BATCH POOLS) --- */
+.payout-threshold-card {
+  background: #121e28;
+  border: 1px solid #1e3245;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.payout-progress-bg {
+  width: 100%;
+  background-color: #0a131c;
+  border-radius: 10px;
+  height: 12px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.payout-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00e676 0%, #00b0ff 100%);
+  border-radius: 10px;
+  transition: width 0.5s ease-in-out;
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.4);
+}
+
+.payout-note {
+  font-size: 10.5px;
+  color: #7a8b9e;
+  margin-top: 10px;
+  line-height: 1.45;
+}
+
+.payout-note strong {
+  color: #cbd5e1;
 }

@@ -27,7 +27,7 @@ db.serialize(() => {
     )
   `);
 
-  // 2. Aggiunta sicura delle colonne (se non esistono già)
+  // 2. Aggiunta sicura delle colonne a eco_actions (se non esistono già)
   db.run("ALTER TABLE eco_actions ADD COLUMN receipt_hash TEXT", (err) => {
     if (!err) console.log("✅ Colonna 'receipt_hash' aggiunta a eco_actions.");
   });
@@ -194,7 +194,7 @@ app.use("/protected", express.static(path.join(__dirname, "protected")));
 app.use("/uploads", express.static(uploadDir));
 
 /* =====================================================
-   STRIPE WEBHOOK (MUST BE BEFORE express.json())
+   STRIPE WEBHOOK (DEVE ESSERE PRIMA DI express.json())
 ===================================================== */
 app.post(
   "/webhook",

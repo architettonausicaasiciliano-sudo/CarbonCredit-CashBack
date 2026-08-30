@@ -12,33 +12,44 @@ export async function processTier2Action(userId, co2Kg, imageHash, auditResult) 
         const batchCode = `BATCH-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`;
         db.run(
           "INSERT INTO credit_batches (id, batch_code, target_co2_kg) VALUES (?, ?, 50000.0)",
-          [batchId, batchCode]
+          [batchId, batchCode],
+          (insertErr) => {
+            if (insertErr) console.error("Errore creazione nuovo batch:", insertErr);
+          }
         );
       } else {
         batchId = currentBatch.id;
       }
 
       const actionId = 'ACT-' + crypto.randomUUID();
-      db.run(`
-        INSERT INTO eco_actions (id, user_id, image_hash, tier, co2_kg, confidence, batch_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `, [actionId, userId, imageHash, auditResult.tier, co2Kg, auditResult.confidence_score, batchId]);
+      db.run(
+        `INSERT INTO eco_actions (id, user_id, image_hash, tier, co2_kg, confidence, batch_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [actionId, userId, imageHash, auditResult.tier, co2Kg, auditResult.confidence_score, batchId],
+        (actionErr) => {
+          if (actionErr) console.error("Errore inserimento eco_action:", actionErr);
+        }
+      );
 
-      db.run(`
-        UPDATE credit_batches 
-        SET total_co2_kg = total_co2_kg + ? 
-        WHERE id = ?
-      `, [co2Kg, batchId], function(err) {
-        if (err) return reject(err);
+      db.run(
+        `UPDATE credit_batches 
+         SET total_co2_kg = total_co2_kg + ? 
+         WHERE id = ?`,
+        [co2Kg, batchId],
+        function (err) {
+          if (err) return reject(err);
 
-        db.get("SELECT * FROM credit_batches WHERE id = ?", [batchId], (err, updatedBatch) => {
-          if (updatedBatch && updatedBatch.total_co2_kg >= updatedBatch.target_co2_kg) {
-            db.run("UPDATE credit_batches SET status = 'LOCKED' WHERE id = ?", [batchId]);
-            console.log(`🚀 BATCH ${batchId} COMPLETATO E BLOCCATO PER VENDITA B2B!`);
-          }
-          resolve(updatedBatch);
-        });
-      });
+          db.get("SELECT * FROM credit_batches WHERE id = ?", [batchId], (err, updatedBatch) => {
+            if (err) return reject(err);
+
+            if (updatedBatch && updatedBatch.total_co2_kg >= updatedBatch.target_co2_kg) {
+              db.run("UPDATE credit_batches SET status = 'LOCKED' WHERE id = ?", [batchId]);
+              console.log(`🚀 BATCH ${batchId} COMPLETATO E BLOCCATO PER VENDITA B2B!`);
+            }
+            resolve(updatedBatch);
+          });
+        }
+      );
     });
   });
 }
