@@ -141,7 +141,7 @@
       border: 1px solid #4b5563;
       border-radius: 10px;
       font-weight: bold;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
       transition: all 0.3s ease;
       margin-top: 10px;
@@ -228,6 +228,41 @@
       letter-spacing: 0.5px;
       margin: 4px 0;
       text-shadow: 0 0 15px rgba(52, 211, 153, 0.35);
+    }
+
+    /* Barra Progressiva Cashback */
+    .progress-section {
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      background: #1f2937;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #374151;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+      width: 0%;
+      transition: width 0.6s ease-in-out;
+      box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
     }
 
     .equiv-grid {
@@ -344,7 +379,7 @@
 
     <div class="reward-box">
       <div style="font-size: 11px; color: #d1d5db; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">
-        Valore Generato / Bonus Maturato Accumulato
+        Valore Totale Cumulato Beni Registrati
       </div>
       <div id="rewardAmountHero" class="reward-amount-hero">€0.00</div>
       <div id="rewardSubtext" style="font-size: 12px; color: #34d399; font-weight: 700; margin-bottom: 6px;"></div>
@@ -353,9 +388,23 @@
       </div>
     </div>
 
-    <button type="button" class="btn-submit ready" style="margin-top: 0; margin-bottom: 16px;" onclick="location.reload();">
-      ➕ CARICA SUBITO UN ALTRO BENE ➔
+    <!-- Barra Progressiva Riscatto Cashback -->
+    <div class="progress-section">
+      <div class="progress-header">
+        <span>PROGRESSO SOGLIA CASHBACK</span>
+        <span id="progressText">€0,00 / €1.000,00 (0%)</span>
+      </div>
+      <div class="progress-track">
+        <div id="progressBarFill" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <button type="button" class="btn-submit ready" style="margin-top: 0; margin-bottom: 4px;" onclick="location.reload();">
+      ➕ CARICA SUBITO UN ALTRO BENE PER RISCUOTERE IL TUO CREDITO ➔
     </button>
+    <div style="font-size: 11px; color: #9ca3af; text-align: center; margin-bottom: 16px; font-style: italic;">
+      * Devi arrivare a 1.000,00 € di valore per poter avere il cashback.
+    </div>
 
     <div class="equiv-grid">
       <div class="equiv-card">
@@ -478,20 +527,27 @@
         badgeEl.className = isB2b ? 'badge-tier2' : 'badge-tier1';
         badgeEl.innerText = isB2b ? 'Tier 2 — B2B' : 'Tier 1 — Community';
 
-        const currentBonus = data.bonusAmount || (amountSpend * 0.10);
-        let accumulatedTotal = parseFloat(localStorage.getItem('dmrv_user_accumulated_bonus') || '0');
-        
-        accumulatedTotal += currentBonus;
-        localStorage.setItem('dmrv_user_accumulated_bonus', accumulatedTotal.toFixed(2));
+        // Somma cumulativa dell'importo dei beni registrati
+        let currentTotalValue = parseFloat(localStorage.getItem('dmrv_user_accumulated_total_value') || '0');
+        currentTotalValue += amountSpend;
+        localStorage.setItem('dmrv_user_accumulated_total_value', currentTotalValue.toFixed(2));
 
-        document.getElementById('rewardAmountHero').innerText = `€${accumulatedTotal.toFixed(2)}`;
-        document.getElementById('rewardSubtext').innerText = `(+€${currentBonus.toFixed(2)} aggiunti ora con questa azione)`;
+        document.getElementById('rewardAmountHero').innerText = `€${currentTotalValue.toFixed(2)}`;
+        document.getElementById('rewardSubtext').innerText = `(+€${amountSpend.toFixed(2)} aggiunti con questa azione)`;
 
+        // Calcolo e aggiornamento della Barra Progressiva (Soglia 1.000 €)
+        const targetThreshold = 1000.0;
+        const progressPct = Math.min((currentTotalValue / targetThreshold) * 100, 100);
+        document.getElementById('progressBarFill').style.width = `${progressPct}%`;
+        document.getElementById('progressText').innerText = `€${currentTotalValue.toFixed(2)} / €1.000,00 (${progressPct.toFixed(1)}%)`;
+
+        // Gestione Punti Eco
         const addedPts = data.creditsAdded || 500;
         let accumulatedPoints = parseInt(localStorage.getItem('dmrv_user_accumulated_points') || '0', 10) + addedPts;
         localStorage.setItem('dmrv_user_accumulated_points', accumulatedPoints);
         document.getElementById('pointsGained').innerText = `+${addedPts} Punti Eco ⚡ (Totale: ${accumulatedPoints})`;
 
+        // Conteggio Beni
         let assetCount = parseInt(localStorage.getItem('dmrv_user_asset_count') || '0', 10) + 1;
         localStorage.setItem('dmrv_user_asset_count', assetCount);
 
