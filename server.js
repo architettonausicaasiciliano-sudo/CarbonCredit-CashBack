@@ -659,6 +659,35 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
 });
 
 /* =====================================================
+   ELIMINAZIONE AZIONE ECO / BENE REGISTRATO
+===================================================== */
+app.delete("/api/eco-actions/:id", (req, res) => {
+  const { id } = req.params;
+  const email = req.query.email;
+
+  if (!id || !email) {
+    return res.status(400).json({ error: "missing_fields" });
+  }
+
+  db.get("SELECT * FROM eco_actions WHERE id = ? AND user_email = ?", [id, email], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) {
+      return res.status(404).json({ error: "not_found", message: "Azione non trovata o non autorizzata." });
+    }
+
+    db.run("DELETE FROM eco_actions WHERE id = ?", [id], (delErr) => {
+      if (delErr) return res.status(500).json({ error: delErr.message });
+
+      // Sottrae i crediti accumulati dall'utente per questa azione
+      const creditsToDeduct = row.credits_earned || 0;
+      db.run("UPDATE users SET carbon_credits = MAX(0, carbon_credits - ?) WHERE email = ?", [creditsToDeduct, email]);
+
+      res.json({ success: true, message: "Bene rimosso con successo." });
+    });
+  });
+});
+
+/* =====================================================
    TRANSAZIONI & CASHBACK
 ===================================================== */
 app.get("/api/transactions", (req, res) => {
@@ -721,7 +750,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use((req, res) => {
-  res.status(404).json({ error: "not_found", message: "La rotta richiesta non esiste." });
+  res.status(404).json({ error: "not_found", message: "La rotta richiesta non existe." });
 });
 
 /* =====================================================
