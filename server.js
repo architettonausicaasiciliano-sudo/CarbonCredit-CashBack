@@ -1,6 +1,6 @@
 /* =====================================================
    SERVER EXPRESS - CARBON CREDIT & DMRV PLATFORM
-   FILE INTEGRALE ED UNIFICATO
+   FILE UNIFICATO COMPLETO CON SICUREZZA COOKIE HTTP-ONLY
    ===================================================== */
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
@@ -9,6 +9,7 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder");
@@ -27,9 +28,12 @@ try {
 const app = express();
 
 /* =====================================================
-   CONFIGURAZIONE MIDDLEWARE & STRIPE WEBHOOK
+   CONFIGURAZIONE MIDDLEWARE GENERALI & STRIPE WEBHOOK
    ===================================================== */
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true // Consente il passaggio dei cookie HTTP-Only nelle chiamate CORS
+}));
 
 // Webhook Stripe: richiede raw body prima di qualsiasi parser JSON
 app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
@@ -96,6 +100,7 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 /* =====================================================
    CARTELLA UPLOADS & CONFIGURAZIONE MULTER
@@ -143,7 +148,6 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 db.serialize(() => {
-  // Tabella Utenti
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -155,7 +159,6 @@ db.serialize(() => {
     )
   `);
 
-  // Tabella Azioni Eco (dMRV System)
   db.run(`
     CREATE TABLE IF NOT EXISTS eco_actions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -176,7 +179,6 @@ db.serialize(() => {
     )
   `);
 
-  // Tabella Data Pools B2B per clustering e aggregazione
   db.run(`
     CREATE TABLE IF NOT EXISTS data_pools (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -189,7 +191,6 @@ db.serialize(() => {
     )
   `);
 
-  // Tabella Transazioni & Payout Cashback
   db.run(`
     CREATE TABLE IF NOT EXISTS transactions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -203,7 +204,6 @@ db.serialize(() => {
     )
   `);
 
-  // Indici per velocizzare ricerche forensi e prevenzione duplicati
   db.run(`CREATE INDEX IF NOT EXISTS idx_eco_actions_email ON eco_actions(user_email)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_eco_actions_image_hash ON eco_actions(image_hash)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_eco_actions_receipt_hash ON eco_actions(receipt_hash)`);
@@ -213,9 +213,9 @@ db.serialize(() => {
 /* =====================================================
    COSTANTI DI DOMINIO & PARAMETRI ECONOMIC
    ===================================================== */
-const CO2_PRICE_PER_TON_EUR = 25.0; // Prezzo mercato B2B per tonnellata
-const KG_CO2_PER_TREE = 20.0;       // Assorbimento medio albero/anno
-const BATCH_THRESHOLD_TON = 1000;   // Soglia di liquidazione batch (1.000 Ton)
+const CO2_PRICE_PER_TON_EUR = 25.0; 
+const KG_CO2_PER_TREE = 20.0;       
+const BATCH_THRESHOLD_TON = 1000;   
 const CURRENT_BATCH_ID = "BATCH-2026-08";
 
 /* =====================================================
@@ -365,7 +365,24 @@ async function verifyEcoAction(imageBuffer, mimeType, title) {
 }
 
 /* =====================================================
-   ROTTE AUDIT PUBBLICO dMRV, ADMIN & MONITORAGGIO POOL
+   MIDDLEWARE DI AUTENTICAZIONE COOKIE (HTTP-ONLY)
+   ===================================================== */
+const requireAuth = (req, res, next) => {
+  const userSession = req.cookies.user_session;
+
+  if (!userSession) {
+    return res.status(401).json({ 
+      error: "UNAUTHORIZED", 
+      message: "Sessione non valida o scaduta. Effettua l'accesso per proseguire." 
+    });
+  }
+
+  req.userEmail = userSession.toLowerCase().trim();
+  next();
+};
+
+/* =====================================================
+   ROTTE PUBBLICHE AUDIT, VERIFICA & STRIPE CHECKOUT
    ===================================================== */
 
 // Portale Pubblico di Verifica Certificato ESG / dMRV via Hash SHA-256
@@ -376,12 +393,8 @@ app.get("/verify/:certId", (req, res) => {
     "SELECT * FROM eco_actions WHERE ticket_id = ? OR id = ?",
     [certId, certId],
     (err, row) => {
-      if (err) {
-        return res.status(500).send("<h1>500 Errore del server durante l'audit.</h1>");
-      }
-      if (!row) {
-        return res.status(404).send("<h1>404 Certificato dMRV non trovato o non registrato a ledger.</h1>");
-      }
+      if (err) return res.status(500).send("<h1>500 Errore del server durante l'audit.</h1>");
+      if (!row) return res.status(404).send("<h1>404 Certificato dMRV non trovato o non registrato a ledger.</h1>");
 
       res.send(`
         <!DOCTYPE html>
@@ -447,63 +460,6 @@ app.get("/api/check-thousand-threshold", (req, res) => {
   );
 });
 
-// Admin API: Elenco Data Pools B2B
-app.get("/api/admin/pools", (req, res) => {
-  db.all("SELECT * FROM data_pools ORDER BY id DESC", [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ pools: rows || [] });
-  });
-});
-
-// Admin API: Sigilla Data Pool B2B per esportazione audit
-app.post("/api/admin/seal-pool", (req, res) => {
-  const { poolId } = req.body;
-  if (!poolId) return res.status(400).json({ error: "missing_pool_id" });
-
-  db.run(
-    "UPDATE data_pools SET status = 'sealed', sealed_at = CURRENT_TIMESTAMP WHERE id = ?",
-    [poolId],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({
-        success: true,
-        message: `Pool B2B #${poolId} sigillato con successo. Nessun'altra azione potrà essere inserita in questo batch.`,
-      });
-    }
-  );
-});
-
-// Admin API: Esportazione Dossier dMRV per Audit Istituzionale B2B
-app.get("/api/admin/export-pool-dossier/:poolId", (req, res) => {
-  const { poolId } = req.params;
-
-  db.get("SELECT * FROM data_pools WHERE id = ?", [poolId], (err, pool) => {
-    if (err || !pool) return res.status(404).json({ error: "pool_not_found" });
-
-    db.all(
-      "SELECT id, user_email, title, category, co2_saved_kg, image_hash, receipt_hash, tier, confidence_score, created_at FROM eco_actions WHERE pool_id = ?",
-      [poolId],
-      (aErr, actions) => {
-        if (aErr) return res.status(500).json({ error: aErr.message });
-
-        res.json({
-          dossierHeader: {
-            poolId: pool.id,
-            category: pool.category,
-            totalCo2Kg: pool.total_co2_kg,
-            totalCo2Ton: pool.total_co2_kg / 1000,
-            estimatedB2bValueEur: (pool.total_co2_kg / 1000) * CO2_PRICE_PER_TON_EUR,
-            status: pool.status,
-            sealedAt: pool.sealed_at,
-            generatedAt: new Date().toISOString()
-          },
-          verifiedActions: actions || []
-        });
-      }
-    );
-  });
-});
-
 // Verificatore Preventivo Duplicati Scontrino
 app.post("/api/check-duplicate-receipt", (req, res) => {
   const { merchant, dateTime, amount } = req.body;
@@ -521,10 +477,6 @@ app.post("/api/check-duplicate-receipt", (req, res) => {
   });
 });
 
-/* =====================================================
-   ROTTE UTENTE & PROFILAZIONE
-   ===================================================== */
-
 // Registrazione o Login Automatico Utente
 app.post("/api/users/register", (req, res) => {
   const { email, stripeCustomerId } = req.body;
@@ -536,42 +488,175 @@ app.post("/api/users/register", (req, res) => {
   const cleanEmail = email.toLowerCase().trim();
 
   db.get("SELECT * FROM users WHERE email = ?", [cleanEmail], (err, row) => {
-    if (err) {
-      console.error("Errore lettura utente:", err.message);
-      return res.status(500).json({ error: "Errore interno del server." });
-    }
+    if (err) return res.status(500).json({ error: "Errore interno del server." });
 
     if (row) {
-      return res.json({
-        message: "Utente già registrato.",
-        user: row,
-      });
+      return res.json({ message: "Utente già registrato.", user: row });
     }
 
     db.run(
       "INSERT INTO users (email, premium, carbon_credits, stripe_customer_id) VALUES (?, 0, 0.0, ?)",
       [cleanEmail, stripeCustomerId || null],
       function (iErr) {
-        if (iErr) {
-          console.error("Errore creazione nuovo utente:", iErr.message);
-          return res.status(500).json({ error: "Impossibile registrare l'utente." });
-        }
+        if (iErr) return res.status(500).json({ error: "Impossibile registrare l'utente." });
 
         db.get("SELECT * FROM users WHERE id = ?", [this.lastID], (fErr, newUser) => {
           if (fErr) return res.status(500).json({ error: "Errore recupero nuovo utente." });
-          res.status(201).json({
-            message: "Utente registrato con successo.",
-            user: newUser,
-          });
+          res.status(201).json({ message: "Utente registrato con successo.", user: newUser });
         });
       }
     );
   });
 });
 
+/* =====================================================
+   ROTTE STRIPE PAYMENT ENGINE
+   ===================================================== */
+app.get("/api/stripe-config", (req, res) => {
+  res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
+});
+
+app.post("/api/create-initial-payment", async (req, res) => {
+  try {
+    const { email, variant, score } = req.body;
+
+    if (!email) return res.status(400).json({ error: "L'indirizzo email è obbligatorio." });
+
+    let customer;
+    const existingCustomers = await stripe.customers.list({ email, limit: 1 });
+
+    if (existingCustomers.data.length > 0) {
+      customer = existingCustomers.data[0];
+    } else {
+      customer = await stripe.customers.create({
+        email,
+        metadata: { platform: "CarbonCredit_dMRV", variant, score }
+      });
+    }
+
+    db.run("UPDATE users SET stripe_customer_id = ? WHERE email = ?", [customer.id, email]);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 69, // 0.69 EUR
+      currency: "eur",
+      customer: customer.id,
+      automatic_payment_methods: { enabled: true },
+      metadata: { email, variant, score }
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      customerId: customer.id,
+      paymentIntentId: paymentIntent.id
+    });
+  } catch (error) {
+    console.error("❌ ERRORE CREAZIONE INITIAL PAYMENT:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/create-subscription", async (req, res) => {
+  try {
+    const { customerId, email } = req.body;
+
+    if (!customerId) return res.status(400).json({ error: "Customer ID mancante." });
+
+    const priceId = process.env.STRIPE_PRICE_ID || process.env.STRIPE_DEFAULT_PRICE_ID;
+
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      trial_period_days: 7,
+      metadata: { email }
+    });
+
+    // Rilascio Cookie HTTP-Only all'attivazione
+    res.cookie("user_session", email, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+
+    res.json({ subscriptionId: subscription.id });
+  } catch (error) {
+    console.error("❌ ERRORE CREAZIONE ABBONAMENTO:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/create-checkout-session", async (req, res) => {
+  try {
+    const { email, priceId, successUrl, cancelUrl } = req.body;
+
+    if (!email) return res.status(400).json({ error: "L'indirizzo email è obbligatorio." });
+
+    const domain = process.env.DOMAIN_URL || "http://localhost:3000";
+
+    let customer;
+    const existingCustomers = await stripe.customers.list({ email: email, limit: 1 });
+    
+    if (existingCustomers.data.length > 0) {
+      customer = existingCustomers.data[0];
+    } else {
+      customer = await stripe.customers.create({
+        email: email,
+        metadata: { platform: "CarbonCredit_dMRV" },
+      });
+    }
+
+    db.run("UPDATE users SET stripe_customer_id = ? WHERE email = ?", [customer.id, email]);
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      customer: customer.id,
+      line_items: [
+        {
+          price: priceId || process.env.STRIPE_DEFAULT_PRICE_ID,
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: successUrl || `${domain}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl || `${domain}/cancel.html`,
+      metadata: { email: email },
+    });
+
+    res.json({ sessionId: session.id, url: session.url });
+  } catch (error) {
+    console.error("❌ ERRORE CREAZIONE CHECKOUT STRIPE:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/* =====================================================
+   ROTTE PROTECT / SESSION CHECK (COOKIE AUTENTICATO)
+   ===================================================== */
+app.get("/api/protected", requireAuth, (req, res) => {
+  res.json({
+    success: true,
+    message: "Accesso confermato all'area riservata dMRV.",
+    userEmail: req.userEmail
+  });
+});
+
+app.post("/api/logout", (req, res) => {
+  res.clearCookie("user_session");
+  res.json({ success: true, message: "Logout effettuato con successo." });
+});
+
+/* =====================================================
+   ROTTE UTENTE & AZIONI ECO (PROTETTE DA COOKIE)
+   ===================================================== */
+
 // Recupero Profilo Utente e Saldi
-app.get("/api/users/profile/:email", (req, res) => {
+app.get("/api/users/profile/:email", requireAuth, (req, res) => {
   const email = req.params.email.toLowerCase().trim();
+
+  // Sicurezza: L'utente può consultare solo i propri dati di sessione
+  if (email !== req.userEmail) {
+    return res.status(403).json({ error: "Accesso negato ai dati di un altro utente." });
+  }
 
   db.get("SELECT * FROM users WHERE email = ?", [email], (err, user) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -608,27 +693,20 @@ app.get("/api/users/profile/:email", (req, res) => {
   });
 });
 
-/* =====================================================
-   CORE ENGINE: REGISTRAZIONE AZIONE ECO & VALIDAZIONE dMRV
-   ===================================================== */
-app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
+// Caricamento Azione Eco & Validazione dMRV
+app.post("/api/eco-actions", requireAuth, upload.single("image"), async (req, res) => {
   try {
-    const { user_email, title, merchant, amount, dateTime } = req.body;
+    const { title, merchant, amount, dateTime } = req.body;
+    const cleanEmail = req.userEmail; // Email derivata dal cookie HTTP-Only protetto
     const file = req.file;
 
-    if (!user_email || !title) {
-      return res.status(400).json({
-        error: "I campi 'user_email' e 'title' sono obbligatori.",
-      });
+    if (!title) {
+      return res.status(400).json({ error: "Il campo 'title' è obbligatorio." });
     }
 
     if (!file) {
-      return res.status(400).json({
-        error: "È necessario caricare un'immagine di prova dell'azione ecologica.",
-      });
+      return res.status(400).json({ error: "È necessario caricare un'immagine di prova dell'azione ecologica." });
     }
-
-    const cleanEmail = user_email.toLowerCase().trim();
 
     let user = await new Promise((resolve, reject) => {
       db.get("SELECT * FROM users WHERE email = ?", [cleanEmail], (err, row) => {
@@ -697,7 +775,7 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
       }
     }
 
-    console.log(`🔍 Esecuzione audit forense AI per l'azione: "${title}"...`);
+    console.log(`🔍 Audit forense AI per l'utente ${cleanEmail} su azione: "${title}"...`);
     const aiResult = await verifyEcoAction(imageBuffer, file.mimetype, title);
 
     if (!aiResult.valid || aiResult.tier === "REJECT") {
@@ -713,7 +791,6 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
     const category = aiResult.category || "GENERAL";
     const co2SavedKg = aiResult.co2_saved_kg || 15.0;
     const poolId = await getOrCreateDataPool(category);
-
     const creditsEarned = parseFloat((co2SavedKg / 10).toFixed(2));
     const ticketId = "DMRV-" + crypto.randomBytes(4).toString("hex").toUpperCase();
 
@@ -790,136 +867,66 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
   }
 });
 
-/* =====================================================
-   INTEGRAZIONE STRIPE COMPLETA (Elements + Session)
-   ===================================================== */
-
-// 1. Chiave pubblica per checkout.html
-app.get("/api/stripe-config", (req, res) => {
-  res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
-});
-
-// 2. Pagamento iniziale 0.69€ usato dalla tua pagina checkout.html
-app.post("/api/create-initial-payment", async (req, res) => {
-  try {
-    const { email, variant, score } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: "L'indirizzo email è obbligatorio." });
-    }
-
-    let customer;
-    const existingCustomers = await stripe.customers.list({ email, limit: 1 });
-
-    if (existingCustomers.data.length > 0) {
-      customer = existingCustomers.data[0];
-    } else {
-      customer = await stripe.customers.create({
-        email,
-        metadata: { platform: "CarbonCredit_dMRV", variant, score }
-      });
-    }
-
-    db.run("UPDATE users SET stripe_customer_id = ? WHERE email = ?", [customer.id, email]);
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 69, // 0.69 EUR
-      currency: "eur",
-      customer: customer.id,
-      automatic_payment_methods: { enabled: true },
-      metadata: { email, variant, score }
-    });
-
-    res.json({
-      clientSecret: paymentIntent.client_secret,
-      customerId: customer.id,
-      paymentIntentId: paymentIntent.id
-    });
-  } catch (error) {
-    console.error("❌ ERRORE CREAZIONE INITIAL PAYMENT:", error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// 3. Attivazione abbonamento dopo i 7 giorni (usato da checkout.html)
-app.post("/api/create-subscription", async (req, res) => {
-  try {
-    const { customerId, email } = req.body;
-
-    if (!customerId) {
-      return res.status(400).json({ error: "Customer ID mancante." });
-    }
-
-    const priceId = process.env.STRIPE_PRICE_ID || process.env.STRIPE_DEFAULT_PRICE_ID;
-
-    const subscription = await stripe.subscriptions.create({
-      customer: customerId,
-      items: [{ price: priceId }],
-      trial_period_days: 7,
-      metadata: { email }
-    });
-
-    res.json({ subscriptionId: subscription.id });
-  } catch (error) {
-    console.error("❌ ERRORE CREAZIONE ABBONAMENTO:", error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// 4. Sessione Checkout Ospitata da Stripe (Hosted Checkout)
-app.post("/api/create-checkout-session", async (req, res) => {
-  try {
-    const { email, priceId, successUrl, cancelUrl } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: "L'indirizzo email è obbligatorio." });
-    }
-
-    const domain = process.env.DOMAIN_URL || "http://localhost:3000";
-
-    let customer;
-    const existingCustomers = await stripe.customers.list({ email: email, limit: 1 });
-    
-    if (existingCustomers.data.length > 0) {
-      customer = existingCustomers.data[0];
-    } else {
-      customer = await stripe.customers.create({
-        email: email,
-        metadata: { platform: "CarbonCredit_dMRV" },
-      });
-    }
-
-    db.run("UPDATE users SET stripe_customer_id = ? WHERE email = ?", [customer.id, email]);
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      customer: customer.id,
-      line_items: [
-        {
-          price: priceId || process.env.STRIPE_DEFAULT_PRICE_ID,
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
-      success_url: successUrl || `${domain}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: cancelUrl || `${domain}/cancel.html`,
-      metadata: {
-        email: email,
-      },
-    });
-
-    res.json({ sessionId: session.id, url: session.url });
-  } catch (error) {
-    console.error("❌ ERRORE CREAZIONE CHECKOUT STRIPE:", error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-/* =====================================================
-   ROTTE FINANCIALS, MONETIZZAZIONE & CASHOUT
-   ===================================================== */
-app.get("/api/user/financial-breakdown/:email", (req, res) => {
+// Elenco Azioni Utente
+app.get("/api/eco-actions/user/:email", requireAuth, (req, res) => {
   const email = req.params.email.toLowerCase().trim();
+
+  if (email !== req.userEmail) {
+    return res.status(403).json({ error: "Non sei autorizzato a visualizzare le azioni di questo account." });
+  }
+
+  db.all(
+    "SELECT * FROM eco_actions WHERE user_email = ? ORDER BY id DESC",
+    [email],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ actions: rows || [] });
+    }
+  );
+});
+
+// Revoca Azione Eco
+app.delete("/api/eco-actions/:id", requireAuth, (req, res) => {
+  const actionId = req.params.id;
+  const cleanEmail = req.userEmail;
+
+  db.get(
+    "SELECT * FROM eco_actions WHERE id = ? AND user_email = ?",
+    [actionId, cleanEmail],
+    (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!row) return res.status(404).json({ error: "Azione non trovata o non autorizzata." });
+
+      db.run(
+        "UPDATE eco_actions SET status = 'revoked' WHERE id = ?",
+        [actionId],
+        (uErr) => {
+          if (uErr) return res.status(500).json({ error: uErr.message });
+
+          db.run(
+            "UPDATE users SET carbon_credits = MAX(0, carbon_credits - ?) WHERE email = ?",
+            [row.credits_earned, row.user_email]
+          );
+
+          res.json({
+            success: true,
+            message: `Azione #${actionId} revocata con successo. Crediti stornati dal conto.`,
+          });
+        }
+      );
+    }
+  );
+});
+
+/* =====================================================
+   ROTTE FINANCIALS, CASH-OUT & MONETIZZAZIONE (PROTETTE)
+   ===================================================== */
+app.get("/api/user/financial-breakdown/:email", requireAuth, (req, res) => {
+  const email = req.params.email.toLowerCase().trim();
+
+  if (email !== req.userEmail) {
+    return res.status(403).json({ error: "Accesso non autorizzato." });
+  }
 
   db.get(
     "SELECT SUM(co2_saved_kg) as total_kg FROM eco_actions WHERE user_email = ? AND status = 'active'",
@@ -950,14 +957,13 @@ app.get("/api/user/financial-breakdown/:email", (req, res) => {
   );
 });
 
-app.post("/api/cashout", (req, res) => {
-  const { user_email, amount_eur } = req.body;
+app.post("/api/cashout", requireAuth, (req, res) => {
+  const { amount_eur } = req.body;
+  const cleanEmail = req.userEmail;
 
-  if (!user_email || !amount_eur || amount_eur <= 0) {
+  if (!amount_eur || amount_eur <= 0) {
     return res.status(400).json({ error: "Dati di pagamento non validi o importo nullo." });
   }
-
-  const cleanEmail = user_email.toLowerCase().trim();
 
   db.get(
     "SELECT SUM(co2_saved_kg) as total_kg FROM eco_actions WHERE user_email = ? AND status = 'active'",
@@ -985,7 +991,7 @@ app.post("/api/cashout", (req, res) => {
           res.json({
             success: true,
             transactionId: this.lastID,
-            message: `Richiesta di cashout di €${amount_eur} registrata con successo nel Batch ${CURRENT_BATCH_ID}. Il bonifico verrà inoltrato alla chiusura della pool B2B.`,
+            message: `Richiesta di cashout di €${amount_eur} registrata con successo nel Batch ${CURRENT_BATCH_ID}.`,
             status: "pending_batch",
           });
         }
@@ -995,57 +1001,8 @@ app.post("/api/cashout", (req, res) => {
 });
 
 /* =====================================================
-   DASHBOARD METRICS & ELENCO AZIONI UTENTE
+   DASHBOARD METRICS & ROTTE ADMIN B2B
    ===================================================== */
-app.get("/api/eco-actions/user/:email", (req, res) => {
-  const email = req.params.email.toLowerCase().trim();
-
-  db.all(
-    "SELECT * FROM eco_actions WHERE user_email = ? ORDER BY id DESC",
-    [email],
-    (err, rows) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ actions: rows || [] });
-    }
-  );
-});
-
-app.delete("/api/eco-actions/:id", (req, res) => {
-  const actionId = req.params.id;
-  const { user_email } = req.body;
-
-  if (!user_email) {
-    return res.status(400).json({ error: "Identificativo utente mancante." });
-  }
-
-  db.get(
-    "SELECT * FROM eco_actions WHERE id = ? AND user_email = ?",
-    [actionId, user_email.toLowerCase().trim()],
-    (err, row) => {
-      if (err) return res.status(500).json({ error: err.message });
-      if (!row) return res.status(404).json({ error: "Azione non trovata o non autorizzata." });
-
-      db.run(
-        "UPDATE eco_actions SET status = 'revoked' WHERE id = ?",
-        [actionId],
-        (uErr) => {
-          if (uErr) return res.status(500).json({ error: uErr.message });
-
-          db.run(
-            "UPDATE users SET carbon_credits = MAX(0, carbon_credits - ?) WHERE email = ?",
-            [row.credits_earned, row.user_email]
-          );
-
-          res.json({
-            success: true,
-            message: `Azione #${actionId} revocata con successo. Crediti stornati dal conto.`,
-          });
-        }
-      );
-    }
-  );
-});
-
 app.get("/api/dashboard/global-stats", (req, res) => {
   const query = `
     SELECT 
@@ -1077,8 +1034,62 @@ app.get("/api/dashboard/global-stats", (req, res) => {
   });
 });
 
+app.get("/api/admin/pools", (req, res) => {
+  db.all("SELECT * FROM data_pools ORDER BY id DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ pools: rows || [] });
+  });
+});
+
+app.post("/api/admin/seal-pool", (req, res) => {
+  const { poolId } = req.body;
+  if (!poolId) return res.status(400).json({ error: "missing_pool_id" });
+
+  db.run(
+    "UPDATE data_pools SET status = 'sealed', sealed_at = CURRENT_TIMESTAMP WHERE id = ?",
+    [poolId],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({
+        success: true,
+        message: `Pool B2B #${poolId} sigillato con successo. Nessun'altra azione potrà essere inserita in questo batch.`,
+      });
+    }
+  );
+});
+
+app.get("/api/admin/export-pool-dossier/:poolId", (req, res) => {
+  const { poolId } = req.params;
+
+  db.get("SELECT * FROM data_pools WHERE id = ?", [poolId], (err, pool) => {
+    if (err || !pool) return res.status(404).json({ error: "pool_not_found" });
+
+    db.all(
+      "SELECT id, user_email, title, category, co2_saved_kg, image_hash, receipt_hash, tier, confidence_score, created_at FROM eco_actions WHERE pool_id = ?",
+      [poolId],
+      (aErr, actions) => {
+        if (aErr) return res.status(500).json({ error: aErr.message });
+
+        res.json({
+          dossierHeader: {
+            poolId: pool.id,
+            category: pool.category,
+            totalCo2Kg: pool.total_co2_kg,
+            totalCo2Ton: pool.total_co2_kg / 1000,
+            estimatedB2bValueEur: (pool.total_co2_kg / 1000) * CO2_PRICE_PER_TON_EUR,
+            status: pool.status,
+            sealedAt: pool.sealed_at,
+            generatedAt: new Date().toISOString()
+          },
+          verifiedActions: actions || []
+        });
+      }
+    );
+  });
+});
+
 /* =====================================================
-   FALLBACK ROTTE STATICHE & FRONTEND HYBRID
+   FALLBACK ROTTE STATICHE & FRONTEND HYBRID (POSIZIONATO IN FONDO)
    ===================================================== */
 app.get("*", (req, res) => {
   const indexPath = path.join(__dirname, "public", "index.html");
@@ -1106,6 +1117,7 @@ app.get("*", (req, res) => {
             <li>AI dMRV Engine (Gemini 2.5 Flash): <strong>READY</strong></li>
             <li>Stripe Payment & Webhook Gateway: <strong>ACTIVE</strong></li>
             <li>Anti-Double Spending Forensics: <strong>ACTIVE</strong></li>
+            <li>HTTP-Only Cookie Authentication: <strong>ENFORCED</strong></li>
           </ul>
         </div>
       </body>
