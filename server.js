@@ -1,6 +1,6 @@
 /* =====================================================
    SERVER EXPRESS - CARBON CREDIT & DMRV PLATFORM
-   PARTE 1 DI 2 (RIGHE 1 - 455)
+   FILE INTEGRALE ED UNIFICATO
    ===================================================== */
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
@@ -11,9 +11,18 @@ const path = require("path");
 const crypto = require("crypto");
 require("dotenv").config();
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder");
+
+// Gestione sicura di Gemini AI (previene crash in assenza del pacchetto)
+let genAI = null;
+try {
+  const { GoogleGenerativeAI } = require("@google/generative-ai");
+  if (process.env.GEMINI_API_KEY) {
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  }
+} catch (err) {
+  console.warn("⚠️ Pacchetto @google/generative-ai non trovato. Fallback attivo.");
+}
 
 const app = express();
 
@@ -206,7 +215,7 @@ db.serialize(() => {
    ===================================================== */
 const CO2_PRICE_PER_TON_EUR = 25.0; // Prezzo mercato B2B per tonnellata
 const KG_CO2_PER_TREE = 20.0;       // Assorbimento medio albero/anno
-const BATCH_THRESHOLD_TON = 1000;  // Soglia di liquidazione batch (1.000 Ton)
+const BATCH_THRESHOLD_TON = 1000;   // Soglia di liquidazione batch (1.000 Ton)
 const CURRENT_BATCH_ID = "BATCH-2026-08";
 
 /* =====================================================
@@ -280,19 +289,13 @@ async function updateDataPoolStats(poolId, co2Kg) {
   });
 }
 
-function triggerAutoBrokerLiquidation(batchId, totalTon) {
-  console.log(
-    `🚀 [AUTO-BROKER LIQUIDATION] Raggiunta quota ${totalTon} Tonnellate CO2 per il Batch ${batchId}. Inizializzazione vendita istituzionale B2B.`
-  );
-}
-
 /* =====================================================
    ENGINE FORENSICS AI (GEMINI VISION OCR & DMRV)
    ===================================================== */
 async function verifyEcoAction(imageBuffer, mimeType, title) {
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      console.warn("⚠️ API Key Gemini mancante. Fallback a validazione base.");
+    if (!genAI || !process.env.GEMINI_API_KEY) {
+      console.warn("⚠️ API Key Gemini mancante o modulo non caricato. Fallback a validazione base.");
       return {
         valid: true,
         tier: "COMMUNITY",
@@ -304,7 +307,7 @@ async function verifyEcoAction(imageBuffer, mimeType, title) {
         merchant: null,
         total_amount: 0.0,
         date_time: null,
-        reason: "Validazione base automatica (API Key non configurata)."
+        reason: "Validazione base automatica (API Key o modulo non configurato)."
       };
     }
 
@@ -501,7 +504,7 @@ app.get("/api/admin/export-pool-dossier/:poolId", (req, res) => {
   });
 });
 
-// Verificatore Preventivo Duplicati Scontrino (Endpoint veloce)
+// Verificatore Preventivo Duplicati Scontrino
 app.post("/api/check-duplicate-receipt", (req, res) => {
   const { merchant, dateTime, amount } = req.body;
   if (!merchant || !amount) {
@@ -517,10 +520,6 @@ app.post("/api/check-duplicate-receipt", (req, res) => {
     res.json({ isDuplicate: false, receiptHash: receiptHash });
   });
 });
-/* =====================================================
-   SERVER EXPRESS - CARBON CREDIT & DMRV PLATFORM
-   PARTE 2 DI 2 (COMPLETAMENTO RIGHE)
-   ===================================================== */
 
 /* =====================================================
    ROTTE UTENTE & PROFILAZIONE
@@ -543,14 +542,12 @@ app.post("/api/users/register", (req, res) => {
     }
 
     if (row) {
-      // Utente già esistente
       return res.json({
         message: "Utente già registrato.",
         user: row,
       });
     }
 
-    // Creazione nuovo utente
     db.run(
       "INSERT INTO users (email, premium, carbon_credits, stripe_customer_id) VALUES (?, 0, 0.0, ?)",
       [cleanEmail, stripeCustomerId || null],
@@ -580,7 +577,6 @@ app.get("/api/users/profile/:email", (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!user) return res.status(404).json({ error: "Utente non trovato." });
 
-    // Recupero il totale della CO2 e crediti validati per l'utente
     db.get(
       `SELECT 
         COUNT(*) as total_actions,
@@ -613,7 +609,7 @@ app.get("/api/users/profile/:email", (req, res) => {
 });
 
 /* =====================================================
-   CORE ENGINE: REGISTRAZIONE AZIONE eco & VALIDAZIONE dMRV
+   CORE ENGINE: REGISTRAZIONE AZIONE ECO & VALIDAZIONE dMRV
    ===================================================== */
 app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
   try {
@@ -634,7 +630,6 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
 
     const cleanEmail = user_email.toLowerCase().trim();
 
-    // 1. Verifico la presenza/creazione dell'utente
     let user = await new Promise((resolve, reject) => {
       db.get("SELECT * FROM users WHERE email = ?", [cleanEmail], (err, row) => {
         if (err) reject(err);
@@ -656,11 +651,9 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
       user = { id: newUserId, email: cleanEmail, premium: 0, carbon_credits: 0.0 };
     }
 
-    // 2. Calcolo Hash SHA-256 Immagine (Anti-Tampering)
     const imageBuffer = fs.readFileSync(file.path);
     const imageHash = calculateBufferHash(imageBuffer);
 
-    // 3. Controllo duplicato su Hash Immagine
     const existingImage = await new Promise((resolve, reject) => {
       db.get(
         "SELECT id, created_at FROM eco_actions WHERE image_hash = ?",
@@ -673,7 +666,6 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
     });
 
     if (existingImage) {
-      // Rimuovo il file caricato per non intasare il disk storage
       fs.unlinkSync(file.path);
       return res.status(409).json({
         error: "DUPLICATE_IMAGE_DETECTED",
@@ -682,7 +674,6 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
       });
     }
 
-    // 4. Generazione ed Anti-double spending check per Scontrino (se metadati forniti)
     let receiptHash = null;
     if (merchant && amount) {
       receiptHash = generateReceiptHash(merchant, dateTime, amount);
@@ -706,7 +697,6 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
       }
     }
 
-    // 5. Analisi Forense AI dMRV (Gemini Vision)
     console.log(`🔍 Esecuzione audit forense AI per l'azione: "${title}"...`);
     const aiResult = await verifyEcoAction(imageBuffer, file.mimetype, title);
 
@@ -720,15 +710,13 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
       });
     }
 
-    // 6. Assegnazione Data Pool B2B e Calcolo Crediti
     const category = aiResult.category || "GENERAL";
     const co2SavedKg = aiResult.co2_saved_kg || 15.0;
     const poolId = await getOrCreateDataPool(category);
 
-    const creditsEarned = parseFloat((co2SavedKg / 10).toFixed(2)); // 1 Credito = 10kg CO2
+    const creditsEarned = parseFloat((co2SavedKg / 10).toFixed(2));
     const ticketId = "DMRV-" + crypto.randomBytes(4).toString("hex").toUpperCase();
 
-    // 7. Salvataggio Azione nel Ledger SQLite
     const actionId = await new Promise((resolve, reject) => {
       db.run(
         `INSERT INTO eco_actions (
@@ -755,7 +743,6 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
       );
     });
 
-    // 8. Aggiornamento Statistiche Data Pool B2B e Crediti Utente
     await updateDataPoolStats(poolId, co2SavedKg);
 
     await new Promise((resolve, reject) => {
@@ -769,7 +756,6 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
       );
     });
 
-    // 9. Risposta Finale con Certificazione dMRV
     res.status(201).json({
       success: true,
       action: {
@@ -817,7 +803,6 @@ app.post("/api/create-checkout-session", async (req, res) => {
 
     const domain = process.env.DOMAIN_URL || "http://localhost:3000";
 
-    // Ricerca o creazione Customer Stripe
     let customer;
     const existingCustomers = await stripe.customers.list({ email: email, limit: 1 });
     
@@ -830,16 +815,14 @@ app.post("/api/create-checkout-session", async (req, res) => {
       });
     }
 
-    // Aggiorna Stripe Customer ID nel DB
     db.run("UPDATE users SET stripe_customer_id = ? WHERE email = ?", [customer.id, email]);
 
-    // Creazione Sessione Checkout
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       customer: customer.id,
       line_items: [
         {
-          price: priceId || process.env.STRIPE_DEFAULT_PRICE_ID, // ID prezzo abbonamento mensile/annuale
+          price: priceId || process.env.STRIPE_DEFAULT_PRICE_ID,
           quantity: 1,
         },
       ],
@@ -861,8 +844,6 @@ app.post("/api/create-checkout-session", async (req, res) => {
 /* =====================================================
    ROTTE FINANCIALS, MONETIZZAZIONE & CASHOUT
    ===================================================== */
-
-// Riepilogo Scaglioni di Liquidaizone & Payout
 app.get("/api/user/financial-breakdown/:email", (req, res) => {
   const email = req.params.email.toLowerCase().trim();
 
@@ -895,7 +876,6 @@ app.get("/api/user/financial-breakdown/:email", (req, res) => {
   );
 });
 
-// Richiesta di Cashout / Liquidaizone Crediti Accumulati
 app.post("/api/cashout", (req, res) => {
   const { user_email, amount_eur } = req.body;
 
@@ -905,7 +885,6 @@ app.post("/api/cashout", (req, res) => {
 
   const cleanEmail = user_email.toLowerCase().trim();
 
-  // Verifico che l'utente abbia maturo il diritto al cashback richiesto
   db.get(
     "SELECT SUM(co2_saved_kg) as total_kg FROM eco_actions WHERE user_email = ? AND status = 'active'",
     [cleanEmail],
@@ -922,7 +901,6 @@ app.post("/api/cashout", (req, res) => {
         });
       }
 
-      // Registrazione richiesta di transazione per il prossimo Batch B2B
       db.run(
         `INSERT INTO transactions (user_email, type, credits, amount_eur, status, batch_id) 
          VALUES (?, 'cashout', ?, ?, 'pending_batch', ?)`,
@@ -945,8 +923,6 @@ app.post("/api/cashout", (req, res) => {
 /* =====================================================
    DASHBOARD METRICS & ELENCO AZIONI UTENTE
    ===================================================== */
-
-// Ottieni storico completo azioni di un utente
 app.get("/api/eco-actions/user/:email", (req, res) => {
   const email = req.params.email.toLowerCase().trim();
 
@@ -960,7 +936,6 @@ app.get("/api/eco-actions/user/:email", (req, res) => {
   );
 });
 
-// Cancellazione / Revoca di un'azione sostenibile
 app.delete("/api/eco-actions/:id", (req, res) => {
   const actionId = req.params.id;
   const { user_email } = req.body;
@@ -976,14 +951,12 @@ app.delete("/api/eco-actions/:id", (req, res) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!row) return res.status(404).json({ error: "Azione non trovata o non autorizzata." });
 
-      // Marcatura come archiviata/revocata
       db.run(
         "UPDATE eco_actions SET status = 'revoked' WHERE id = ?",
         [actionId],
         (uErr) => {
           if (uErr) return res.status(500).json({ error: uErr.message });
 
-          // Sottrazione crediti all'utente
           db.run(
             "UPDATE users SET carbon_credits = MAX(0, carbon_credits - ?) WHERE email = ?",
             [row.credits_earned, row.user_email]
@@ -999,7 +972,6 @@ app.delete("/api/eco-actions/:id", (req, res) => {
   );
 });
 
-// Statistiche Globali Piattaforma dMRV (Public Dashboard)
 app.get("/api/dashboard/global-stats", (req, res) => {
   const query = `
     SELECT 
@@ -1088,6 +1060,6 @@ app.listen(PORT, () => {
   console.log(`=====================================================`);
   console.log(`🚀 SERVER DMRV & CARBON CREDIT ATTIVO SULLA PORTA ${PORT}`);
   console.log(`🌍 API Endpoint locale: http://localhost:${PORT}`);
-  console.log(`🛡️  Audit dMRV Certificati: http://localhost:${PORT}/verify/:certId`);
+  console.log(`🛡️ Audit dMRV Certificati: http://localhost:${PORT}/verify/:certId`);
   console.log(`=====================================================`);
 });

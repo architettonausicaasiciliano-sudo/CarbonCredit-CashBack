@@ -274,7 +274,7 @@
     </p>
 
     <div id="tranchesContainer">
-      <!-- Popolato dinamicamente da JavaScript -->
+      <!-- Popolato dinamicamente da dashboard.js -->
     </div>
 
     <button id="btnCloseTrancheModalBottom" class="btn-action" style="background: #334155; color: white; border-color: #475569; margin-top: 10px;">
@@ -284,77 +284,5 @@
 </div>
 
 <script src="/protected/js/dashboard.js"></script>
-<script>
-  // Script di supporto locale per aggiornamento e gestione modale Tranche
-  function syncTrancheDashboard() {
-    const assets = JSON.parse(localStorage.getItem('dmrv_user_assets_list') || '[]');
-    const totalCredit = assets.reduce((sum, item) => sum + (item.credit || 0), 0);
-    
-    const completedTranches = Math.floor(totalCredit / 1000);
-    const currentTrancheProgress = parseFloat((totalCredit % 1000).toFixed(2));
-    const currentTranchePercentage = parseFloat(((currentTrancheProgress / 1000) * 100).toFixed(1));
-    const unlockedCashback = completedTranches * 100;
-
-    // Aggiornamento interfaccia dashboard
-    const dashTrancheLabel = document.getElementById('dashTrancheLabel');
-    const dashProgressBarFill = document.getElementById('dashProgressBarFill');
-    const dashProgressText = document.getElementById('dashProgressText');
-    const dashUnlockedCashback = document.getElementById('dashUnlockedCashback');
-
-    if (dashTrancheLabel) dashTrancheLabel.innerText = `Tranche Attiva: #${completedTranches + 1}`;
-    if (dashProgressBarFill) dashProgressBarFill.style.width = `${currentTranchePercentage}%`;
-    if (dashProgressText) dashProgressText.innerText = `€${currentTrancheProgress.toFixed(2)} / €1.000,00 (${currentTranchePercentage}%)`;
-    if (dashUnlockedCashback) dashUnlockedCashback.innerText = `Riscattabili: €${unlockedCashback.toFixed(2)}`;
-
-    // Popolamento Modale Ispezione
-    const tranchesContainer = document.getElementById('tranchesContainer');
-    if (tranchesContainer) {
-      tranchesContainer.innerHTML = '';
-
-      for (let i = 0; i <= completedTranches; i++) {
-        const isCurrent = i === completedTranches;
-        const isCompleted = i < completedTranches;
-        const trancheVal = isCompleted ? 1000 : currentTrancheProgress;
-        const pct = isCompleted ? 100 : currentTranchePercentage;
-        const cashbackVal = isCompleted ? 100 : 0;
-
-        const item = document.createElement('div');
-        item.className = `tranche-item ${isCompleted ? 'completed' : ''}`;
-        item.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px;">
-            <span>Tranche #${i + 1} ${isCompleted ? '✅ (Completata)' : '⏳ (In corso)'}</span>
-            <span style="color: ${isCompleted ? 'var(--accent-yellow)' : 'var(--text-muted)'};">
-              ${isCompleted ? 'Cashback Sbloccato: €100.00' : 'Sblocco a 1.000 €'}
-            </span>
-          </div>
-          <div class="progress-track" style="height: 8px; margin: 6px 0;">
-            <div class="progress-fill" style="width: ${pct}%;"></div>
-          </div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
-            <span>Credito: €${trancheVal.toFixed(2)} / €1.000,00</span>
-            <span>Avanzamento: ${pct}%</span>
-          </div>
-        `;
-        tranchesContainer.appendChild(item);
-      }
-    }
-  }
-
-  // Gestione apertura/chiusura Modale
-  const modal = document.getElementById('trancheModal');
-  const btnOpen = document.getElementById('btnOpenTrancheModal');
-  const btnClose = document.getElementById('btnCloseTrancheModal');
-  const btnCloseBottom = document.getElementById('btnCloseTrancheModalBottom');
-
-  if (btnOpen) btnOpen.addEventListener('click', () => { syncTrancheDashboard(); modal.style.display = 'flex'; });
-  if (btnClose) btnClose.addEventListener('click', () => { modal.style.display = 'none'; });
-  if (btnCloseBottom) btnCloseBottom.addEventListener('click', () => { modal.style.display = 'none'; });
-
-  window.addEventListener('click', (e) => {
-    if (e.target === modal) modal.style.display = 'none';
-  });
-
-  document.addEventListener('DOMContentLoaded', syncTrancheDashboard);
-</script>
 </body>
 </html>
