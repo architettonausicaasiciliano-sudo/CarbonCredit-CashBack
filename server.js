@@ -791,8 +791,82 @@ app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
 });
 
 /* =====================================================
-   INTEGRAZIONE STRIPE CHECKOUT & ABBONAMENTI
+   INTEGRAZIONE STRIPE COMPLETA (Elements + Session)
    ===================================================== */
+
+// 1. Chiave pubblica per checkout.html
+app.get("/api/stripe-config", (req, res) => {
+  res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
+});
+
+// 2. Pagamento iniziale 0.69€ usato dalla tua pagina checkout.html
+app.post("/create-initial-payment", async (req, res) => {
+  try {
+    const { email, variant, score } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "L'indirizzo email è obbligatorio." });
+    }
+
+    let customer;
+    const existingCustomers = await stripe.customers.list({ email, limit: 1 });
+
+    if (existingCustomers.data.length > 0) {
+      customer = existingCustomers.data[0];
+    } else {
+      customer = await stripe.customers.create({
+        email,
+        metadata: { platform: "CarbonCredit_dMRV", variant, score }
+      });
+    }
+
+    db.run("UPDATE users SET stripe_customer_id = ? WHERE email = ?", [customer.id, email]);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 69, // 0.69 EUR
+      currency: "eur",
+      customer: customer.id,
+      automatic_payment_methods: { enabled: true },
+      metadata: { email, variant, score }
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      customerId: customer.id,
+      paymentIntentId: paymentIntent.id
+    });
+  } catch (error) {
+    console.error("❌ ERRORE CREAZIONE INITIAL PAYMENT:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 3. Attivazione abbonamento dopo i 7 giorni (usato da checkout.html)
+app.post("/create-subscription", async (req, res) => {
+  try {
+    const { customerId, email } = req.body;
+
+    if (!customerId) {
+      return res.status(400).json({ error: "Customer ID mancante." });
+    }
+
+    const priceId = process.env.STRIPE_PRICE_ID || process.env.STRIPE_DEFAULT_PRICE_ID;
+
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      trial_period_days: 7,
+      metadata: { email }
+    });
+
+    res.json({ subscriptionId: subscription.id });
+  } catch (error) {
+    console.error("❌ ERRORE CREAZIONE ABBONAMENTO:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 4. Sessione Checkout Ospitata da Stripe (Hosted Checkout)
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { email, priceId, successUrl, cancelUrl } = req.body;
