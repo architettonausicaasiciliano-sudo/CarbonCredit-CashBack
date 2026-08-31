@@ -68,6 +68,7 @@ db.serialize(() => {
       category TEXT,
       status TEXT DEFAULT 'OPEN',
       total_co2_kg REAL DEFAULT 0.0,
+      item_count INTEGER DEFAULT 0,
       block_hash TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
@@ -86,7 +87,7 @@ db.serialize(() => {
     )
   `);
 
-  // Migrazione automatica colonne dMRV e B2B per database esistenti
+  // Migrazione automatica colonne dMRV e B2B per eco_actions
   const dMrvColumns = [
     { name: "image_hash", type: "TEXT" },
     { name: "tier", type: "TEXT DEFAULT 'COMMUNITY'" },
@@ -113,6 +114,22 @@ db.serialize(() => {
           });
         }
       });
+    }
+  });
+
+  // Migrazione automatica colonna item_count per data_pools
+  db.all("PRAGMA table_info(data_pools)", [], (err, rows) => {
+    if (!err && rows) {
+      const existingColumns = rows.map((r) => r.name);
+      if (!existingColumns.includes("item_count")) {
+        db.run("ALTER TABLE data_pools ADD COLUMN item_count INTEGER DEFAULT 0", (alterErr) => {
+          if (alterErr) {
+            console.error("⚠️ Errore aggiunta colonna item_count:", alterErr.message);
+          } else {
+            console.log("✅ Colonna 'item_count' aggiunta a data_pools.");
+          }
+        });
+      }
     }
   });
 });
