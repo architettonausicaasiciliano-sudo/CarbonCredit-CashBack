@@ -21,17 +21,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 /**
+ * Funzione di utilità per evitare vulnerabilità XSS
+ */
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
  * Carica e aggiorna tutti i dati della Dashboard
  */
 async function loadDashboardData(email) {
   try {
-    // Fetch dati riepilogativi utente
-    const userRes = await fetch(`/api/user?email=${encodeURIComponent(email)}`);
-    const userData = await userRes.json();
+    // Fetch dati riepilogativi utente e azioni in parallelo
+    const [userRes, actionsRes] = await Promise.all([
+      fetch(`/api/user?email=${encodeURIComponent(email)}`),
+      fetch(`/api/eco-actions?email=${encodeURIComponent(email)}`)
+    ]);
 
-    // Fetch lista azioni/beni registrati
-    const actionsRes = await fetch(`/api/eco-actions?email=${encodeURIComponent(email)}`);
-    const actionsData = await actionsRes.json();
+    const userData = userRes.ok ? await userRes.json() : {};
+    const actionsData = actionsRes.ok ? await actionsRes.json() : {};
     const ecoActions = actionsData.ecoActions || [];
 
     // Aggiornamento Metriche Statistiche
@@ -61,16 +75,16 @@ function updateUserStats(userData, ecoActions) {
   const batchStatusEl = document.getElementById("batchStatus");
   const treeBannerText = document.getElementById("treeBannerText");
 
-  // Calcolo totale crediti cashback accumulati (10% dei beni)
+  // Calcolo totale crediti cashback accumulati (10% del valore dei beni)
   const totalCashbackAccumulated = ecoActions.reduce((sum, item) => {
     const spend = parseFloat(item.amount_spend || item.amountSpend || item.amount || 0);
     const credit = item.cashback_credit ? parseFloat(item.cashback_credit) : (spend * 0.10);
     return sum + credit;
   }, 0);
 
-  const validatedCredits = userData.carbon_credits || 0.0;
-  const totalCo2 = userData.totalCo2Kg || 0.0;
-  const treesCount = userData.treesEquivalent || 0;
+  const validatedCredits = parseFloat(userData.carbon_credits || 0.0);
+  const totalCo2 = parseFloat(userData.totalCo2Kg || 0.0);
+  const treesCount = parseInt(userData.treesEquivalent || 0, 10);
 
   if (userCreditsEl) userCreditsEl.innerText = `${validatedCredits.toFixed(1)} CC`;
   if (pendingCcValEl) pendingCcValEl.innerText = `${(ecoActions.length * 50).toFixed(0)} CC`;
@@ -87,9 +101,8 @@ function updateUserStats(userData, ecoActions) {
  * Calcola e visualizza la barra di avanzamento verso la Soglia Cashback di €1.000,00
  */
 function renderCycleProgressCard(ecoActions) {
-  const TARGET_THRESHOLD = 1000.0; // Soglia target cashback
+  const TARGET_THRESHOLD = 1000.0;
 
-  // Calcolo la somma del 10% dei beni inseriti
   const totalAccumulatedCashback = ecoActions.reduce((sum, item) => {
     const spend = parseFloat(item.amount_spend || item.amountSpend || item.amount || 0);
     const credit = item.cashback_credit ? parseFloat(item.cashback_credit) : (spend * 0.10);
@@ -163,25 +176,27 @@ function renderAssetsList(ecoActions, userEmail) {
 
     const spend = parseFloat(item.amount_spend || item.amountSpend || item.amount || 0);
     const cashbackCredit = item.cashback_credit ? parseFloat(item.cashback_credit) : (spend * 0.10);
+    const title = escapeHtml(item.title || item.asset_name || 'Bene Registrato');
+    const safeAssetId = escapeHtml(item.id);
 
     return `
       <div style="background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
         <div>
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            <h4 style="margin: 0; color: #f8fafc; font-size: 0.95rem;">${item.title || item.asset_name || 'Bene Registrato'}</h4>
+            <h4 style="margin: 0; color: #f8fafc; font-size: 0.95rem;">${title}</h4>
             ${tierBadge}
           </div>
           <span style="font-size: 0.78rem; color: #94a3b8;">
             Valore Bene: <strong style="color: #cbd5e1;">€${spend.toFixed(2)}</strong> | 
             Credito 10%: <strong style="color: #34d399;">€${cashbackCredit.toFixed(2)}</strong> | 
-            CO₂ Evitata: <strong style="color: #4ade80;">${item.co2_saved_kg || item.co2_kg || 0} kg</strong>
+            CO₂ Evitata: <strong style="color: #4ade80;">${parseFloat(item.co2_saved_kg || item.co2_kg || 0).toFixed(1)} kg</strong>
           </span>
         </div>
         <div style="text-align: right; display: flex; align-items: center; gap: 8px;">
-          <a href="/verify/${item.id}" target="_blank" style="display: inline-block; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 8px; text-decoration: none;">
+          <a href="/verify/${safeAssetId}" target="_blank" style="display: inline-block; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 8px; text-decoration: none;">
             📄 Certificato →
           </a>
-          <button onclick="removeAsset('${item.id}', '${userEmail}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+          <button onclick="removeAsset('${safeAssetId}', '${escapeHtml(userEmail)}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
             ❌ Elimina
           </button>
         </div>
@@ -206,7 +221,6 @@ async function removeAsset(assetId, email) {
     if (res.ok) {
       alert("✅ Bene rimosso con successo!");
     } else {
-      console.warn("Bene rimosso lato client.");
       alert("✅ Bene rimosso.");
     }
 
@@ -230,7 +244,7 @@ async function handleRedeemCashback(email) {
     const res = await fetch(`/api/user?email=${encodeURIComponent(email)}`);
     const userData = await res.json();
 
-    if (!userData || userData.carbon_credits < 10) {
+    if (!userData || (userData.carbon_credits || 0) < 10) {
       alert("⚠️ Per richiedere il payout occorre accumulare almeno 10.0 Crediti Convalidati.");
       return;
     }

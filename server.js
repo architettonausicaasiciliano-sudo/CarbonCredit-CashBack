@@ -21,6 +21,7 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       category TEXT NOT NULL,
       status TEXT DEFAULT 'BUILDING',
+      block_hash TEXT,
       total_co2_kg REAL DEFAULT 0,
       item_count INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -28,18 +29,20 @@ db.serialize(() => {
   `);
 
   // 2. Aggiunta sicura delle colonne a eco_actions (se non esistono già)
-  db.run("ALTER TABLE eco_actions ADD COLUMN receipt_hash TEXT", (err) => {
-    if (!err) console.log("✅ Colonna 'receipt_hash' aggiunta a eco_actions.");
+  db.run("ALTER TABLE eco_actions ADD COLUMN receipt_hash TEXT", () => {});
+  db.run("ALTER TABLE eco_actions ADD COLUMN pool_id INTEGER", () => {});
+  db.run("ALTER TABLE eco_actions ADD COLUMN ticket_id TEXT", (err) => {
+    if (!err) console.log("✅ Colonna 'ticket_id' aggiunta a eco_actions.");
   });
-
-  db.run("ALTER TABLE eco_actions ADD COLUMN pool_id INTEGER", (err) => {
-    if (!err) console.log("✅ Colonna 'pool_id' aggiunta a eco_actions.");
+  db.run("ALTER TABLE eco_actions ADD COLUMN status TEXT DEFAULT 'active'", (err) => {
+    if (!err) console.log("✅ Colonna 'status' aggiunta a eco_actions.");
   });
 
   // 3. Indici per velocizzare controlli e clustering
   db.run("CREATE INDEX IF NOT EXISTS idx_image_hash ON eco_actions(image_hash)");
   db.run("CREATE INDEX IF NOT EXISTS idx_receipt_hash ON eco_actions(receipt_hash)");
   db.run("CREATE INDEX IF NOT EXISTS idx_pool_id ON eco_actions(pool_id)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_ticket_id ON eco_actions(ticket_id)");
 });
 
 /* =====================================================
@@ -81,7 +84,7 @@ const upload = multer({
 });
 
 /* =====================================================
-   HELPER CRITTOGRAFICI & ANTI-DUPLICATI (SHA-256)
+   HELPER CRITTOGRAFICI & TICKET UTENTE
 ===================================================== */
 function calculateBufferHash(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
@@ -96,6 +99,10 @@ function generateReceiptHash(merchant, dateTime, totalAmount) {
 function generateDmrvHash(action) {
   const rawData = `${action.id}-${action.user_email}-${action.co2_saved_kg}-${action.image_hash || 'no_photo_hash'}-${action.tier || 'TIER2'}-${action.created_at || '2026'}`;
   return crypto.createHash('sha256').update(rawData).digest('hex');
+}
+
+function generateTicketCode() {
+  return "TICKET-1000-" + crypto.randomBytes(3).toString("hex").toUpperCase();
 }
 
 /* =====================================================
@@ -365,6 +372,75 @@ app.get("/api/stripe-config", (req, res) => {
 });
 
 /* =====================================================
+   SOGLIA €1000 & GENERAZIONE TICKET UTENTE
+===================================================== */
+app.post("/api/check-thousand-threshold", (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "missing_email" });
+
+  db.get(
+    "SELECT SUM(co2_saved_kg) as total_co2 FROM eco_actions WHERE user_email = ? AND (status IS NULL OR status = 'active')",
+    [email],
+    (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      const totalCo2 = row?.total_co2 || 0;
+      const totalEur = parseFloat(((totalCo2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2));
+
+      if (totalEur >= 1000) {
+        const ticketCode = generateTicketCode();
+
+        db.run(
+          "UPDATE eco_actions SET status = 'in_review_batch', ticket_id = ? WHERE user_email = ? AND (status IS NULL OR status = 'active')",
+          [ticketCode, email],
+          (updateErr) => {
+            if (updateErr) return res.status(500).json({ error: updateErr.message });
+
+            res.json({
+              thresholdReached: true,
+              ticketCode: ticketCode,
+              amountLockedEur: totalEur,
+              message: "Bene, molto bene! Questo primo blocco adesso è in valutazione. Al più presto avrai un riscontro."
+            });
+          }
+        );
+      } else {
+        res.json({
+          thresholdReached: false,
+          currentEur: totalEur,
+          remainingEur: parseFloat((1000 - totalEur).toFixed(2))
+        });
+      }
+    }
+  );
+});
+
+/* =====================================================
+   ROTTE AMMINISTRATIVE B2B (POOL SEALING & dMRV EXPORT)
+===================================================== */
+app.post("/api/admin/pools/:id/seal", async (req, res) => {
+  try {
+    const { sealPool } = require("./src/services/poolService");
+    const result = await sealPool(req.params.id);
+    res.json({ success: true, pool: result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/admin/pools/:id/export-dmrv", async (req, res) => {
+  try {
+    const { generateDmrvDossier } = require("./src/services/poolService");
+    const dossier = await generateDmrvDossier(req.params.id);
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader("Content-Disposition", `attachment; filename=dMRV_Dossier_Pool_${req.params.id}.json`);
+    res.send(JSON.stringify(dossier, null, 2));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* =====================================================
    CHECK DUPLICATI (HASH CLIENT / SERVER SQLITE)
 ===================================================== */
 app.get("/api/check-duplicate", (req, res) => {
@@ -462,7 +538,7 @@ app.get("/api/user", (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
 
     db.get(
-      "SELECT SUM(co2_saved_kg) as total_co2, COUNT(id) as total_items FROM eco_actions WHERE user_email = ? AND (tier IS NULL OR tier != 'REJECT')",
+      "SELECT SUM(co2_saved_kg) as total_co2, COUNT(id) as total_items FROM eco_actions WHERE user_email = ? AND (tier IS NULL OR tier != 'REJECT') AND (status IS NULL OR status = 'active')",
       [email],
       (co2Error, co2Row) => {
         const totalCo2 = co2Row && co2Row.total_co2 ? parseFloat(co2Row.total_co2) : 0.0;
@@ -517,12 +593,10 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
   const spendAmount = parseFloat(amountSpend) || 0;
 
   try {
-    // 1. Processamento e verifica se la foto è stata caricata
     if (req.file) {
       const imageBuffer = fs.readFileSync(req.file.path);
       calculatedHash = calculateBufferHash(imageBuffer);
 
-      // Controllo 1: Stesso Identico File (Hash Immagine)
       const duplicatePhoto = await new Promise((resolve) => {
         db.get("SELECT id FROM eco_actions WHERE image_hash = ?", [calculatedHash], (err, row) => resolve(row));
       });
@@ -535,7 +609,6 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
         });
       }
 
-      // Audit Forense IA Gemini
       const aiResult = await verifyEcoAction(imageBuffer, req.file.mimetype, title);
 
       if (!aiResult.valid || aiResult.tier === "REJECT") {
@@ -546,7 +619,6 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
         });
       }
 
-      // Controllo 2: Stessa Transazione/Scontrino (Hash Esercente + Data + Importo)
       if (aiResult.is_receipt) {
         const extractedAmount = aiResult.total_amount > 0 ? aiResult.total_amount : spendAmount;
         receiptHash = generateReceiptHash(aiResult.merchant, aiResult.date_time, extractedAmount);
@@ -576,45 +648,37 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
       finalCategory = aiResult.category || finalCategory;
     }
 
-    // Fallback stima CO2 se non passata
     if (isNaN(co2) || co2 <= 0) {
       co2 = spendAmount > 0 ? spendAmount * 0.5 : 25.0;
     }
 
-    // Identifica o crea il pool B2B di appartenenza per la categoria
     const poolId = await getOrCreateDataPool(finalCategory);
 
-    // CALCOLO 10% PROPORZIONALE SULL'IMPORTO CARICATO
     const actionValueEur = spendAmount > 0 ? (spendAmount * 0.10).toFixed(2) : ((co2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2);
     const credits = parseFloat(creditsEarned) || Math.max(1.0, Math.round(spendAmount * 0.10));
     const actionSource = source || (req.file ? "ai_verified_photo" : "manual");
     const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
     const actionTrees = Math.max(1, Math.round(co2 / KG_CO2_PER_TREE));
-    const kmDrivenEquiv = Math.round(co2 * 5); // 1kg CO2 = ~5km guidati in auto media
+    const kmDrivenEquiv = Math.round(co2 * 5);
 
-    // 2. Inserimento nel database SQLite (incluso il pool_id)
     db.run(
-      "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source, image_hash, tier, confidence_score, receipt_hash, pool_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO eco_actions (user_email, title, category, credits_earned, co2_saved_kg, source, image_hash, tier, confidence_score, receipt_hash, pool_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')",
       [email, title, finalCategory, credits, co2, actionSource, calculatedHash, aiTier, confidenceScore, receiptHash, poolId],
       async function (error) {
         if (error) return res.status(500).json({ error: error.message });
 
         const actionId = this.lastID;
 
-        // Aggiorna metriche accumulate del data pool di riferimento
         await updateDataPoolStats(poolId, co2).catch((pErr) => console.error("POOL STATS ERROR:", pErr));
 
-        // 3. Aggiornamento crediti utente
         db.run("UPDATE users SET carbon_credits = carbon_credits + ? WHERE email = ?", [credits, email], (updateError) => {
           if (updateError) console.error("CREDITS UPDATE ERROR:", updateError);
 
-          // 4. Registrazione transazione
           db.run(
             "INSERT INTO transactions (user_email, type, credits, amount_eur, status) VALUES (?, 'earn', ?, ?, 'pending_batch')",
             [email, credits, parseFloat(actionValueEur)]
           );
 
-          // 5. Verifica della soglia per la liquidazione automatica B2B
           db.get("SELECT SUM(co2_saved_kg) as total_kg FROM eco_actions WHERE tier = 'B2B_INSTITUTIONAL'", [], (err, row) => {
             const totalTon = (row?.total_kg || 0) / 1000;
 
@@ -678,7 +742,6 @@ app.delete("/api/eco-actions/:id", (req, res) => {
     db.run("DELETE FROM eco_actions WHERE id = ?", [id], (delErr) => {
       if (delErr) return res.status(500).json({ error: delErr.message });
 
-      // Sottrae i crediti accumulati dall'utente per questa azione
       const creditsToDeduct = row.credits_earned || 0;
       db.run("UPDATE users SET carbon_credits = MAX(0, carbon_credits - ?) WHERE email = ?", [creditsToDeduct, email]);
 
@@ -750,7 +813,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use((req, res) => {
-  res.status(404).json({ error: "not_found", message: "La rotta richiesta non existe." });
+  res.status(404).json({ error: "not_found", message: "La rotta richiesta non esiste." });
 });
 
 /* =====================================================
