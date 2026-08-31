@@ -409,7 +409,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btn = document.getElementById("payBtn");
   const emailInput = document.getElementById("email");
   const message = document.getElementById("payment-message");
-  const paymentElementDiv = document.getElementById("payment-element");
 
   if (!btn || !emailInput) {
     console.error("CHECKOUT ERROR: Missing form elements");
@@ -444,36 +443,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     /* =========================================
-        STRIPE CONFIG & INITIALIZATION (ROTTA RELATIVA)
+        STRIPE CONFIG & INITIALIZATION
     ========================================= */
     const configResponse = await fetch("/api/stripe-config");
 
     if (!configResponse.ok) {
-      throw new Error("Backend unreachable. Activating local test mode.");
+      throw new Error("Impossibile contattare il server. Riprova più tardi.");
     }
 
     const config = await configResponse.json();
 
     if (!config.publishableKey) {
-      throw new Error("Stripe publishable key not configured.");
+      throw new Error("Chiave Stripe non configurata sul server.");
     }
 
     stripe = Stripe(config.publishableKey);
 
-} catch (error) {
+  } catch (error) {
     console.error("STRIPE INITIALIZATION ERROR:", error.message);
-    isDemoMode = false;
     showError("Impossibile caricare il modulo di pagamento. Riprova più tardi.");
     btn.disabled = true;
   }
 
   async function initializePayment() {
-    if (isDemoMode) {
-      paymentReady = true;
-      return;
-    }
-
-    if (creatingPayment || paymentReady) return;
+    if (isDemoMode || creatingPayment || paymentReady) return;
 
     const email = emailInput.value.trim();
     if (!email) return;
@@ -484,18 +477,26 @@ document.addEventListener("DOMContentLoaded", async () => {
       const variant = localStorage.getItem("abVariant") || "A";
       const currentScore = localStorage.getItem("carbonCredit_score") || localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore") || "50";
 
-      /* ROTTA RELATIVA PER L'INTENT DI PAGAMENTO */
-      const response = await fetch("/create-initial-payment", {
+      const response = await fetch("/api/create-initial-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, variant, score: currentScore })
       });
 
-      const data = await response.json();
-
+      // Gestione sicura degli errori HTTP / HTML
       if (!response.ok) {
-        throw new Error(data.error || "Error creating payment intent.");
+        const errorText = await response.text();
+        let errMsg = "Errore durante la creazione del pagamento.";
+        try {
+          const errJson = JSON.parse(errorText);
+          errMsg = errJson.error || errMsg;
+        } catch (e) {
+          errMsg = `Errore server (${response.status}). Verificare i log.`;
+        }
+        throw new Error(errMsg);
       }
+
+      const data = await response.json();
 
       clientSecret = data.clientSecret;
       customerId = data.customerId;
@@ -550,21 +551,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // LOCAL DEMO SIMULATION
-    if (isDemoMode) {
-      btn.disabled = true;
-      btn.innerText = "Processing...";
-
-      setTimeout(() => {
-        localStorage.setItem("email", email);
-        localStorage.setItem("hasPaid", "true");
-        window.location.href = "/protected/success.html";
-      }, 600);
-
-      return;
-    }
-
-    // STRIPE REALTIME PAYMENT
     if (!paymentReady) {
       btn.innerText = "Initializing...";
       btn.disabled = true;
@@ -599,7 +585,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const currentScore = localStorage.getItem("carbonCredit_score") || localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore") || "50";
 
-      const subscriptionResponse = await fetch("/create-subscription", {
+      // Chiamata con prefisso /api/ e gestione sicura
+      const subscriptionResponse = await fetch("/api/create-subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -611,11 +598,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         })
       });
 
-      const subscriptionData = await subscriptionResponse.json();
-
       if (!subscriptionResponse.ok) {
-        throw new Error(subscriptionData.error || "Unable to activate subscription.");
+        const errText = await subscriptionResponse.text();
+        let errMsg = "Unable to activate subscription.";
+        try {
+          const errJson = JSON.parse(errText);
+          errMsg = errJson.error || errMsg;
+        } catch(e) {}
+        throw new Error(errMsg);
       }
+
+      const subscriptionData = await subscriptionResponse.json();
 
       localStorage.setItem("email", email);
       localStorage.setItem("hasPaid", "true");

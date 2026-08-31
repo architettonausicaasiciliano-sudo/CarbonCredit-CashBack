@@ -800,7 +800,7 @@ app.get("/api/stripe-config", (req, res) => {
 });
 
 // 2. Pagamento iniziale 0.69€ usato dalla tua pagina checkout.html
-app.post("/create-initial-payment", async (req, res) => {
+app.post("/api/create-initial-payment", async (req, res) => {
   try {
     const { email, variant, score } = req.body;
 
@@ -842,7 +842,7 @@ app.post("/create-initial-payment", async (req, res) => {
 });
 
 // 3. Attivazione abbonamento dopo i 7 giorni (usato da checkout.html)
-app.post("/create-subscription", async (req, res) => {
+app.post("/api/create-subscription", async (req, res) => {
   try {
     const { customerId, email } = req.body;
 
