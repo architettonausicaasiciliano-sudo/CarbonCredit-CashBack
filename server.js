@@ -10,6 +10,7 @@ const app = express();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const db = require("./db");
 const { verifyEcoAction } = require("./src/services/geminiService");
+const { calculateTranches } = require("./src/services/trancheService");
 
 /* =====================================================
    AUTO-MIGRAZIONE DATABASE, TABELLA DATA_POOLS & INDICI
@@ -447,7 +448,7 @@ app.get("/api/check-duplicate", (req, res) => {
   const { hash } = req.query;
   if (!hash) return res.json({ isDuplicate: false });
 
-  db.get("SELECT id FROM eco_actions WHERE image_hash = ?", [hash], (err, row) => {
+  db.get("SELECT id FROM eco_actions WHERE image_hash = ? OR receipt_hash = ?", [hash, hash], (err, row) => {
     if (err) return res.json({ isDuplicate: false, error: err.message });
     res.json({ isDuplicate: !!row });
   });
@@ -528,7 +529,7 @@ app.post("/create-subscription", async (req, res) => {
 });
 
 /* =====================================================
-   CHECK USER STATUS, BATCH STANDBY & STATS AMBIENTALI
+   CHECK USER STATUS, BATCH STANDBY, STATS & TRANCHES
 ===================================================== */
 app.get("/api/user", (req, res) => {
   const email = req.query.email;
@@ -542,7 +543,8 @@ app.get("/api/user", (req, res) => {
       [email],
       (co2Error, co2Row) => {
         const totalCo2 = co2Row && co2Row.total_co2 ? parseFloat(co2Row.total_co2) : 0.0;
-        const pendingB2bEur = ((totalCo2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2);
+        const pendingB2bEur = parseFloat(((totalCo2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2));
+        const tranchesInfo = calculateTranches(pendingB2bEur);
         const treesPlanted = Math.floor(totalCo2 / KG_CO2_PER_TREE);
 
         res.json({
@@ -551,10 +553,11 @@ app.get("/api/user", (req, res) => {
           carbon_credits: row ? row.carbon_credits : 0.0,
           batchId: CURRENT_BATCH_ID,
           totalCo2Kg: totalCo2,
-          pendingB2bEur: parseFloat(pendingB2bEur),
+          pendingB2bEur: pendingB2bEur,
           treesEquivalent: treesPlanted,
           totalItems: co2Row ? co2Row.total_items : 0,
-          batchStatus: "In aggregazione per Payout Cashback"
+          batchStatus: "In aggregazione per Payout Cashback",
+          tranches: tranchesInfo
         });
       }
     );
@@ -686,31 +689,42 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
               triggerAutoBrokerLiquidation(CURRENT_BATCH_ID, totalTon);
             }
 
-            res.json({
-              success: true,
-              id: actionId,
-              poolId: poolId,
-              tier: aiTier,
-              confidenceScore: confidenceScore,
-              fraudRisk: fraudRisk,
-              creditsAdded: credits,
-              co2SavedKg: co2,
-              category: finalCategory,
-              estimatedB2bValEur: parseFloat(actionValueEur),
-              treesEquivalent: actionTrees,
-              equivalents: {
-                trees: actionTrees,
-                kmDriven: kmDrivenEquiv,
-                estimatedEur: parseFloat(actionValueEur)
-              },
-              batchInfo: {
-                batchId: CURRENT_BATCH_ID,
-                thresholdTon: BATCH_THRESHOLD_TON
-              },
-              batchId: CURRENT_BATCH_ID,
-              photoUrl: photoUrl,
-              message: `Azione registrata con successo! Il tuo impatto ha il valore stimato di €${actionValueEur} ed equivale a ${actionTrees} alberi piantati.`
-            });
+            db.get(
+              "SELECT SUM(co2_saved_kg) as user_total_co2 FROM eco_actions WHERE user_email = ? AND (status IS NULL OR status = 'active')",
+              [email],
+              (uErr, uRow) => {
+                const updatedTotalCo2 = uRow?.user_total_co2 || 0;
+                const updatedTotalEur = parseFloat(((updatedTotalCo2 / 1000) * CO2_PRICE_PER_TON_EUR).toFixed(2));
+                const updatedTranches = calculateTranches(updatedTotalEur);
+
+                res.json({
+                  success: true,
+                  id: actionId,
+                  poolId: poolId,
+                  tier: aiTier,
+                  confidenceScore: confidenceScore,
+                  fraudRisk: fraudRisk,
+                  creditsAdded: credits,
+                  co2SavedKg: co2,
+                  category: finalCategory,
+                  estimatedB2bValEur: parseFloat(actionValueEur),
+                  treesEquivalent: actionTrees,
+                  equivalents: {
+                    trees: actionTrees,
+                    kmDriven: kmDrivenEquiv,
+                    estimatedEur: parseFloat(actionValueEur)
+                  },
+                  tranches: updatedTranches,
+                  batchInfo: {
+                    batchId: CURRENT_BATCH_ID,
+                    thresholdTon: BATCH_THRESHOLD_TON
+                  },
+                  batchId: CURRENT_BATCH_ID,
+                  photoUrl: photoUrl,
+                  message: `Azione registrata con successo! Il tuo impatto ha il valore stimato di €${actionValueEur} ed equivale a ${actionTrees} alberi piantati.`
+                });
+              }
+            );
           });
         });
       }
