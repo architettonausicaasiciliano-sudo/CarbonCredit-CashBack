@@ -1,16 +1,29 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // Recupera l'email dell'utente registrata nel localStorage
+    // 1. Recupero credenziali utente da localStorage
     const userEmail = localStorage.getItem('email') || localStorage.getItem('userEmail');
 
-    // Elementi DOM della Dashboard
+    // 2. Elementi DOM - Statistiche Principali
     const userCreditsEl = document.getElementById('userCredits');
+    const pendingCcValEl = document.getElementById('pendingCcVal');
     const totalCo2El = document.getElementById('totalCo2');
     const totalTreesEl = document.getElementById('totalTrees');
+    const treeBannerTextEl = document.getElementById('treeBannerText');
     const batchIdEl = document.getElementById('batchId');
     const pendingEurEl = document.getElementById('pendingEur');
     const batchStatusEl = document.getElementById('batchStatus');
-    const treeBannerTextEl = document.getElementById('treeBannerText');
+
+    // Elementi DOM - Tranche & Modale
+    const dashTrancheLabel = document.getElementById('dashTrancheLabel');
+    const dashProgressBarFill = document.getElementById('dashProgressBarFill');
+    const dashProgressText = document.getElementById('dashProgressText');
+    const dashUnlockedCashback = document.getElementById('dashUnlockedCashback');
     const tranchesContainerEl = document.getElementById('tranchesContainer');
+    const trancheModal = document.getElementById('trancheModal');
+    const btnOpenTrancheModal = document.getElementById('btnOpenTrancheModal');
+    const btnCloseTrancheModal = document.getElementById('btnCloseTrancheModal');
+    const btnCloseTrancheModalBottom = document.getElementById('btnCloseTrancheModalBottom');
+
+    // Elementi DOM - Azioni & Liste
     const btnRedeem = document.getElementById('btnRedeem');
     const assetsList = document.getElementById('assetsList');
 
@@ -19,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /* =====================================================
-       1. RECUPERO STATISTICHE E DATI UTENTE
+       1. RECUPERO E RENDER STATISTICHE UTENTE
     ===================================================== */
     async function loadUserData() {
         if (!userEmail) return;
@@ -31,26 +44,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data && !data.error) {
                 // Saldo Crediti e CO2
                 if (userCreditsEl) userCreditsEl.textContent = `${(data.carbon_credits || 0).toFixed(1)} CC`;
+                if (pendingCcValEl) pendingCcValEl.textContent = `${data.pendingCc || 0} CC`;
                 if (totalCo2El) totalCo2El.textContent = `${(data.totalCo2Kg || 0).toFixed(1)} kg`;
                 if (totalTreesEl) totalTreesEl.textContent = `${data.treesEquivalent || 0} 🌳`;
-                
+                if (treeBannerTextEl) treeBannerTextEl.textContent = `${data.treesEquivalent || 0} Equivalente Alberi Piantati`;
+
                 // Dati Batch B2B
                 if (batchIdEl) batchIdEl.textContent = data.batchId || "BATCH-2026-104";
                 if (pendingEurEl) pendingEurEl.textContent = `€ ${(data.pendingB2bEur || 0).toFixed(2)}`;
-                if (batchStatusEl) batchStatusEl.textContent = data.batchStatus || "⏳ In aggregazione per Payout Cashback";
-                
-                // Impatto Simbolico (Alberi)
-                if (treeBannerTextEl) {
-                    treeBannerTextEl.textContent = `${data.treesEquivalent || 0} Trees Planted Equivalent`;
-                }
+                if (batchStatusEl) batchStatusEl.textContent = data.batchStatus || "In aggregazione per Payout Cashback";
 
-                // Render Tranches (se presente l'elemento nel DOM)
-                if (tranchesContainerEl && data.tranches) {
-                    renderTranches(data.tranches);
-                }
+                // Calcolo e Render Tranche (Backend Data o Tranches array)
+                renderTranchesProgress(data);
 
-                // Controllo automatico soglia €1000
-                checkThousandThreshold();
+                // Controllo soglia €1000
+                await checkThousandThreshold();
             }
         } catch (err) {
             console.error("Errore durante il recupero dei dati utente:", err);
@@ -58,18 +66,66 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /* =====================================================
-       2. RENDER TRANCHES IMPATTO / SBLOCCO CASHBACK
+       2. CALCOLO E RENDER AVANZAMENTO TRANCHE (PROGRESS BAR & MODAL)
     ===================================================== */
-    function renderTranches(tranches) {
-        if (!tranchesContainerEl || !Array.isArray(tranches)) return;
-        tranchesContainerEl.innerHTML = tranches.map(t => `
-            <div class="tranche-item ${t.unlocked ? 'unlocked' : 'locked'}" style="padding: 10px; margin: 5px 0; border-radius: 6px; background: ${t.unlocked ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.03)'}; border: 1px solid ${t.unlocked ? '#10b981' : 'rgba(255,255,255,0.1)'};">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>Tranche ${t.id} (€${t.targetEur})</span>
-                    <strong style="color: ${t.unlocked ? '#10b981' : '#a0aec0'};">${t.unlocked ? '✓ Sbloccata' : '🔒 In Corso'}</strong>
-                </div>
-            </div>
-        `).join('');
+    function renderTranchesProgress(data) {
+        const totalCreditAccumulated = data.totalCreditAccumulated || data.totalSpentEur || 0;
+        const tranchesList = data.tranches || [];
+
+        const completedTranches = Math.floor(totalCreditAccumulated / 1000);
+        const currentTrancheProgress = parseFloat((totalCreditAccumulated % 1000).toFixed(2));
+        const currentTranchePercentage = parseFloat(((currentTrancheProgress / 1000) * 100).toFixed(1));
+        const unlockedCashback = completedTranches * 100;
+
+        // Aggiornamento Card Principale Dashboard
+        if (dashTrancheLabel) dashTrancheLabel.innerText = `Tranche Attiva: #${completedTranches + 1}`;
+        if (dashProgressBarFill) dashProgressBarFill.style.width = `${currentTranchePercentage}%`;
+        if (dashProgressText) dashProgressText.innerText = `€${currentTrancheProgress.toFixed(2)} / €1.000,00 (${currentTranchePercentage}%)`;
+        if (dashUnlockedCashback) dashUnlockedCashback.innerText = `Sbloccati: €${unlockedCashback.toFixed(2)}`;
+
+        // Render Elenco Tranche dentro la Modale
+        if (tranchesContainerEl) {
+            tranchesContainerEl.innerHTML = '';
+
+            // Se il backend invia una lista predefinita la usiamo, altrimenti la generiamo dinamicamente
+            if (tranchesList.length > 0) {
+                tranchesContainerEl.innerHTML = tranchesList.map(t => `
+                    <div class="tranche-item ${t.unlocked ? 'completed' : ''}">
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-weight:bold; margin-bottom: 6px;">
+                            <span>Tranche #${t.id} (€${t.targetEur})</span>
+                            <span style="color: ${t.unlocked ? 'var(--accent-green-bright)' : 'var(--text-muted)'};">
+                                ${t.unlocked ? '✓ Sbloccata (€100)' : '🔒 In Corso'}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                for (let i = 0; i <= completedTranches; i++) {
+                    const isCompleted = i < completedTranches;
+                    const trancheVal = isCompleted ? 1000 : currentTrancheProgress;
+                    const pct = isCompleted ? 100 : currentTranchePercentage;
+
+                    const item = document.createElement('div');
+                    item.className = `tranche-item ${isCompleted ? 'completed' : ''}`;
+                    item.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px;">
+                            <span>Tranche #${i + 1} ${isCompleted ? '✅ (Completata)' : '⏳ (In corso)'}</span>
+                            <span style="color: ${isCompleted ? 'var(--accent-yellow)' : 'var(--text-muted)'};">
+                                ${isCompleted ? 'Cashback Sbloccato: €100.00' : 'Sblocco a 1.000 €'}
+                            </span>
+                        </div>
+                        <div class="progress-track" style="height: 8px; margin: 6px 0;">
+                            <div class="progress-fill" style="width: ${pct}%;"></div>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                            <span>Credito: €${trancheVal.toFixed(2)} / €1.000,00</span>
+                            <span>Avanzamento: ${pct}%</span>
+                        </div>
+                    `;
+                    tranchesContainerEl.appendChild(item);
+                }
+            }
+        }
     }
 
     /* =====================================================
@@ -107,8 +163,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (actions.length === 0) {
                 assetsList.innerHTML = `
-                    <p class="empty-msg" style="text-align: center; color: #a0aec0; padding: 20px;">
-                        Nessun bene green o acquisto registrato. Clicca sul pulsante in alto per registrare la tua prima azione!
+                    <p class="empty-msg" style="text-align: center; color: var(--text-muted); padding: 24px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
+                        Nessun bene green o acquisto registrato. Clicca sul pulsante in alto per registrare la tua prima azione dMRV!
                     </p>`;
                 return;
             }
@@ -122,33 +178,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const card = document.createElement('div');
                 card.className = 'asset-item';
-                card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 10px; background: rgba(255,255,255,0.02); border-radius: 8px;';
-                
+                card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 12px; background: var(--card-bg); border-radius: 12px;';
+
                 card.innerHTML = `
                     <div class="asset-info" style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                            <h4 style="margin: 0; color: #00ff88; font-size: 1.1em;">${action.title}</h4>
-                            <span style="font-size: 0.7em; padding: 2px 8px; border-radius: 4px; font-weight: bold; background: ${isB2B ? 'rgba(56, 189, 248, 0.2)' : 'rgba(234, 179, 8, 0.2)'}; color: ${isB2B ? '#38bdf8' : '#eab308'}; border: 1px solid ${isB2B ? '#38bdf8' : '#eab308'};">
+                            <h4 style="margin: 0; color: var(--accent-green-bright); font-size: 1.05em;">${action.title}</h4>
+                            <span style="font-size: 0.7em; padding: 2px 8px; border-radius: 4px; font-weight: bold; background: ${isB2B ? 'rgba(56, 189, 248, 0.15)' : 'rgba(234, 179, 8, 0.15)'}; color: ${isB2B ? 'var(--accent-blue)' : 'var(--accent-yellow)'}; border: 1px solid ${isB2B ? 'var(--accent-blue)' : 'var(--accent-yellow)'};">
                                 ${isB2B ? 'TIER 2 B2B' : 'TIER 1 COMMUNITY'}
                             </span>
                         </div>
-                        <p style="margin: 0; font-size: 0.85em; color: #a0aec0;">
+                        <p style="margin: 0; font-size: 0.85em; color: var(--text-muted);">
                             Categoria: <strong>${action.category}</strong> | Fonte: ${action.source || 'Inserimento Manuale'} | Stato: <em>${statusBadge}</em>
                         </p>
-                        <p style="margin: 6px 0 0 0; font-size: 0.9em; color: #e2e8f0;">
+                        <p style="margin: 6px 0 0 0; font-size: 0.9em; color: #f8fafc;">
                             CO₂ Evitata: <strong>${co2Kg} kg</strong> | 
                             Crediti: <strong>+${action.credits_earned} CC</strong> | 
-                            Valore B2B Stimato: <strong style="color: #ffb703;">€ ${estB2bValue}</strong>
+                            Valore B2B Stimato: <strong style="color: var(--accent-yellow);">€ ${estB2bValue}</strong>
                         </p>
                         <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center;">
-                            <a href="/verify/${action.id}" target="_blank" style="color: #38bdf8; font-size: 0.8em; text-decoration: underline;">🔍 Audit dMRV</a>
-                            <button class="btn-delete-asset" data-id="${action.id}" style="background: transparent; border: none; color: #ef4444; font-size: 0.8em; cursor: pointer; padding: 0;">🗑 Rimuovi</button>
+                            <a href="/verify/${action.id}" target="_blank" style="color: var(--accent-blue); font-size: 0.8em; text-decoration: underline;">🔍 Audit dMRV</a>
+                            <button class="btn-delete-asset" data-id="${action.id}" style="background: transparent; border: none; color: var(--danger-red); font-size: 0.8em; cursor: pointer; padding: 0;">🗑 Rimuovi</button>
                         </div>
                     </div>
-                    ${action.photo_url ? `<img src="${action.photo_url}" class="asset-thumb" alt="Allegato" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px; margin-left: 12px; border: 1px solid #00ff88;">` : ''}
+                    ${action.photo_url ? `<img src="${action.photo_url}" class="asset-thumb" alt="Allegato" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px; margin-left: 12px; border: 1px solid var(--accent-green);">` : ''}
                 `;
 
-                // Event listener per la rimozione dell'azione
+                // Event listener eliminazione
                 const deleteBtn = card.querySelector('.btn-delete-asset');
                 if (deleteBtn) {
                     deleteBtn.addEventListener('click', async (e) => {
@@ -218,7 +274,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const result = await res.json();
                 if (result.success) {
-                    alert(`Richiesta di riscatto registrata!\n\nImporto Cashback: €${amountEur}\nStato: La richiesta è stata accodata nel Batch B2B corrente. Riceverai notifica dell'accredito a completamento.`);
+                    alert(`Richiesta di riscatto registrata!\n\nImporto Cashback: €${amountEur}\nStato: La richiesta è stata accodata nel Batch B2B corrente.`);
                     await loadUserData();
                     await loadEcoActions();
                 } else {
@@ -230,6 +286,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    /* =====================================================
+       7. CONTROL EVENTI MODALE TRANCHE
+    ===================================================== */
+    if (btnOpenTrancheModal && trancheModal) {
+        btnOpenTrancheModal.addEventListener('click', () => {
+            trancheModal.style.display = 'flex';
+        });
+    }
+    if (btnCloseTrancheModal && trancheModal) {
+        btnCloseTrancheModal.addEventListener('click', () => {
+            trancheModal.style.display = 'none';
+        });
+    }
+    if (btnCloseTrancheModalBottom && trancheModal) {
+        btnCloseTrancheModalBottom.addEventListener('click', () => {
+            trancheModal.style.display = 'none';
+        });
+    }
+    window.addEventListener('click', (e) => {
+        if (e.target === trancheModal) {
+            trancheModal.style.display = 'none';
+        }
+    });
 
     // Esecuzione caricamento iniziale
     await loadUserData();

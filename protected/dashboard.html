@@ -13,6 +13,8 @@
       --accent-green: #10b981;
       --accent-green-bright: #34d399;
       --accent-blue: #38bdf8;
+      --accent-yellow: #eab308;
+      --danger-red: #ef4444;
       --text-muted: #94a3b8;
     }
 
@@ -88,6 +90,33 @@
       margin-top: 24px;
     }
 
+    /* Modulo Tranche Cashback */
+    .tranche-card {
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 16px;
+      padding: 22px;
+      margin-top: 24px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 14px;
+      background: #0f172a;
+      border-radius: 7px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      margin: 12px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+      width: 0%;
+      transition: width 0.6s ease-in-out;
+      box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+    }
+
     .btn-action {
       background: rgba(16, 185, 129, 0.15);
       color: var(--accent-green-bright);
@@ -102,6 +131,67 @@
     }
     .btn-action:hover {
       background: rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-inspect {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid var(--accent-blue);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    .btn-inspect:hover {
+      background: rgba(56, 189, 248, 0.3);
+    }
+
+    /* Modal Overlay & Card */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      max-width: 550px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      animation: modalFadeIn 0.25s ease-out;
+    }
+
+    .tranche-item {
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .tranche-item.completed {
+      border-color: var(--accent-green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -134,11 +224,31 @@
     </div>
   </div>
 
+  <!-- Progresso Tranche Cashback Attiva -->
+  <div class="tranche-card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h3 style="margin: 0; font-size: 1.05rem; color: var(--accent-green-bright);">🔍 Progresso Riscatto Tranche</h3>
+        <span id="dashTrancheLabel" style="font-size: 0.8rem; color: var(--text-muted);">Tranche Attiva: #1</span>
+      </div>
+      <button id="btnOpenTrancheModal" class="btn-inspect">🔎 Ispeziona Tranche</button>
+    </div>
+
+    <div class="progress-track">
+      <div id="dashProgressBarFill" class="progress-fill"></div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+      <span id="dashProgressText" style="color: var(--text-muted);">€0.00 / €1.000,00</span>
+      <span id="dashUnlockedCashback" style="color: var(--accent-yellow); font-weight: bold;">Sbloccati: €0.00</span>
+    </div>
+  </div>
+
   <!-- Card B2B & Payout -->
   <div class="b2b-card">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <div>
-        <h3 style="margin: 0; font-size: 1.05rem;">💰 Saldo Cashback Maturato (10%)</h3>
+        <h3 style="margin: 0; font-size: 1.05rem;">💰 Saldo Cashback Maturato Totale (10%)</h3>
         <span style="font-size: 0.8rem; color: var(--text-muted);">Batch ID: <strong id="batchId" style="color: var(--accent-blue);">N/A</strong> | Stato: <span id="batchStatus">In lavorazione</span></span>
       </div>
       <div id="pendingEur" style="font-size: 1.6rem; font-weight: 900; color: var(--accent-green-bright);">€ 0.00</div>
@@ -151,6 +261,100 @@
   <div id="assetsList"></div>
 </div>
 
+<!-- Modal Ispezione Tranche -->
+<div id="trancheModal" class="modal-overlay">
+  <div class="modal-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h3 style="margin: 0; color: var(--accent-green-bright); font-size: 1.2rem;">🔍 Ispezione Tranche Cashback</h3>
+      <button id="btnCloseTrancheModal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer;">✕</button>
+    </div>
+
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0; margin-bottom: 16px;">
+      Ogni tranche richiede l'accumulo di <strong>1.000,00 €</strong> di credito (generati dal 10% degli scontrini dMRV) per sbloccare <strong>100,00 €</strong> di cashback erogabile.
+    </p>
+
+    <div id="tranchesContainer">
+      <!-- Popolato dinamicamente da JavaScript -->
+    </div>
+
+    <button id="btnCloseTrancheModalBottom" class="btn-action" style="background: #334155; color: white; border-color: #475569; margin-top: 10px;">
+      Chiudi Ispezione
+    </button>
+  </div>
+</div>
+
 <script src="/protected/js/dashboard.js"></script>
+<script>
+  // Script di supporto locale per aggiornamento e gestione modale Tranche
+  function syncTrancheDashboard() {
+    const assets = JSON.parse(localStorage.getItem('dmrv_user_assets_list') || '[]');
+    const totalCredit = assets.reduce((sum, item) => sum + (item.credit || 0), 0);
+    
+    const completedTranches = Math.floor(totalCredit / 1000);
+    const currentTrancheProgress = parseFloat((totalCredit % 1000).toFixed(2));
+    const currentTranchePercentage = parseFloat(((currentTrancheProgress / 1000) * 100).toFixed(1));
+    const unlockedCashback = completedTranches * 100;
+
+    // Aggiornamento interfaccia dashboard
+    const dashTrancheLabel = document.getElementById('dashTrancheLabel');
+    const dashProgressBarFill = document.getElementById('dashProgressBarFill');
+    const dashProgressText = document.getElementById('dashProgressText');
+    const dashUnlockedCashback = document.getElementById('dashUnlockedCashback');
+
+    if (dashTrancheLabel) dashTrancheLabel.innerText = `Tranche Attiva: #${completedTranches + 1}`;
+    if (dashProgressBarFill) dashProgressBarFill.style.width = `${currentTranchePercentage}%`;
+    if (dashProgressText) dashProgressText.innerText = `€${currentTrancheProgress.toFixed(2)} / €1.000,00 (${currentTranchePercentage}%)`;
+    if (dashUnlockedCashback) dashUnlockedCashback.innerText = `Riscattabili: €${unlockedCashback.toFixed(2)}`;
+
+    // Popolamento Modale Ispezione
+    const tranchesContainer = document.getElementById('tranchesContainer');
+    if (tranchesContainer) {
+      tranchesContainer.innerHTML = '';
+
+      for (let i = 0; i <= completedTranches; i++) {
+        const isCurrent = i === completedTranches;
+        const isCompleted = i < completedTranches;
+        const trancheVal = isCompleted ? 1000 : currentTrancheProgress;
+        const pct = isCompleted ? 100 : currentTranchePercentage;
+        const cashbackVal = isCompleted ? 100 : 0;
+
+        const item = document.createElement('div');
+        item.className = `tranche-item ${isCompleted ? 'completed' : ''}`;
+        item.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px;">
+            <span>Tranche #${i + 1} ${isCompleted ? '✅ (Completata)' : '⏳ (In corso)'}</span>
+            <span style="color: ${isCompleted ? 'var(--accent-yellow)' : 'var(--text-muted)'};">
+              ${isCompleted ? 'Cashback Sbloccato: €100.00' : 'Sblocco a 1.000 €'}
+            </span>
+          </div>
+          <div class="progress-track" style="height: 8px; margin: 6px 0;">
+            <div class="progress-fill" style="width: ${pct}%;"></div>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+            <span>Credito: €${trancheVal.toFixed(2)} / €1.000,00</span>
+            <span>Avanzamento: ${pct}%</span>
+          </div>
+        `;
+        tranchesContainer.appendChild(item);
+      }
+    }
+  }
+
+  // Gestione apertura/chiusura Modale
+  const modal = document.getElementById('trancheModal');
+  const btnOpen = document.getElementById('btnOpenTrancheModal');
+  const btnClose = document.getElementById('btnCloseTrancheModal');
+  const btnCloseBottom = document.getElementById('btnCloseTrancheModalBottom');
+
+  if (btnOpen) btnOpen.addEventListener('click', () => { syncTrancheDashboard(); modal.style.display = 'flex'; });
+  if (btnClose) btnClose.addEventListener('click', () => { modal.style.display = 'none'; });
+  if (btnCloseBottom) btnCloseBottom.addEventListener('click', () => { modal.style.display = 'none'; });
+
+  window.addEventListener('click', (e) => {
+    if (e.target === modal) modal.style.display = 'none';
+  });
+
+  document.addEventListener('DOMContentLoaded', syncTrancheDashboard);
+</script>
 </body>
 </html>

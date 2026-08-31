@@ -250,16 +250,17 @@
     .btn-secondary {
       display: block;
       width: 100%;
-      padding: 10px;
-      background: #374151;
+      padding: 12px;
+      background: #2563eb;
       color: white;
       text-align: center;
       border-radius: 8px;
       text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: bold;
       box-sizing: border-box;
       margin-top: 10px;
+      border: 1px solid #3b82f6;
     }
 
     .cert-link {
@@ -389,7 +390,7 @@
 
     <div id="resultDesc" class="result-desc"></div>
 
-    <button type="button" class="btn-submit ready" style="margin-top: 0; margin-bottom: 6px;" onclick="location.reload();">
+    <button type="button" id="btnLoadAnother" class="btn-submit ready" style="margin-top: 0; margin-bottom: 6px;">
       ➕ CARICA SUBITO UN ALTRO BENE ➔
     </button>
     <div style="font-size: 11px; color: #9ca3af; text-align: center; margin-bottom: 16px; font-style: italic;">
@@ -397,7 +398,7 @@
     </div>
 
     <a id="certUrl" href="#" target="_blank" class="cert-link" style="margin: 12px 0;">📄 Visualizza Certificato dMRV Pubblico ➔</a>
-    <a href="/dashboard" class="btn-secondary">Vai alla Dashboard Gestione Beni</a>
+    <a href="/dashboard" class="btn-secondary">📊 Vai alla Dashboard (Ispeziona Tranche) ➔</a>
   </div>
 </div>
 
@@ -408,7 +409,10 @@
   const filePromptText = document.getElementById('filePromptText');
   const dropZone = document.getElementById('dropZone');
   const submitBtn = document.getElementById('submitBtn');
+  const addAssetForm = document.getElementById('addAssetForm');
+  const resultModal = document.getElementById('resultModal');
 
+  // Gestione selezione foto ed anteprima
   photoInput.addEventListener('change', function () {
     const file = this.files[0];
     if (file) {
@@ -424,6 +428,24 @@
     }
   });
 
+  // Funzione di reset pulito per evitare ri-caricamento infinito di scontrini vecchi
+  function resetForm() {
+    addAssetForm.reset();
+    photoInput.value = '';
+    imagePreview.src = '';
+    previewContainer.style.display = 'none';
+    filePromptText.innerText = '⚡ CLICCA QUI PER CARICARE LO SCONTRINO / RICEVUTA ⚡';
+    dropZone.classList.remove('has-file');
+    submitBtn.classList.remove('ready');
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'AVVIA AUDIT AI & GENERAZIONE dMRV ➔';
+    document.getElementById('errorBox').style.display = 'none';
+    resultModal.style.display = 'none';
+    addAssetForm.style.display = 'block';
+  }
+
+  document.getElementById('btnLoadAnother').addEventListener('click', resetForm);
+
   async function calculateImageHash(file) {
     const arrayBuffer = await file.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
@@ -437,16 +459,15 @@
     errorBox.style.display = 'block';
   }
 
-  document.getElementById('addAssetForm').addEventListener('submit', async (e) => {
+  addAssetForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     document.getElementById('errorBox').style.display = 'none';
 
-    const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail') || 'user@example.com';
+    const userEmail = localStorage.getItem('userEmail') || localStorage.getItem('email') || 'user@example.com';
     const title = document.getElementById('title').value;
     const category = document.getElementById('category').value;
     const amountSpend = parseFloat(document.getElementById('amountSpend').value) || 0;
     const file = photoInput.files[0];
-
     const cashbackCredit = amountSpend * 0.10;
 
     if (!file) {
@@ -476,8 +497,8 @@
       const data = await res.json();
 
       if (res.ok && (data.success || data.id)) {
-        document.getElementById('addAssetForm').style.display = 'none';
-        document.getElementById('resultModal').style.display = 'block';
+        addAssetForm.style.display = 'none';
+        resultModal.style.display = 'block';
 
         let assets = JSON.parse(localStorage.getItem('dmrv_user_assets_list') || '[]');
         const newAsset = {
@@ -513,7 +534,6 @@
         document.getElementById('progressBarFill').style.width = `${trancheData.currentTranchePercentage}%`;
         document.getElementById('progressText').innerText = `€${trancheData.currentTrancheProgress.toFixed(2)} / €1.000,00 (${trancheData.currentTranchePercentage}%)`;
 
-        // Popolamento dinamico delle note forensi / audit AI
         const resultDesc = document.getElementById('resultDesc');
         resultDesc.innerHTML = `🛡️ <strong>Verifica AI Forensics completata:</strong> Hash SHA-256 registrato (${imageHash.substring(0, 12)}...). ` + 
                                (data.aiNote || "La prova fotografica è coerente con la spesa dichiarata.");

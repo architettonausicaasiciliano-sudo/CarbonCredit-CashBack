@@ -17,6 +17,7 @@ function calculateTranches(totalEur) {
   // 1. Tranche già completate
   for (let i = 1; i <= completedCount; i++) {
     tranchesList.push({
+      id: i,
       number: i,
       title: `Tranche #${i}`,
       range: `${(i - 1) * 1000}€ - ${i * 1000}€`,
@@ -25,6 +26,7 @@ function calculateTranches(totalEur) {
       percentage: 100,
       cashbackEur: CASHBACK_PER_TRANCHE,
       isCompleted: true,
+      unlocked: true,
       status: "completed"
     });
   }
@@ -32,6 +34,7 @@ function calculateTranches(totalEur) {
   // 2. Tranche in corso (attiva)
   const activeTrancheNumber = completedCount + 1;
   tranchesList.push({
+    id: activeTrancheNumber,
     number: activeTrancheNumber,
     title: `Tranche #${activeTrancheNumber}`,
     range: `${completedCount * 1000}€ - ${(completedCount + 1) * 1000}€`,
@@ -40,6 +43,7 @@ function calculateTranches(totalEur) {
     percentage: currentPercentage,
     cashbackEur: parseFloat((currentProgress * 0.10).toFixed(2)),
     isCompleted: false,
+    unlocked: false,
     status: "in_progress"
   });
 
@@ -50,6 +54,7 @@ function calculateTranches(totalEur) {
     currentTrancheTarget: TRANCHE_SIZE,
     currentTranchePercentage: currentPercentage,
     unlockedCashback: totalUnlockedCashback,
+    tranches: tranchesList,
     tranchesList
   };
 }
