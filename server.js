@@ -607,7 +607,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
 
     db.run("UPDATE users SET stripe_customer_id = ? WHERE email = ?", [customer.id, email]);
 
-    const session = await stripe.checkout.sessions.create({
+const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       customer: customer.id,
       line_items: [
@@ -617,7 +617,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
         },
       ],
       mode: "subscription",
-      success_url: successUrl || `${domain}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${domain}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${domain}/cancel.html`,
       metadata: { email: email },
     });
@@ -1087,7 +1087,43 @@ app.get("/api/admin/export-pool-dossier/:poolId", (req, res) => {
     );
   });
 });
+/* =====================================================
+   GESTIONE ROTTE PROTECTED E RITORNO STRIPE
+   ===================================================== */
 
+// Rotta richiamata dopo il pagamento su Stripe per impostare il cookie di sessione
+app.get("/checkout-success", async (req, res) => {
+  const sessionId = req.query.session_id;
+  if (sessionId && stripe) {
+    try {
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      const email = session.customer_details?.email || session.metadata?.email;
+      if (email) {
+        res.cookie("user_session", email.toLowerCase().trim(), {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 30 * 24 * 60 * 60 * 1000
+        });
+      }
+    } catch (err) {
+      console.error("Errore verifica sessione Stripe:", err);
+    }
+  }
+  res.redirect("/dashboard.html");
+});
+
+// Serve i file della cartella protected
+app.use("/protected", requireAuth, express.static(path.join(__dirname, "protected")));
+
+// Scorciatoie dirette per le pagine protette
+app.get("/dashboard.html", requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, "protected", "dashboard.html"));
+});
+
+app.get("/success.html", requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, "protected", "success.html"));
+});
 /* =====================================================
    FALLBACK ROTTE STATICHE & FRONTEND HYBRID (POSIZIONATO IN FONDO)
    ===================================================== */
