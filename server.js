@@ -11,7 +11,8 @@ const path = require("path");
 const crypto = require("crypto");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
-
+// Service dMRV / AutoBatch
+const autoBatchService = require("./src/services/autoBatchService");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder");
 
 // Gestione sicura di Gemini AI (previene crash in assenza del pacchetto)
