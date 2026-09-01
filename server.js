@@ -1313,6 +1313,21 @@ app.use((err, req, res, next) => {
         message: err.message || "Si è verificato un errore imprevisto."
     });
 });
+/* =====================================================
+   AUTOMAZIONE NOTTURNA (Esecuzione ogni notte alle 02:00)
+   ===================================================== */
+setInterval(async () => {
+    const oraAttuale = new Date();
+    if (oraAttuale.getHours() === 2 && oraAttuale.getMinutes() === 0) {
+        try {
+            console.log("🔄 Avvio aggregazione automatica per macro-categorie...");
+            const risultati = await autoBatchService.checkAndSealBatch(1000);
+            console.log("✅ AutoBatch notturno completato:", risultati);
+        } catch (error) {
+            console.error("❌ Errore durante l'AutoBatch notturno:", error.message);
+        }
+    }
+}, 60000);
 
 /* =====================================================
    AVVIO SERVER EXPRESS
