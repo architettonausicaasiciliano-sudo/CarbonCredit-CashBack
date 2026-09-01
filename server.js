@@ -1315,17 +1315,25 @@ app.use((err, req, res, next) => {
     });
 });
 /* =====================================================
-   AUTOMAZIONE NOTTURNA (Esecuzione ogni notte alle 02:00)
+   AUTOMAZIONE NOTTURNA CON SIMULAZIONE B2B (DRY_RUN)
    ===================================================== */
 setInterval(async () => {
     const oraAttuale = new Date();
-    if (oraAttuale.getHours() === 2 && oraAttuale.getMinutes() === 0) {
+    if (oraAttuale.getHours() === 0 && oraAttuale.getMinutes() === 0) {
+        if (process.env.CRON_ENABLED !== "true") return;
+
+        console.log("⏰ [CRON NOTTURNO] Avvio aggregazione dMRV...");
         try {
-            console.log("🔄 Avvio aggregazione automatica per macro-categorie...");
-            const risultati = await autoBatchService.checkAndSealBatch(1000);
-            console.log("✅ AutoBatch notturno completato:", risultati);
+            const batchResult = await autoBatchService.checkAndSealBatch(1000);
+            const mode = process.env.B2B_DISPATCH_MODE || "DRY_RUN";
+
+            if (mode === "DRY_RUN") {
+                console.log("🧪 [SIMULAZIONE B2B] Blocco elaborato e congelato a DB (Nessun invio esterno):", batchResult);
+            } else {
+                console.log("🚀 [LIVE B2B] Invio automatico report all'acquirente eseguito.");
+            }
         } catch (error) {
-            console.error("❌ Errore durante l'AutoBatch notturno:", error.message);
+            console.error("❌ Errore durante l'automazione notturna:", error.message);
         }
     }
 }, 60000);

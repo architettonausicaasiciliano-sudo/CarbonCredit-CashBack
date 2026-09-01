@@ -135,3 +135,49 @@ db.serialize(() => {
 });
 
 module.exports = db;
+// Incolla all'interno di db.js (nella sezione delle inizializzazioni tabelle)
+
+db.serialize(() => {
+    // 1. Creazione Tabella B2B Buyers
+    db.run(`
+        CREATE TABLE IF NOT EXISTS b2b_buyers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            company_name TEXT NOT NULL,
+            vat_number TEXT,
+            email TEXT NOT NULL UNIQUE,
+            webhook_url TEXT,
+            macro_category TEXT NOT NULL,
+            price_per_kg_co2 REAL NOT NULL DEFAULT 0.10,
+            monthly_budget_limit REAL DEFAULT 0.00,
+            status TEXT NOT NULL DEFAULT 'ACTIVE',
+            auto_invoice BOOLEAN NOT NULL DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `, (err) => {
+        if (err) {
+            console.error("❌ Errore creazione tabella b2b_buyers:", err.message);
+        } else {
+            console.log("✅ Tabella b2b_buyers verificata/creata.");
+            seedB2bBuyers();
+        }
+    });
+});
+
+// 2. Seeding automatico di 2 acquirenti B2B di prova
+function seedB2bBuyers() {
+    db.get(`SELECT COUNT(*) AS count FROM b2b_buyers`, [], (err, row) => {
+        if (err || !row) return;
+        if (row.count === 0) {
+            const insertQuery = `
+                INSERT INTO b2b_buyers (company_name, vat_number, email, webhook_url, macro_category, price_per_kg_co2)
+                VALUES 
+                ('Green Mobility Corp', 'IT12345678901', 'mobility-buyer@test.com', 'https://webhook.site/mobility-demo', 'MOBILITY', 0.12),
+                ('EcoEnergy Global Ltd', 'IT98765432109', 'energy-buyer@test.com', 'https://webhook.site/energy-demo', 'ENERGY', 0.10)
+            `;
+            db.run(insertQuery, (err) => {
+                if (err) console.error("❌ Errore seeding B2B:", err.message);
+                else console.log("🌱 Seeding completato: 2 acquirenti B2B inseriti per la simulazione.");
+            });
+        }
+    });
+}
