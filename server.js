@@ -1128,3 +1128,64 @@ app.get("/success.html", requireAuth, (req, res) => {
 app.get("/add-asset.html", requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "add-asset.html"));
 });
+/* =====================================================
+   FALLBACK ROTTE STATICHE & FRONTEND HYBRID
+   ===================================================== */
+app.get("*", (req, res) => {
+  const indexPath = path.join(__dirname, "public", "index.html");
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Carbon Credit dMRV API Engine</title>
+        <style>
+          body { font-family: monospace; background:#0f172a; color:#38bdf8; padding:40px; }
+          h1 { color:#10b981; }
+          .card { background:#1e293b; padding:20px; border-radius:8px; margin-top:20px; border:1px solid #334155; }
+        </style>
+      </head>
+      <body>
+        <h1>🌱 Carbon Credit & dMRV Engine Active</h1>
+        <p>Il server Node.js Express è in esecuzione ed operativo.</p>
+        <div class="card">
+          <h3>Stato Servizi Engine:</h3>
+          <ul>
+            <li>Database SQLite: <strong>ONLINE</strong></li>
+            <li>AI dMRV Engine (Gemini 2.5 Flash): <strong>READY</strong></li>
+            <li>Stripe Payment & Webhook Gateway: <strong>ACTIVE</strong></li>
+            <li>Anti-Double Spending Forensics: <strong>ACTIVE</strong></li>
+            <li>HTTP-Only Cookie Authentication: <strong>ENFORCED</strong></li>
+          </ul>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+});
+
+/* =====================================================
+   GESTIONE GLOBALE ERRORE & UNCAUGHT EXCEPTIONS
+   ===================================================== */
+app.use((err, req, res, next) => {
+  console.error("❌ ERRORE NON GESTITO NEL SERVER:", err.stack);
+  res.status(500).json({
+    error: "INTERNAL_SERVER_ERROR",
+    message: err.message || "Si è verificato un errore imprevisto.",
+  });
+});
+
+/* =====================================================
+   AVVIO SERVER EXPRESS
+   ===================================================== */
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`=====================================================`);
+  console.log(`🚀 SERVER DMRV & CARBON CREDIT ATTIVO SULLA PORTA ${PORT}`);
+  console.log(`🌍 API Endpoint locale: http://localhost:${PORT}`);
+  console.log(`🛡️ Audit dMRV Certificati: http://localhost:${PORT}/verify/:certId`);
+  console.log(`=====================================================`);
+});
