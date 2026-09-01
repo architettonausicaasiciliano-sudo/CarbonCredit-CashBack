@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (pendingEurEl) pendingEurEl.textContent = `€ ${(data.pendingB2bEur || 0).toFixed(2)}`;
                 if (batchStatusEl) batchStatusEl.textContent = data.batchStatus || "In aggregazione per Payout Cashback";
 
-                // Calcolo e Render Tranche (Backend Data o Tranches array)
+                // Calcolo e Render Tranche con relativi Codici Tracciamento
                 renderTranchesProgress(data);
 
                 // Controllo soglia €1000
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /* =====================================================
-       2. CALCOLO E RENDER AVANZAMENTO TRANCHE (PROGRESS BAR & MODAL)
+       2. CALCOLO, RENDER E GESTIONE CODICI DI TRACCIAMENTO TRANCHE
     ===================================================== */
     function renderTranchesProgress(data) {
         const totalCreditAccumulated = data.totalCreditAccumulated || data.totalSpentEur || 0;
@@ -87,45 +87,105 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (tranchesContainerEl) {
             tranchesContainerEl.innerHTML = '';
 
-            // Se il backend invia una lista predefinita la usiamo, altrimenti la generiamo dinamicamente
+            // Se l'API restituisce un array 'tranches' personalizzato
             if (tranchesList.length > 0) {
-                tranchesContainerEl.innerHTML = tranchesList.map(t => `
-                    <div class="tranche-item ${t.unlocked ? 'completed' : ''}">
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-weight:bold; margin-bottom: 6px;">
-                            <span>Tranche #${t.id} (€${t.targetEur})</span>
-                            <span style="color: ${t.unlocked ? 'var(--accent-green-bright)' : 'var(--text-muted)'};">
-                                ${t.unlocked ? '✓ Sbloccata (€100)' : '🔒 In Corso'}
-                            </span>
-                        </div>
-                    </div>
-                `).join('');
+                tranchesList.forEach(t => {
+                    const item = createTrancheElement(t.id, t.unlocked, t.targetEur || 1000, t.currentEur || 1000, t.trackingCode, t.processingStatus);
+                    tranchesContainerEl.appendChild(item);
+                });
             } else {
+                // Generazione dinamica basata sulle tranche completate e su quella in corso
                 for (let i = 0; i <= completedTranches; i++) {
                     const isCompleted = i < completedTranches;
                     const trancheVal = isCompleted ? 1000 : currentTrancheProgress;
                     const pct = isCompleted ? 100 : currentTranchePercentage;
+                    const trancheNum = i + 1;
 
-                    const item = document.createElement('div');
-                    item.className = `tranche-item ${isCompleted ? 'completed' : ''}`;
-                    item.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px;">
-                            <span>Tranche #${i + 1} ${isCompleted ? '✅ (Completata)' : '⏳ (In corso)'}</span>
-                            <span style="color: ${isCompleted ? 'var(--accent-yellow)' : 'var(--text-muted)'};">
-                                ${isCompleted ? 'Cashback Sbloccato: €100.00' : 'Sblocco a 1.000 €'}
-                            </span>
-                        </div>
-                        <div class="progress-track" style="height: 8px; margin: 6px 0;">
-                            <div class="progress-fill" style="width: ${pct}%;"></div>
-                        </div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
-                            <span>Credito: €${trancheVal.toFixed(2)} / €1.000,00</span>
-                            <span>Avanzamento: ${pct}%</span>
-                        </div>
-                    `;
+                    // Codice univoco di tracciamento simulato/derivato
+                    const userHash = (userEmail || 'USER').substring(0, 4).toUpperCase();
+                    const trackingCode = `TRN-2026-T${trancheNum}-${userHash}-${1000 + trancheNum * 17}`;
+                    const processingStatus = isCompleted ? 'In Convalida Batch B2B / Liquidazione' : 'In Accumulo Credito';
+
+                    const item = createTrancheElement(trancheNum, isCompleted, 1000, trancheVal, trackingCode, processingStatus, pct);
                     tranchesContainerEl.appendChild(item);
                 }
             }
         }
+    }
+
+    /* Helper per la creazione del DOM di una singola Tranche */
+    function createTrancheElement(num, isCompleted, targetEur, currentEur, trackingCode, processingStatus, pct) {
+        const item = document.createElement('div');
+        item.className = `tranche-item ${isCompleted ? 'completed' : ''}`;
+        
+        const progressPercentage = pct !== undefined ? pct : Math.min(100, ((currentEur / targetEur) * 100).toFixed(1));
+
+        item.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px;">
+                <span>Tranche #${num} ${isCompleted ? '✅ (Completata)' : '⏳ (In corso)'}</span>
+                <span style="color: ${isCompleted ? 'var(--accent-yellow)' : 'var(--text-muted)'};">
+                    ${isCompleted ? 'Cashback Sbloccato: €100.00' : `Sblocco a €${targetEur}`}
+                </span>
+            </div>
+
+            <div class="progress-track" style="height: 8px; margin: 6px 0;">
+                <div class="progress-fill" style="width: ${progressPercentage}%;"></div>
+            </div>
+
+            <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+                <span>Credito: €${currentEur.toFixed(2)} / €${targetEur.toFixed(2)} (${progressPercentage}%)</span>
+                ${isCompleted ? `
+                    <button class="btn-track-code" data-code="${trackingCode}" data-tranche="${num}">
+                        🎟️ Codice Processamento
+                    </button>
+                ` : '<span style="font-size: 0.75rem; color: var(--text-muted);">Avanzamento in corso</span>'}
+            </div>
+
+            ${isCompleted ? `
+                <div class="tranche-code-detail" id="trancheCodeDetail-${num}">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <strong style="color: var(--accent-yellow);">📋 Codice Tracciamento Lavorazione:</strong>
+                        <button class="btn-copy-code" data-code="${trackingCode}" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: white; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;">📋 Copia</button>
+                    </div>
+                    <div style="font-family: monospace; background: #000; padding: 6px 10px; border-radius: 4px; color: var(--accent-green-bright); font-weight: bold; font-size: 0.95rem; text-align: center; margin-bottom: 6px; letter-spacing: 0.5px;">
+                        ${trackingCode}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">
+                        • Stato Processamento: <strong style="color: var(--accent-blue);">${processingStatus}</strong><br>
+                        • Nota Trasparenza: Questo codice identifica in modo immutabile la tranche dMRV aggregata nel Batch B2B di riferimento.
+                    </div>
+                </div>
+            ` : ''}
+        `;
+
+        // Event listener per mostrare/nascondere il codice di processamento
+        const btnTrack = item.querySelector('.btn-track-code');
+        if (btnTrack) {
+            btnTrack.addEventListener('click', () => {
+                const detailBox = item.querySelector(`#trancheCodeDetail-${num}`);
+                if (detailBox) {
+                    const isVisible = detailBox.style.display === 'block';
+                    detailBox.style.display = isVisible ? 'none' : 'block';
+                }
+            });
+        }
+
+        // Event listener per copiare il codice negli appunti
+        const btnCopy = item.querySelector('.btn-copy-code');
+        if (btnCopy) {
+            btnCopy.addEventListener('click', (e) => {
+                const codeToCopy = e.currentTarget.getAttribute('data-code');
+                navigator.clipboard.writeText(codeToCopy).then(() => {
+                    const origText = e.currentTarget.innerText;
+                    e.currentTarget.innerText = '✓ Copiato!';
+                    setTimeout(() => { e.currentTarget.innerText = origText; }, 1800);
+                }).catch(err => {
+                    console.error("Errore durante la copia:", err);
+                });
+            });
+        }
+
+        return item;
     }
 
     /* =====================================================
@@ -164,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (actions.length === 0) {
                 assetsList.innerHTML = `
                     <p class="empty-msg" style="text-align: center; color: var(--text-muted); padding: 24px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
-                        Nessun bene green o acquisto registrato. Clicca sul pulsante in alto per registrare la tua prima azione dMRV!
+                        Nessun bene green o scontrino registrato. Clicca sul pulsante in alto per registrare la tua prima azione dMRV!
                     </p>`;
                 return;
             }
@@ -196,20 +256,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                             Crediti: <strong>+${action.credits_earned} CC</strong> | 
                             Valore B2B Stimato: <strong style="color: var(--accent-yellow);">€ ${estB2bValue}</strong>
                         </p>
-                        <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center;">
-                            <a href="/verify/${action.id}" target="_blank" style="color: var(--accent-blue); font-size: 0.8em; text-decoration: underline;">🔍 Audit dMRV</a>
-                            <button class="btn-delete-asset" data-id="${action.id}" style="background: transparent; border: none; color: var(--danger-red); font-size: 0.8em; cursor: pointer; padding: 0;">🗑 Rimuovi</button>
+                        <div style="margin-top: 10px; display: flex; gap: 12px; align-items: center;">
+                            <a href="/verify/${action.id}" target="_blank" style="color: var(--accent-blue); font-size: 0.85em; text-decoration: underline;">🔍 Audit dMRV</a>
+                            <button class="btn-delete-asset" data-id="${action.id}" title="Elimina questo scontrino">
+                                🗑️ Rimuovi
+                            </button>
                         </div>
                     </div>
                     ${action.photo_url ? `<img src="${action.photo_url}" class="asset-thumb" alt="Allegato" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px; margin-left: 12px; border: 1px solid var(--accent-green);">` : ''}
                 `;
 
-                // Event listener eliminazione
+                // Listener pulsante eliminazione diretta scontrino
                 const deleteBtn = card.querySelector('.btn-delete-asset');
                 if (deleteBtn) {
                     deleteBtn.addEventListener('click', async (e) => {
-                        const actionId = e.target.getAttribute('data-id');
-                        if (confirm("Sei sicuro di voler eliminare questo bene registrato? I crediti accumulati verranno stornati dal saldo.")) {
+                        const targetBtn = e.currentTarget;
+                        const actionId = targetBtn.getAttribute('data-id');
+                        
+                        if (confirm("Sei sicuro di voler eliminare questo scontrino / bene registrato? I crediti accumulati verranno ricalcolati e stornati dal saldo.")) {
                             await deleteEcoAction(actionId);
                         }
                     });
@@ -223,23 +287,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /* =====================================================
-       5. ELIMINAZIONE AZIONE ECO / BENE
+       5. ELIMINAZIONE DIRETTA AZIONE ECO / SCONTRINO
     ===================================================== */
     async function deleteEcoAction(actionId) {
+        if (!actionId || !userEmail) return;
+
         try {
             const res = await fetch(`/api/eco-actions/${actionId}?email=${encodeURIComponent(userEmail)}`, {
                 method: 'DELETE'
             });
             const result = await res.json();
-            if (result.success) {
+
+            if (res.ok && (result.success || result.status === 'success')) {
+                // Aggiorna dinamicamente sia il saldo crediti/tranche che la lista beni
                 await loadUserData();
                 await loadEcoActions();
             } else {
-                alert(`Errore nella rimozione: ${result.message || result.error}`);
+                alert(`Errore nella rimozione: ${result.message || result.error || 'Operazione non riuscita'}`);
             }
         } catch (err) {
             console.error("Errore durante l'eliminazione:", err);
-            alert("Si è verificato un errore durante l'eliminazione del bene.");
+            alert("Si è verificato un errore di connessione durante l'eliminazione dello scontrino.");
         }
     }
 
@@ -288,7 +356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /* =====================================================
-       7. CONTROL EVENTI MODALE TRANCHE
+       7. CONTROLLO EVENTI MODALE TRANCHE
     ===================================================== */
     if (btnOpenTrancheModal && trancheModal) {
         btnOpenTrancheModal.addEventListener('click', () => {

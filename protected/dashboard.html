@@ -148,6 +148,56 @@
       background: rgba(56, 189, 248, 0.3);
     }
 
+    /* Pulsante di eliminazione scontrino */
+    .btn-delete-asset {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger-red);
+      border: 1px solid var(--danger-red);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-delete-asset:hover {
+      background: rgba(239, 68, 68, 0.35);
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Pulsante Codice Tracciamento Tranche */
+    .btn-track-code {
+      background: rgba(234, 179, 8, 0.15);
+      color: var(--accent-yellow);
+      border: 1px solid var(--accent-yellow);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-track-code:hover {
+      background: rgba(234, 179, 8, 0.3);
+      box-shadow: 0 0 8px rgba(234, 179, 8, 0.4);
+    }
+
+    .tranche-code-detail {
+      display: none;
+      background: #090d16;
+      border: 1px dashed var(--accent-yellow);
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+    }
+
     /* Modal Overlay & Card */
     .modal-overlay {
       display: none;
@@ -169,11 +219,13 @@
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      max-width: 550px;
+      max-width: 600px;
       width: 100%;
       padding: 24px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
       animation: modalFadeIn 0.25s ease-out;
+      max-height: 85vh;
+      overflow-y: auto;
     }
 
     .tranche-item {
@@ -231,7 +283,7 @@
         <h3 style="margin: 0; font-size: 1.05rem; color: var(--accent-green-bright);">🔍 Progresso Riscatto Tranche</h3>
         <span id="dashTrancheLabel" style="font-size: 0.8rem; color: var(--text-muted);">Tranche Attiva: #1</span>
       </div>
-      <button id="btnOpenTrancheModal" class="btn-inspect">🔎 Ispeziona Tranche</button>
+      <button id="btnOpenTrancheModal" class="btn-inspect">🔎 Ispeziona Tranche & Codici</button>
     </div>
 
     <div class="progress-track">
@@ -261,16 +313,16 @@
   <div id="assetsList"></div>
 </div>
 
-<!-- Modal Ispezione Tranche -->
+<!-- Modal Ispezione Tranche e Tracciabilità Codici -->
 <div id="trancheModal" class="modal-overlay">
   <div class="modal-content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-      <h3 style="margin: 0; color: var(--accent-green-bright); font-size: 1.2rem;">🔍 Ispezione Tranche Cashback</h3>
+      <h3 style="margin: 0; color: var(--accent-green-bright); font-size: 1.2rem;">🔍 Registro Tranche & Tracciamento Lavorazione</h3>
       <button id="btnCloseTrancheModal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer;">✕</button>
     </div>
 
     <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0; margin-bottom: 16px;">
-      Ogni tranche richiede l'accumulo di <strong>1.000,00 €</strong> di credito (generati dal 10% degli scontrini dMRV) per sbloccare <strong>100,00 €</strong> di cashback erogabile.
+      Ogni tranche richiede l'accumulo di <strong>1.000,00 €</strong> di credito. Per ogni tranche completata viene emesso un <strong>Codice Unico di Tracciamento Batch/dMRV</strong> per seguire la lavorazione e il payout con massima trasparenza.
     </p>
 
     <div id="tranchesContainer">
