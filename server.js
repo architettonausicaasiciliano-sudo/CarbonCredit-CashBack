@@ -1275,6 +1275,29 @@ app.use((err, req, res, next) => {
    AVVIO SERVER EXPRESS
    ===================================================== */
 const PORT = process.env.PORT || 3000;
+const autoBatchService = require('./src/services/autoBatchService');
+
+// Rotta per eseguire l'aggregazione automatica e la sigillatura Batch
+app.post('/api/admin/trigger-autobatch', async (req, res) => {
+    try {
+        const threshold = req.body.thresholdCo2Kg || 1000;
+        const result = await autoBatchService.checkAndSealBatch(threshold);
+        res.json({ success: true, result });
+    } catch (error) {
+        console.error("Errore AutoBatch:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Rotta per esportare il report/certificato dMRV B2B
+app.get('/api/admin/export-batch/:batchId', async (req, res) => {
+    try {
+        const report = await autoBatchService.exportBatchReport(req.params.batchId);
+        res.json(report);
+    } catch (error) {
+        res.status(404).json({ success: false, error: error.message });
+    }
+});
 
 app.listen(PORT, () => {
   console.log(`=====================================================`);
