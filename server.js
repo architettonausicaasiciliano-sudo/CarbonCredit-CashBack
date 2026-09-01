@@ -1277,7 +1277,9 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 const autoBatchService = require('./src/services/autoBatchService');
 
-// Rotta standard per il trigger autobatch
+/* =====================================================
+   ROTTE B2B AUTOBATCH & DMRV
+   ===================================================== */
 app.post('/api/admin/trigger-autobatch', async (req, res) => {
     try {
         const threshold = req.body.thresholdCo2Kg !== undefined ? req.body.thresholdCo2Kg : 1000;
@@ -1289,7 +1291,6 @@ app.post('/api/admin/trigger-autobatch', async (req, res) => {
     }
 });
 
-// Alias per compatibilità con il frontend dashboard.js (risolve l'errore 404)
 app.post('/api/check-thousand-threshold', async (req, res) => {
     try {
         const result = await autoBatchService.checkAndSealBatch(1000);
@@ -1299,7 +1300,6 @@ app.post('/api/check-thousand-threshold', async (req, res) => {
     }
 });
 
-// Rotta per esportare il report dMRV
 app.get('/api/admin/export-batch/:batchId', async (req, res) => {
     try {
         const report = await autoBatchService.exportBatchReport(req.params.batchId);
@@ -1307,4 +1307,23 @@ app.get('/api/admin/export-batch/:batchId', async (req, res) => {
     } catch (error) {
         res.status(404).json({ success: false, error: error.message });
     }
+});
+
+/* =====================================================
+   GESTIONE GLOBALE ERRORE & UNCAUGHT EXCEPTIONS
+   ===================================================== */
+app.use((err, req, res, next) => {
+    console.error("❌ ERRORE NON GESTITO NEL SERVER:", err.stack);
+    res.status(500).json({
+        error: "INTERNAL_SERVER_ERROR",
+        message: err.message || "Si è verificato un errore imprevisto."
+    });
+});
+
+/* =====================================================
+   AVVIO SERVER EXPRESS
+   ===================================================== */
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server attivo sulla porta ${PORT}`);
 });
