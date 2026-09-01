@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Recupero credenziali utente da localStorage
-    const userEmail = localStorage.getItem('email') || localStorage.getItem('userEmail');
+    const userEmail = localStorage.getItem('email') || localStorage.getItem('userEmail'); 
 
     // 2. Elementi DOM - Statistiche Principali
     const userCreditsEl = document.getElementById('userCredits');
@@ -37,32 +37,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadUserData() {
         if (!userEmail) return;
 
+        let userData = null;
+
         try {
             const res = await fetch(`/api/user?email=${encodeURIComponent(userEmail)}`);
-            const data = await res.json();
+            const contentType = res.headers.get("content-type");
 
-            if (data && !data.error) {
-                // Saldo Crediti e CO2
-                if (userCreditsEl) userCreditsEl.textContent = `${(data.carbon_credits || 0).toFixed(1)} CC`;
-                if (pendingCcValEl) pendingCcValEl.textContent = `${data.pendingCc || 0} CC`;
-                if (totalCo2El) totalCo2El.textContent = `${(data.totalCo2Kg || 0).toFixed(1)} kg`;
-                if (totalTreesEl) totalTreesEl.textContent = `${data.treesEquivalent || 0} 🌳`;
-                if (treeBannerTextEl) treeBannerTextEl.textContent = `${data.treesEquivalent || 0} Equivalente Alberi Piantati`;
-
-                // Dati Batch B2B
-                if (batchIdEl) batchIdEl.textContent = data.batchId || "BATCH-2026-104";
-                if (pendingEurEl) pendingEurEl.textContent = `€ ${(data.pendingB2bEur || 0).toFixed(2)}`;
-                if (batchStatusEl) batchStatusEl.textContent = data.batchStatus || "In aggregazione per Payout Cashback";
-
-                // Calcolo e Render Tranche con relativi Codici Tracciamento
-                renderTranchesProgress(data);
-
-                // Controllo soglia €1000
-                await checkThousandThreshold();
+            if (res.ok && contentType && contentType.includes("application/json")) {
+                userData = await res.json();
+            } else {
+                console.warn("API /api/user non ha restituito JSON valido. Utilizzo fallback locale.");
             }
         } catch (err) {
-            console.error("Errore durante il recupero dei dati utente:", err);
+            console.error("Errore durante il recupero dei dati utente via API:", err);
         }
+
+        // Fallback resiliente su localStorage se l'API risponde con errore o HTML
+        if (!userData || userData.error) {
+            const storedTotalSpent = parseFloat(
+                localStorage.getItem('dmrv_user_accumulated_total_value') || 
+                localStorage.getItem('totalCreditAccumulated') || 
+                '0'
+            );
+            const totalCredits = storedTotalSpent > 0 ? parseFloat((storedTotalSpent * 0.1).toFixed(1)) : 0;
+
+            userData = {
+                carbon_credits: totalCredits,
+                pendingCc: 0,
+                totalCo2Kg: totalCredits * 10,
+                treesEquivalent: Math.floor((totalCredits * 10) / 20),
+                totalCreditAccumulated: storedTotalSpent,
+                batchId: "BATCH-2026-104",
+                pendingB2bEur: 0,
+                batchStatus: "In aggregazione per Payout Cashback"
+            };
+        }
+
+        // Render Dati su Schermo
+        if (userCreditsEl) userCreditsEl.textContent = `${(userData.carbon_credits || 0).toFixed(1)} CC`;
+        if (pendingCcValEl) pendingCcValEl.textContent = `${userData.pendingCc || 0} CC`;
+        if (totalCo2El) totalCo2El.textContent = `${(userData.totalCo2Kg || 0).toFixed(1)} kg`;
+        if (totalTreesEl) totalTreesEl.textContent = `${userData.treesEquivalent || 0} 🌳`;
+        if (treeBannerTextEl) treeBannerTextEl.textContent = `${userData.treesEquivalent || 0} Equivalente Alberi Piantati`;
+
+        // Dati Batch B2B
+        if (batchIdEl) batchIdEl.textContent = userData.batchId || "BATCH-2026-104";
+        if (pendingEurEl) pendingEurEl.textContent = `€ ${(userData.pendingB2bEur || 0).toFixed(2)}`;
+        if (batchStatusEl) batchStatusEl.textContent = userData.batchStatus || "In aggregazione per Payout Cashback";
+
+        // Calcolo e Render Tranche con Codici Tracciamento
+        renderTranchesProgress(userData);
+
+        // Controllo soglia €1000
+        await checkThousandThreshold();
     }
 
     /* =====================================================
@@ -87,7 +114,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (tranchesContainerEl) {
             tranchesContainerEl.innerHTML = '';
 
-            // Se l'API restituisce un array 'tranches' personalizzato
             if (tranchesList.length > 0) {
                 tranchesList.forEach(t => {
                     const item = createTrancheElement(t.id, t.unlocked, t.targetEur || 1000, t.currentEur || 1000, t.trackingCode, t.processingStatus);
@@ -101,7 +127,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const pct = isCompleted ? 100 : currentTranchePercentage;
                     const trancheNum = i + 1;
 
-                    // Codice univoco di tracciamento simulato/derivato
                     const userHash = (userEmail || 'USER').substring(0, 4).toUpperCase();
                     const trackingCode = `TRN-2026-T${trancheNum}-${userHash}-${1000 + trancheNum * 17}`;
                     const processingStatus = isCompleted ? 'In Convalida Batch B2B / Liquidazione' : 'In Accumulo Credito';
@@ -142,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
 
             ${isCompleted ? `
-                <div class="tranche-code-detail" id="trancheCodeDetail-${num}">
+                <div class="tranche-code-detail" id="trancheCodeDetail-${num}" style="display: none; margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                         <strong style="color: var(--accent-yellow);">📋 Codice Tracciamento Lavorazione:</strong>
                         <button class="btn-copy-code" data-code="${trackingCode}" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: white; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;">📋 Copia</button>
@@ -199,9 +224,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: userEmail })
             });
-            const data = await res.json();
-            if (data.thresholdReached && data.ticketCode) {
-                console.log(`🎯 Soglia €1000 raggiunta! Ticket generato: ${data.ticketCode}`);
+            const contentType = res.headers.get("content-type");
+            if (res.ok && contentType && contentType.includes("application/json")) {
+                const data = await res.json();
+                if (data.thresholdReached && data.ticketCode) {
+                    console.log(`🎯 Soglia €1000 raggiunta! Ticket generato: ${data.ticketCode}`);
+                }
             }
         } catch (err) {
             console.error("Errore verifica soglia €1000:", err);
@@ -212,78 +240,86 @@ document.addEventListener('DOMContentLoaded', async () => {
        4. RECUPERO BENI ED AZIONI ECO REGISTRATE
     ===================================================== */
     async function loadEcoActions() {
-        if (!userEmail) return;
+        if (!userEmail || !assetsList) return;
+
+        let actions = [];
 
         try {
             const res = await fetch(`/api/eco-actions?email=${encodeURIComponent(userEmail)}`);
-            const data = await res.json();
-            const actions = data.ecoActions || [];
+            const contentType = res.headers.get("content-type");
 
-            if (!assetsList) return;
+            if (res.ok && contentType && contentType.includes("application/json")) {
+                const data = await res.json();
+                actions = data.ecoActions || (Array.isArray(data) ? data : []);
+            } else {
+                console.warn("API /api/eco-actions non ha restituito JSON valido. Recupero da localStorage.");
+                actions = JSON.parse(localStorage.getItem('dmrv_user_assets_list') || '[]');
+            }
+        } catch (err) {
+            console.error("Errore durante il recupero delle azioni eco via API:", err);
+            actions = JSON.parse(localStorage.getItem('dmrv_user_assets_list') || '[]');
+        }
 
-            if (actions.length === 0) {
-                assetsList.innerHTML = `
-                    <p class="empty-msg" style="text-align: center; color: var(--text-muted); padding: 24px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
-                        Nessun bene green o scontrino registrato. Clicca sul pulsante in alto per registrare la tua prima azione dMRV!
-                    </p>`;
-                return;
+        if (actions.length === 0) {
+            assetsList.innerHTML = `
+                <p class="empty-msg" style="text-align: center; color: var(--text-muted); padding: 24px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
+                    Nessun bene green o scontrino registrato. Clicca sul pulsante in alto per registrare la tua prima azione dMRV!
+                </p>`;
+            return;
+        }
+
+        assetsList.innerHTML = '';
+        actions.forEach(action => {
+            const co2Kg = action.co2_saved_kg || action.co2Saved || 0;
+            const estB2bValue = ((co2Kg / 1000) * 25.00).toFixed(2);
+            const isB2B = action.tier === 'B2B_INSTITUTIONAL';
+            const statusBadge = action.status === 'in_review_batch' ? '⏳ In Valutazione Batch' : '✓ Attivo';
+
+            const card = document.createElement('div');
+            card.className = 'asset-item';
+            card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 12px; background: var(--card-bg); border-radius: 12px;';
+
+            card.innerHTML = `
+                <div class="asset-info" style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <h4 style="margin: 0; color: var(--accent-green-bright); font-size: 1.05em;">${action.title || action.assetName || 'Bene Registrato'}</h4>
+                        <span style="font-size: 0.7em; padding: 2px 8px; border-radius: 4px; font-weight: bold; background: ${isB2B ? 'rgba(56, 189, 248, 0.15)' : 'rgba(234, 179, 8, 0.15)'}; color: ${isB2B ? 'var(--accent-blue)' : 'var(--accent-yellow)'}; border: 1px solid ${isB2B ? 'var(--accent-blue)' : 'var(--accent-yellow)'};">
+                            ${isB2B ? 'TIER 2 B2B' : 'TIER 1 COMMUNITY'}
+                        </span>
+                    </div>
+                    <p style="margin: 0; font-size: 0.85em; color: var(--text-muted);">
+                        Categoria: <strong>${action.category || 'Generica'}</strong> | Fonte: ${action.source || 'Inserimento Manuale'} | Stato: <em>${statusBadge}</em>
+                    </p>
+                    <p style="margin: 6px 0 0 0; font-size: 0.9em; color: #f8fafc;">
+                        CO₂ Evitata: <strong>${co2Kg} kg</strong> | 
+                        Crediti: <strong>+${action.credits_earned || action.credits || 0} CC</strong> | 
+                        Valore B2B Stimato: <strong style="color: var(--accent-yellow);">€ ${estB2bValue}</strong>
+                    </p>
+                    <div style="margin-top: 10px; display: flex; gap: 12px; align-items: center;">
+                        <a href="/verify/${action.id}" target="_blank" style="color: var(--accent-blue); font-size: 0.85em; text-decoration: underline;">🔍 Audit dMRV</a>
+                        <button class="btn-delete-asset" data-id="${action.id}" title="Elimina questo scontrino">
+                            🗑️ Rimuovi
+                        </button>
+                    </div>
+                </div>
+                ${(action.photo_url || action.photoUrl) ? `<img src="${action.photo_url || action.photoUrl}" class="asset-thumb" alt="Allegato" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px; margin-left: 12px; border: 1px solid var(--accent-green);">` : ''}
+            `;
+
+            // Listener pulsante eliminazione diretta scontrino
+            const deleteBtn = card.querySelector('.btn-delete-asset');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', async (e) => {
+                    const targetBtn = e.currentTarget;
+                    const actionId = targetBtn.getAttribute('data-id');
+                    
+                    if (confirm("Sei sicuro di voler eliminare questo scontrino / bene registrato? I crediti accumulati verranno ricalcolati e stornati dal saldo.")) {
+                        await deleteEcoAction(actionId);
+                    }
+                });
             }
 
-            assetsList.innerHTML = '';
-            actions.forEach(action => {
-                const co2Kg = action.co2_saved_kg || 0;
-                const estB2bValue = ((co2Kg / 1000) * 25.00).toFixed(2);
-                const isB2B = action.tier === 'B2B_INSTITUTIONAL';
-                const statusBadge = action.status === 'in_review_batch' ? '⏳ In Valutazione Batch' : '✓ Attivo';
-
-                const card = document.createElement('div');
-                card.className = 'asset-item';
-                card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 12px; background: var(--card-bg); border-radius: 12px;';
-
-                card.innerHTML = `
-                    <div class="asset-info" style="flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                            <h4 style="margin: 0; color: var(--accent-green-bright); font-size: 1.05em;">${action.title}</h4>
-                            <span style="font-size: 0.7em; padding: 2px 8px; border-radius: 4px; font-weight: bold; background: ${isB2B ? 'rgba(56, 189, 248, 0.15)' : 'rgba(234, 179, 8, 0.15)'}; color: ${isB2B ? 'var(--accent-blue)' : 'var(--accent-yellow)'}; border: 1px solid ${isB2B ? 'var(--accent-blue)' : 'var(--accent-yellow)'};">
-                                ${isB2B ? 'TIER 2 B2B' : 'TIER 1 COMMUNITY'}
-                            </span>
-                        </div>
-                        <p style="margin: 0; font-size: 0.85em; color: var(--text-muted);">
-                            Categoria: <strong>${action.category}</strong> | Fonte: ${action.source || 'Inserimento Manuale'} | Stato: <em>${statusBadge}</em>
-                        </p>
-                        <p style="margin: 6px 0 0 0; font-size: 0.9em; color: #f8fafc;">
-                            CO₂ Evitata: <strong>${co2Kg} kg</strong> | 
-                            Crediti: <strong>+${action.credits_earned} CC</strong> | 
-                            Valore B2B Stimato: <strong style="color: var(--accent-yellow);">€ ${estB2bValue}</strong>
-                        </p>
-                        <div style="margin-top: 10px; display: flex; gap: 12px; align-items: center;">
-                            <a href="/verify/${action.id}" target="_blank" style="color: var(--accent-blue); font-size: 0.85em; text-decoration: underline;">🔍 Audit dMRV</a>
-                            <button class="btn-delete-asset" data-id="${action.id}" title="Elimina questo scontrino">
-                                🗑️ Rimuovi
-                            </button>
-                        </div>
-                    </div>
-                    ${action.photo_url ? `<img src="${action.photo_url}" class="asset-thumb" alt="Allegato" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px; margin-left: 12px; border: 1px solid var(--accent-green);">` : ''}
-                `;
-
-                // Listener pulsante eliminazione diretta scontrino
-                const deleteBtn = card.querySelector('.btn-delete-asset');
-                if (deleteBtn) {
-                    deleteBtn.addEventListener('click', async (e) => {
-                        const targetBtn = e.currentTarget;
-                        const actionId = targetBtn.getAttribute('data-id');
-                        
-                        if (confirm("Sei sicuro di voler eliminare questo scontrino / bene registrato? I crediti accumulati verranno ricalcolati e stornati dal saldo.")) {
-                            await deleteEcoAction(actionId);
-                        }
-                    });
-                }
-
-                assetsList.appendChild(card);
-            });
-        } catch (err) {
-            console.error("Errore durante il recupero delle azioni eco:", err);
-        }
+            assetsList.appendChild(card);
+        });
     }
 
     /* =====================================================
@@ -296,10 +332,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const res = await fetch(`/api/eco-actions/${actionId}?email=${encodeURIComponent(userEmail)}`, {
                 method: 'DELETE'
             });
-            const result = await res.json();
+            
+            const contentType = res.headers.get("content-type");
+            let result = {};
+            if (contentType && contentType.includes("application/json")) {
+                result = await res.json();
+            }
 
             if (res.ok && (result.success || result.status === 'success')) {
-                // Aggiorna dinamicamente sia il saldo crediti/tranche che la lista beni
                 await loadUserData();
                 await loadEcoActions();
             } else {
