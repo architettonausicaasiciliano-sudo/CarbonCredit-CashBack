@@ -1277,10 +1277,10 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 const autoBatchService = require('./src/services/autoBatchService');
 
-// Rotta per eseguire l'aggregazione automatica e la sigillatura Batch
+// Rotta standard per il trigger autobatch
 app.post('/api/admin/trigger-autobatch', async (req, res) => {
     try {
-        const threshold = req.body.thresholdCo2Kg || 1000;
+        const threshold = req.body.thresholdCo2Kg !== undefined ? req.body.thresholdCo2Kg : 1000;
         const result = await autoBatchService.checkAndSealBatch(threshold);
         res.json({ success: true, result });
     } catch (error) {
@@ -1289,7 +1289,17 @@ app.post('/api/admin/trigger-autobatch', async (req, res) => {
     }
 });
 
-// Rotta per esportare il report/certificato dMRV B2B
+// Alias per compatibilità con il frontend dashboard.js (risolve l'errore 404)
+app.post('/api/check-thousand-threshold', async (req, res) => {
+    try {
+        const result = await autoBatchService.checkAndSealBatch(1000);
+        res.json({ success: true, result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Rotta per esportare il report dMRV
 app.get('/api/admin/export-batch/:batchId', async (req, res) => {
     try {
         const report = await autoBatchService.exportBatchReport(req.params.batchId);
@@ -1297,12 +1307,4 @@ app.get('/api/admin/export-batch/:batchId', async (req, res) => {
     } catch (error) {
         res.status(404).json({ success: false, error: error.message });
     }
-});
-
-app.listen(PORT, () => {
-  console.log(`=====================================================`);
-  console.log(`🚀 SERVER DMRV & CARBON CREDIT ATTIVO SULLA PORTA ${PORT}`);
-  console.log(`🌍 API Endpoint locale: http://localhost:${PORT}`);
-  console.log(`🛡️ Audit dMRV Certificati: http://localhost:${PORT}/verify/:certId`);
-  console.log(`=====================================================`);
 });

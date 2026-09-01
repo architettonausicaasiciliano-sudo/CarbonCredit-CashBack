@@ -1,21 +1,29 @@
 const crypto = require('crypto');
-const db = require('../../db'); // Importa db.js dalla radice del progetto
+const db = require('../../db');
 
-/**
- * Servizio di automazione per l'aggregazione, sigillatura dMRV e certificazione Batch B2B
- */
+// Assicura che le colonne status e batch_id esistano nella tabella
+const ensureColumnsExist = () => {
+    return new Promise((resolve) => {
+        db.run("ALTER TABLE eco_actions ADD COLUMN status TEXT DEFAULT 'in_review_batch'", () => {
+            db.run("ALTER TABLE eco_actions ADD COLUMN batch_id TEXT", () => {
+                resolve();
+            });
+        });
+    });
+};
+
 const autoBatchService = {
 
     /**
-     * Verifica se ci sono abbastanza crediti/CO2 per chiudere automaticamente un Batch
-     * @param {number} thresholdCo2Kg - Soglia in kg di CO2 per chiudere il batch (default: 1000 kg)
+     * Verifica e sigilla il Batch se la soglia viene raggiunta
      */
     async checkAndSealBatch(thresholdCo2Kg = 1000) {
+        await ensureColumnsExist(); // Crea le colonne nel DB se non esistono
+
         return new Promise((resolve, reject) => {
-            // 1. Recupera tutte le azioni eco non ancora assegnate a un batch sigillato
             const queryPending = `
                 SELECT * FROM eco_actions 
-                WHERE status = 'in_review_batch' OR batch_id IS NULL OR batch_id = ''
+                WHERE status IS NULL OR status = 'in_review_batch' OR batch_id IS NULL OR batch_id = ''
             `;
 
             db.all(queryPending, [], (err, rows) => {
@@ -24,10 +32,9 @@ const autoBatchService = {
                     return resolve({ status: 'NO_PENDING_DATA', message: 'Nessuna azione in attesa di aggregazione.' });
                 }
 
-                // Calcolo totale CO2 accumulata nel pool non sigillato
+                // Calcolo totale CO2
                 const totalCo2 = rows.reduce((sum, item) => sum + (parseFloat(item.co2_saved_kg || item.co2Saved || 0)), 0);
 
-                // Se la soglia non è ancora raggiunta, restituisce lo stato attuale
                 if (totalCo2 < thresholdCo2Kg) {
                     return resolve({
                         status: 'THRESHOLD_NOT_MET',
@@ -37,18 +44,15 @@ const autoBatchService = {
                     });
                 }
 
-                // 2. Soglia Raggiunta: Generazione Batch ID e Hash SHA-256 di Garanzia
+                // Soglia raggiunta
                 const batchTimestamp = Date.now();
                 const batchId = `BATCH-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-                // Calcolo Hash del payload completo per immutabilità dMRV
                 const payloadString = JSON.stringify(rows) + batchTimestamp;
                 const batchHash = crypto.createHash('sha256').update(payloadString).digest('hex');
 
                 const totalCredits = rows.reduce((sum, item) => sum + (parseFloat(item.credits_earned || item.credits || 0)), 0);
-                const estimatedB2bEurValue = (totalCo2 / 1000) * 25.00; // Valore stimato 25€/ton di CO2
+                const estimatedB2bEurValue = (totalCo2 / 1000) * 25.00;
 
-                // 3. Aggiorna le azioni nel Database con il nuovo Batch ID e lo stato 'sealed'
                 const actionIds = rows.map(r => r.id);
                 const placeholders = actionIds.map(() => '?').join(',');
                 const updateQuery = `
@@ -60,7 +64,7 @@ const autoBatchService = {
                 db.run(updateQuery, [batchId, ...actionIds], function(updateErr) {
                     if (updateErr) return reject(updateErr);
 
-                    const resultSummary = {
+                    resolve({
                         status: 'BATCH_SEALED_SUCCESSFULLY',
                         batchId: batchId,
                         batchHash: batchHash,
@@ -69,19 +73,14 @@ const autoBatchService = {
                         totalCredits: totalCredits,
                         estimatedB2bEurValue: estimatedB2bEurValue.toFixed(2),
                         sealedAt: new Date().toISOString()
-                    };
-
-                    console.log(`✅ AUTO-BATCH CHIUSO CON SUCCESSO: ${batchId} [Hash: ${batchHash.substring(0, 12)}...]`);
-                    resolve(resultSummary);
+                    });
                 });
             });
         });
     },
 
-    /**
-     * Esporta il report JSON/CSV pronto per essere consegnato all'acquirente B2B
-     */
     async exportBatchReport(batchId) {
+        await ensureColumnsExist();
         return new Promise((resolve, reject) => {
             const query = `SELECT id, user_email, category, co2_saved_kg, credits_earned, timestamp, status FROM eco_actions WHERE batch_id = ?`;
             
@@ -91,7 +90,6 @@ const autoBatchService = {
 
                 const totalCo2 = rows.reduce((sum, item) => sum + (item.co2_saved_kg || 0), 0);
                 const totalCredits = rows.reduce((sum, item) => sum + (item.credits_earned || 0), 0);
-                
                 const batchHash = crypto.createHash('sha256').update(JSON.stringify(rows)).digest('hex');
 
                 resolve({
