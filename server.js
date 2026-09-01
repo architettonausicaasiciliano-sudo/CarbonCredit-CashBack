@@ -1272,12 +1272,6 @@ app.use((err, req, res, next) => {
 });
 
 /* =====================================================
-   AVVIO SERVER EXPRESS
-   ===================================================== */
-const PORT = process.env.PORT || 3000;
-const autoBatchService = require('./src/services/autoBatchService');
-
-/* =====================================================
    ROTTE B2B AUTOBATCH & DMRV
    ===================================================== */
 app.post('/api/admin/trigger-autobatch', async (req, res) => {
