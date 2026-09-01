@@ -428,6 +428,7 @@
     }
   });
 
+<script>
   // Funzione di reset pulito per evitare ri-caricamento infinito di scontrini vecchi
   function resetForm() {
     addAssetForm.reset();
@@ -487,6 +488,8 @@
       formData.append('amountSpend', amountSpend);
       formData.append('cashbackCredit', cashbackCredit);
       formData.append('imageHash', imageHash);
+      
+      // La chiave 'photo' DEVE coincidere con upload.single('photo') in server.js
       formData.append('photo', file);
 
       const res = await fetch('/api/eco-actions', {
@@ -539,7 +542,7 @@
                                (data.aiNote || "La prova fotografica è coerente con la spesa dichiarata.");
 
         const certLink = document.getElementById('certUrl');
-        certLink.href = `/verify/${data.id || 1}`;
+        certLink.href = `/verify/${data.ticketId || data.id || 1}`;
 
       } else {
         showError(`❌ Audit AI Fallito: ${data.message || data.error || 'Errore durante la verifica.'}`);
@@ -555,5 +558,3 @@
     }
   });
 </script>
-</body>
-</html>

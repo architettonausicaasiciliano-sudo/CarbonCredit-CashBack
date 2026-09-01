@@ -693,12 +693,16 @@ app.get("/api/users/profile/:email", requireAuth, (req, res) => {
   });
 });
 
-// Caricamento Azione Eco & Validazione dMRV
-app.post("/api/eco-actions", requireAuth, upload.single("image"), async (req, res) => {
+/* =====================================================
+   CARICAMENTO AZIONE ECO & VALIDAZIONE dMRV
+   ===================================================== */
+app.post("/api/eco-actions", requireAuth, upload.single("photo"), async (req, res) => {
   try {
-    const { title, merchant, amount, dateTime } = req.body;
-    const cleanEmail = req.userEmail; // Email derivata dal cookie HTTP-Only protetto
+    const { title, category: bodyCategory, merchant, amount, amountSpend, dateTime } = req.body;
+    const cleanEmail = req.userEmail; // Email dal cookie HTTP-Only protetto
     const file = req.file;
+
+    const parsedAmount = parseFloat(amount || amountSpend || 0);
 
     if (!title) {
       return res.status(400).json({ error: "Il campo 'title' è obbligatorio." });
@@ -708,6 +712,7 @@ app.post("/api/eco-actions", requireAuth, upload.single("image"), async (req, re
       return res.status(400).json({ error: "È necessario caricare un'immagine di prova dell'azione ecologica." });
     }
 
+    // 1. Recupero o creazione utente
     let user = await new Promise((resolve, reject) => {
       db.get("SELECT * FROM users WHERE email = ?", [cleanEmail], (err, row) => {
         if (err) reject(err);
@@ -729,6 +734,7 @@ app.post("/api/eco-actions", requireAuth, upload.single("image"), async (req, re
       user = { id: newUserId, email: cleanEmail, premium: 0, carbon_credits: 0.0 };
     }
 
+    // 2. Controllo duplicati Immagine (SHA-256)
     const imageBuffer = fs.readFileSync(file.path);
     const imageHash = calculateBufferHash(imageBuffer);
 
@@ -752,9 +758,10 @@ app.post("/api/eco-actions", requireAuth, upload.single("image"), async (req, re
       });
     }
 
+    // 3. Controllo duplicati Scontrino/Ricevuta
     let receiptHash = null;
-    if (merchant && amount) {
-      receiptHash = generateReceiptHash(merchant, dateTime, amount);
+    if (merchant && parsedAmount) {
+      receiptHash = generateReceiptHash(merchant, dateTime, parsedAmount);
       const existingReceipt = await new Promise((resolve, reject) => {
         db.get(
           "SELECT id FROM eco_actions WHERE receipt_hash = ?",
@@ -775,6 +782,7 @@ app.post("/api/eco-actions", requireAuth, upload.single("image"), async (req, re
       }
     }
 
+    // 4. Audit Forense AI (Gemini)
     console.log(`🔍 Audit forense AI per l'utente ${cleanEmail} su azione: "${title}"...`);
     const aiResult = await verifyEcoAction(imageBuffer, file.mimetype, title);
 
@@ -788,7 +796,8 @@ app.post("/api/eco-actions", requireAuth, upload.single("image"), async (req, re
       });
     }
 
-    const category = aiResult.category || "GENERAL";
+    // 5. Calcolo valori e salvataggio DB
+    const category = bodyCategory || aiResult.category || "GENERAL";
     const co2SavedKg = aiResult.co2_saved_kg || 15.0;
     const poolId = await getOrCreateDataPool(category);
     const creditsEarned = parseFloat((co2SavedKg / 10).toFixed(2));
@@ -833,8 +842,12 @@ app.post("/api/eco-actions", requireAuth, upload.single("image"), async (req, re
       );
     });
 
+    // Risposta compatibile con la UI del client
     res.status(201).json({
       success: true,
+      id: actionId,
+      ticketId: ticketId,
+      aiNote: aiResult.reason || "La prova fotografica è coerente con la spesa dichiarata.",
       action: {
         id: actionId,
         ticketId: ticketId,
@@ -861,8 +874,7 @@ app.post("/api/eco-actions", requireAuth, upload.single("image"), async (req, re
     }
     res.status(500).json({
       error: "SERVER_ERROR",
-      message: "Si è verificato un errore interno durante la registrazione dMRV.",
-      details: error.message,
+      message: error.message || "Si è verificato un errore interno durante la registrazione dMRV.",
     });
   }
 });
@@ -1087,6 +1099,7 @@ app.get("/api/admin/export-pool-dossier/:poolId", (req, res) => {
     );
   });
 });
+
 /* =====================================================
    1. ELIMINAZIONE ASSET / SCONTRINI ERRATI
    ===================================================== */
@@ -1139,7 +1152,7 @@ app.get("/api/user/tranches", requireAuth, (req, res) => {
             targetEur: TRANCHE_TARGET_EUR,
             accumulatedEur: parseFloat(currentAccumulatedEur.toFixed(2)),
             progressPercent: 100,
-            status: "sealed_ready_b2b", // Stato validazione
+            status: "sealed_ready_b2b",
             ticketUrl: `/verify/${trancheId}`,
             qrCodeData: `https://carboncredit-cashback.onrender.com/verify/${trancheId}`,
             actionsCount: currentActions.length
@@ -1151,7 +1164,6 @@ app.get("/api/user/tranches", requireAuth, (req, res) => {
         }
       });
 
-      // Tranche in corso di accumulo
       if (currentAccumulatedEur > 0 || tranches.length === 0) {
         const trancheId = `TR-${cleanEmail.split("@")[0].toUpperCase()}-T${currentTrancheNum}`;
         tranches.push({
@@ -1171,11 +1183,10 @@ app.get("/api/user/tranches", requireAuth, (req, res) => {
     }
   );
 });
+
 /* =====================================================
    GESTIONE ROTTE PROTECTED E RITORNO STRIPE
    ===================================================== */
-
-// Rotta richiamata dopo il pagamento su Stripe per impostare il cookie di sessione
 app.get("/checkout-success", async (req, res) => {
   const sessionId = req.query.session_id;
   if (sessionId && stripe) {
@@ -1197,10 +1208,8 @@ app.get("/checkout-success", async (req, res) => {
   res.redirect("/dashboard.html");
 });
 
-// Serve i file della cartella protected
 app.use("/protected", requireAuth, express.static(path.join(__dirname, "protected")));
 
-// Scorciatoie dirette per le pagine protette (supporta sia con che senza estensione .html)
 app.get(["/dashboard", "/dashboard.html"], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "dashboard.html"));
 });
