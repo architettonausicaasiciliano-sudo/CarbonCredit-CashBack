@@ -1116,18 +1116,19 @@ app.get("/checkout-success", async (req, res) => {
 // Serve i file della cartella protected
 app.use("/protected", requireAuth, express.static(path.join(__dirname, "protected")));
 
-// Scorciatoie dirette per le pagine protette
-app.get("/dashboard.html", requireAuth, (req, res) => {
+// Scorciatoie dirette per le pagine protette (supporta sia con che senza estensione .html)
+app.get(["/dashboard", "/dashboard.html"], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "dashboard.html"));
 });
 
-app.get("/success.html", requireAuth, (req, res) => {
+app.get(["/success", "/success.html"], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "success.html"));
 });
 
-app.get("/add-asset.html", requireAuth, (req, res) => {
+app.get(["/add-asset", "/add-asset.html"], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "add-asset.html"));
 });
+
 /* =====================================================
    FALLBACK ROTTE STATICHE & FRONTEND HYBRID
    ===================================================== */
