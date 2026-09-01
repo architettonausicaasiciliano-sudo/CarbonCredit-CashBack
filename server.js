@@ -1337,7 +1337,17 @@ setInterval(async () => {
         }
     }
 }, 60000);
-
+/* =====================================================
+   ROTTA ADMIN: LISTA ACQUIRENTI B2B (SIMULAZIONE & PROD)
+   ===================================================== */
+app.get("/api/admin/b2b-buyers", (req, res) => {
+    db.all("SELECT * FROM b2b_buyers ORDER BY created_at DESC", [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json({ success: true, count: rows.length, buyers: rows });
+    });
+});
 /* =====================================================
    AVVIO SERVER EXPRESS
    ===================================================== */
