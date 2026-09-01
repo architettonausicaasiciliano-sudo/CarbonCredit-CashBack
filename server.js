@@ -1088,6 +1088,90 @@ app.get("/api/admin/export-pool-dossier/:poolId", (req, res) => {
   });
 });
 /* =====================================================
+   1. ELIMINAZIONE ASSET / SCONTRINI ERRATI
+   ===================================================== */
+app.delete("/api/eco-actions/:id", requireAuth, (req, res) => {
+  const actionId = req.params.id;
+  const userEmail = req.userEmail;
+
+  db.run(
+    "DELETE FROM eco_actions WHERE id = ? AND user_email = ? AND status != 'sealed'",
+    [actionId, userEmail],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) {
+        return res.status(400).json({ error: "Azione non trovata o già sigillata in tranche B2B." });
+      }
+      res.json({ success: true, message: "Scontrino rimosso con successo." });
+    }
+  );
+});
+
+/* =====================================================
+   2. VISUALIZZAZIONE TRANCHE DA 1000€ & TICKET / QR
+   ===================================================== */
+app.get("/api/user/tranches", requireAuth, (req, res) => {
+  const cleanEmail = req.userEmail;
+  const TRANCHE_TARGET_EUR = 1000;
+  const PRICE_PER_TON = 80; // Valore stimato €/Ton CO2
+
+  db.all(
+    "SELECT id, title, co2_saved_kg, status, created_at FROM eco_actions WHERE user_email = ? AND status != 'deleted' ORDER BY created_at ASC",
+    [cleanEmail],
+    (err, actions) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      const tranches = [];
+      let currentAccumulatedEur = 0;
+      let currentTrancheNum = 1;
+      let currentActions = [];
+
+      (actions || []).forEach((act) => {
+        const actEur = (act.co2_saved_kg / 1000) * PRICE_PER_TON;
+        currentAccumulatedEur += actEur;
+        currentActions.push(act);
+
+        if (currentAccumulatedEur >= TRANCHE_TARGET_EUR) {
+          const trancheId = `TR-${cleanEmail.split("@")[0].toUpperCase()}-T${currentTrancheNum}`;
+          tranches.push({
+            trancheId: trancheId,
+            number: currentTrancheNum,
+            targetEur: TRANCHE_TARGET_EUR,
+            accumulatedEur: parseFloat(currentAccumulatedEur.toFixed(2)),
+            progressPercent: 100,
+            status: "sealed_ready_b2b", // Stato validazione
+            ticketUrl: `/verify/${trancheId}`,
+            qrCodeData: `https://carboncredit-cashback.onrender.com/verify/${trancheId}`,
+            actionsCount: currentActions.length
+          });
+
+          currentTrancheNum++;
+          currentAccumulatedEur = 0;
+          currentActions = [];
+        }
+      });
+
+      // Tranche in corso di accumulo
+      if (currentAccumulatedEur > 0 || tranches.length === 0) {
+        const trancheId = `TR-${cleanEmail.split("@")[0].toUpperCase()}-T${currentTrancheNum}`;
+        tranches.push({
+          trancheId: trancheId,
+          number: currentTrancheNum,
+          targetEur: TRANCHE_TARGET_EUR,
+          accumulatedEur: parseFloat(currentAccumulatedEur.toFixed(2)),
+          progressPercent: Math.min(100, parseFloat(((currentAccumulatedEur / TRANCHE_TARGET_EUR) * 100).toFixed(1))),
+          status: "accumulating_ai_verification",
+          ticketUrl: `/verify/${trancheId}`,
+          qrCodeData: `https://carboncredit-cashback.onrender.com/verify/${trancheId}`,
+          actionsCount: currentActions.length
+        });
+      }
+
+      res.json({ success: true, tranches });
+    }
+  );
+});
+/* =====================================================
    GESTIONE ROTTE PROTECTED E RITORNO STRIPE
    ===================================================== */
 
