@@ -1,4 +1,4 @@
-const CACHE_NAME = 'carboncredit-v2';
+const CACHE_NAME = 'carboncredit-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -10,7 +10,7 @@ const ASSETS_TO_CACHE = [
 
 // Installazione: Pre-cache degli asset e attivazione immediata
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // Forza il nuovo Service Worker ad attivarsi subito
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
@@ -34,9 +34,20 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Strategy: Stale-While-Revalidate con Fallback Offline
+// Fetch Strategy: Bypass per Certificate e API, Stale-While-Revalidate per il resto
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+
+  // Esclude dal Service Worker il certificato B2B, le API e la cartella uploads
+  if (
+    url.pathname.includes('b2b-certificate.html') ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/uploads/')
+  ) {
+    return; // Passa direttamente alla rete senza intercettazione
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
@@ -65,8 +76,11 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       }).catch(async () => {
-        // Fallback quando non c'è connessione durante la navigazione HTML
-        if (event.request.headers.get('accept')?.includes('text/html')) {
+        // Fallback offline escludendo la pagina del certificato
+        if (
+          event.request.headers.get('accept')?.includes('text/html') &&
+          !url.pathname.includes('b2b-certificate.html')
+        ) {
           return (
             (await caches.match('/index.html')) ||
             (await caches.match('/success.html'))
