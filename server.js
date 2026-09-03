@@ -1349,6 +1349,101 @@ app.get("/api/admin/b2b-buyers", (req, res) => {
     });
 });
 /* =====================================================
+   ROTTE PAYOUT CASHBACK UTENTI (STRIPE CONNECT / BANK)
+   ===================================================== */
+
+// Endpoint per la richiesta di payout da parte dell'utente
+app.post("/api/payouts/request", (req, res) => {
+    const { userId, email, amount, paymentMethod, destination } = req.body;
+    const MIN_PAYOUT_THRESHOLD = 50.00;
+
+    if (!amount || amount < MIN_PAYOUT_THRESHOLD) {
+        return res.status(400).json({ 
+            success: false, 
+            error: `Importo minimo per il riscatto: €${MIN_PAYOUT_THRESHOLD.toFixed(2)}` 
+        });
+    }
+
+    db.get(`SELECT cashback_balance FROM users WHERE email = ?`, [email], (err, user) => {
+        if (err || !user) {
+            return res.status(404).json({ success: false, error: "Utente non trovato." });
+        }
+
+        if (user.cashback_balance < amount) {
+            return res.status(400).json({ success: false, error: "Saldo cashback insufficiente." });
+        }
+
+        db.run(
+            `INSERT INTO payout_requests (user_id, email, amount, payout_method, destination) VALUES (?, ?, ?, ?, ?)`,
+            [userId || 0, email, amount, paymentMethod || 'STRIPE_CONNECT', destination],
+            function(err) {
+                if (err) return res.status(500).json({ success: false, error: err.message });
+                
+                db.run(`UPDATE users SET cashback_balance = cashback_balance - ? WHERE email = ?`, [amount, email]);
+
+                res.json({ 
+                    success: true, 
+                    message: "Richiesta di payout registrata con successo.",
+                    requestId: this.lastID 
+                });
+            }
+        );
+    });
+});
+// Endpoint Admin: Approvazione o Rifiuto manuale del Payout
+app.post("/api/admin/payouts/:id/status", (req, res) => {
+    const { id } = req.params;
+    const { action } = req.body; // 'APPROVE' oppure 'REJECT'
+
+    db.get(`SELECT * FROM payout_requests WHERE id = ?`, [id], (err, payout) => {
+        if (err || !payout) {
+            return res.status(404).json({ success: false, error: "Richiesta non trovata." });
+        }
+
+        if (payout.status !== 'PENDING') {
+            return res.status(400).json({ success: false, error: "Richiesta già elaborata." });
+        }
+
+        if (action === 'APPROVE') {
+            // Approvazione: Imposta lo stato a PAID
+            db.run(
+                `UPDATE payout_requests SET status = 'PAID', processed_at = CURRENT_TIMESTAMP WHERE id = ?`,
+                [id],
+                (updateErr) => {
+                    if (updateErr) return res.status(500).json({ success: false, error: updateErr.message });
+                    res.json({ success: true, message: `Payout #${id} approvato e contrassegnato come PAGATO.` });
+                }
+            );
+        } else if (action === 'REJECT') {
+            // Rifiuto: Ripristina il saldo cashback all'utente
+            db.run(
+                `UPDATE payout_requests SET status = 'REJECTED', processed_at = CURRENT_TIMESTAMP WHERE id = ?`,
+                [id],
+                (updateErr) => {
+                    if (updateErr) return res.status(500).json({ success: false, error: updateErr.message });
+                    
+                    db.run(
+                        `UPDATE users SET cashback_balance = cashback_balance + ? WHERE email = ?`,
+                        [payout.amount, payout.email],
+                        () => {
+                            res.json({ success: true, message: `Payout #${id} rifiutato e importo riaccreditato all'utente.` });
+                        }
+                    );
+                }
+            );
+        } else {
+            res.status(400).json({ success: false, error: "Azione non valida. Usa 'APPROVE' o 'REJECT'." });
+        }
+    });
+});
+// Endpoint Admin per visualizzare le richieste
+app.get("/api/admin/payouts", (req, res) => {
+    db.all(`SELECT * FROM payout_requests ORDER BY created_at DESC`, [], (err, rows) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
+        res.json({ success: true, requests: rows });
+    });
+});
+/* =====================================================
    AVVIO SERVER EXPRESS
    ===================================================== */
 const PORT = process.env.PORT || 3000;

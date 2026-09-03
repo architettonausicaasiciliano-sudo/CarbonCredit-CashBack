@@ -13,7 +13,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 db.serialize(() => {
-  // 1. Tabella Utenti (Stripe & Saldo Crediti Carbonio)
+  // 1. Tabella Utenti (Stripe & Saldi)
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +21,9 @@ db.serialize(() => {
       password TEXT,
       premium INTEGER DEFAULT 0,
       stripe_customer_id TEXT,
+      stripe_connect_id TEXT,
       carbon_credits REAL DEFAULT 0.0,
+      cashback_balance REAL DEFAULT 0.0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -49,7 +51,7 @@ db.serialize(() => {
     )
   `);
 
-  // 3. Tabella Credit Batches (gestione lotti CO2 Tier 2 / B2B)
+  // 3. Tabella Credit Batches
   db.run(`
     CREATE TABLE IF NOT EXISTS credit_batches (
       id TEXT PRIMARY KEY,
@@ -61,7 +63,7 @@ db.serialize(() => {
     )
   `);
 
-  // 4. Tabella Data Pools (sigillatura crittografica SHA-256 e dossier dMRV)
+  // 4. Tabella Data Pools
   db.run(`
     CREATE TABLE IF NOT EXISTS data_pools (
       id TEXT PRIMARY KEY,
@@ -74,7 +76,7 @@ db.serialize(() => {
     )
   `);
 
-  // 5. Tabella Transazioni & Payout Cashback
+  // 5. Tabella Transazioni
   db.run(`
     CREATE TABLE IF NOT EXISTS transactions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,7 +89,43 @@ db.serialize(() => {
     )
   `);
 
-  // Migrazione automatica colonne dMRV e B2B per eco_actions
+  // 6. Tabella B2B Buyers
+  db.run(`
+    CREATE TABLE IF NOT EXISTS b2b_buyers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      company_name TEXT NOT NULL,
+      vat_number TEXT,
+      email TEXT NOT NULL UNIQUE,
+      webhook_url TEXT,
+      macro_category TEXT NOT NULL,
+      price_per_kg_co2 REAL NOT NULL DEFAULT 0.10,
+      monthly_budget_limit REAL DEFAULT 0.00,
+      status TEXT NOT NULL DEFAULT 'ACTIVE',
+      auto_invoice BOOLEAN NOT NULL DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `, (err) => {
+    if (!err) seedB2bBuyers();
+  });
+
+  // 7. Tabella Payout Requests (Riscatto Guadagni / Stripe Connect)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS payout_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      email TEXT NOT NULL,
+      amount REAL NOT NULL,
+      payout_method TEXT DEFAULT 'STRIPE_CONNECT',
+      destination TEXT,
+      status TEXT NOT NULL DEFAULT 'PENDING',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      processed_at DATETIME
+    )
+  `, (err) => {
+    if (!err) console.log("✅ Tabella payout_requests pronta.");
+  });
+
+  // Migrazione automatica colonne per eco_actions
   const dMrvColumns = [
     { name: "image_hash", type: "TEXT" },
     { name: "tier", type: "TEXT DEFAULT 'COMMUNITY'" },
@@ -105,79 +143,39 @@ db.serialize(() => {
       const existingColumns = rows.map((r) => r.name);
       dMrvColumns.forEach((col) => {
         if (!existingColumns.includes(col.name)) {
-          db.run(`ALTER TABLE eco_actions ADD COLUMN ${col.name} ${col.type}`, (alterErr) => {
-            if (alterErr) {
-              console.error(`⚠️ Errore aggiunta colonna ${col.name}:`, alterErr.message);
-            } else {
-              console.log(`✅ Colonna '${col.name}' aggiunta a eco_actions.`);
-            }
-          });
+          db.run(`ALTER TABLE eco_actions ADD COLUMN ${col.name} ${col.type}`);
         }
       });
     }
   });
 
-  // Migrazione automatica colonna item_count per data_pools
-  db.all("PRAGMA table_info(data_pools)", [], (err, rows) => {
+  // Migrazione automatica colonne per users
+  db.all("PRAGMA table_info(users)", [], (err, rows) => {
     if (!err && rows) {
-      const existingColumns = rows.map((r) => r.name);
-      if (!existingColumns.includes("item_count")) {
-        db.run("ALTER TABLE data_pools ADD COLUMN item_count INTEGER DEFAULT 0", (alterErr) => {
-          if (alterErr) {
-            console.error("⚠️ Errore aggiunta colonna item_count:", alterErr.message);
-          } else {
-            console.log("✅ Colonna 'item_count' aggiunta a data_pools.");
-          }
-        });
+      const existing = rows.map((r) => r.name);
+      if (!existing.includes("cashback_balance")) {
+        db.run("ALTER TABLE users ADD COLUMN cashback_balance REAL DEFAULT 0.0");
+      }
+      if (!existing.includes("stripe_connect_id")) {
+        db.run("ALTER TABLE users ADD COLUMN stripe_connect_id TEXT");
       }
     }
   });
 });
 
-module.exports = db;
-// Incolla all'interno di db.js (nella sezione delle inizializzazioni tabelle)
-
-db.serialize(() => {
-    // 1. Creazione Tabella B2B Buyers
-    db.run(`
-        CREATE TABLE IF NOT EXISTS b2b_buyers (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            company_name TEXT NOT NULL,
-            vat_number TEXT,
-            email TEXT NOT NULL UNIQUE,
-            webhook_url TEXT,
-            macro_category TEXT NOT NULL,
-            price_per_kg_co2 REAL NOT NULL DEFAULT 0.10,
-            monthly_budget_limit REAL DEFAULT 0.00,
-            status TEXT NOT NULL DEFAULT 'ACTIVE',
-            auto_invoice BOOLEAN NOT NULL DEFAULT 1,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    `, (err) => {
-        if (err) {
-            console.error("❌ Errore creazione tabella b2b_buyers:", err.message);
-        } else {
-            console.log("✅ Tabella b2b_buyers verificata/creata.");
-            seedB2bBuyers();
-        }
-    });
-});
-
-// 2. Seeding automatico di 2 acquirenti B2B di prova
 function seedB2bBuyers() {
-    db.get(`SELECT COUNT(*) AS count FROM b2b_buyers`, [], (err, row) => {
-        if (err || !row) return;
-        if (row.count === 0) {
-            const insertQuery = `
-                INSERT INTO b2b_buyers (company_name, vat_number, email, webhook_url, macro_category, price_per_kg_co2)
-                VALUES 
-                ('Green Mobility Corp', 'IT12345678901', 'mobility-buyer@test.com', 'https://webhook.site/mobility-demo', 'MOBILITY', 0.12),
-                ('EcoEnergy Global Ltd', 'IT98765432109', 'energy-buyer@test.com', 'https://webhook.site/energy-demo', 'ENERGY', 0.10)
-            `;
-            db.run(insertQuery, (err) => {
-                if (err) console.error("❌ Errore seeding B2B:", err.message);
-                else console.log("🌱 Seeding completato: 2 acquirenti B2B inseriti per la simulazione.");
-            });
-        }
-    });
+  db.get(`SELECT COUNT(*) AS count FROM b2b_buyers`, [], (err, row) => {
+    if (err || !row) return;
+    if (row.count === 0) {
+      const insertQuery = `
+        INSERT INTO b2b_buyers (company_name, vat_number, email, webhook_url, macro_category, price_per_kg_co2)
+        VALUES 
+        ('Green Mobility Corp', 'IT12345678901', 'mobility-buyer@test.com', 'https://webhook.site/mobility-demo', 'MOBILITY', 0.12),
+        ('EcoEnergy Global Ltd', 'IT98765432109', 'energy-buyer@test.com', 'https://webhook.site/energy-demo', 'ENERGY', 0.10)
+      `;
+      db.run(insertQuery);
+    }
+  });
 }
+
+module.exports = db;
