@@ -5,67 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EcoCredits — Turn Sustainable Choices Into CashBack</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Animazione pulsante stile MySafeHaven per Macro-Tasti e Hero */
+        @keyframes safeHavenPulse {
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+            50% { transform: scale(1.025); box-shadow: 0 0 28px rgba(16, 185, 129, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+        }
+        .pulse-macro-btn {
+            animation: safeHavenPulse 2.8s infinite ease-in-out;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .pulse-macro-btn:hover {
+            transform: scale(1.03) !important;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
+    <div class="container">
         
-        <!-- HEADER PRINCIPALE ANIMATO (STILE MYSAFEHAVEN CON LOGO SU FONDO SCURO) -->
+        <!-- BLOCCO HERO PRINCIPALE -->
         <header class="hero" style="margin-bottom: 24px; text-align: center;">
-            <style>
-                @keyframes safeHavenPulse {
-                    0% { transform: scale(1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
-                    50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(16, 185, 129, 0.4); }
-                    100% { transform: scale(1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
-                }
-                .hero-animated-card {
-                    animation: safeHavenPulse 3s infinite ease-in-out;
-                    border: 2px solid #10b981;
-                    border-radius: 20px;
-                    padding: 28px 16px;
-                    background: rgba(16, 185, 129, 0.05);
-                }
-            </style>
-            
-            <div class="hero-animated-card">
+            <div style="border: 2px solid #10b981; border-radius: 20px; padding: 28px 16px; background: rgba(16, 185, 129, 0.05); box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);">
                 
-                <!-- LOGO GRANDE SENZA SFONDO BIANCO (FUSIONE SCURA) -->
+                <!-- LOGO INGRANDITO E A CONTRASTO ELEVATO -->
                 <div style="margin-bottom: 16px; display: flex; justify-content: center; align-items: center;">
-                    <img src="/images/logo.png" alt="CarbonCredit CashBack" style="width: 140px; height: 140px; object-fit: contain; border-radius: 50%; background: #0b132b; padding: 6px; border: 2px solid #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);">
+                    <img src="/images/logo.png" alt="CarbonCredit CashBack" style="width: 150px; height: 150px; object-fit: contain; border-radius: 50%; background: #0a1128; padding: 6px; border: 3px solid #10b981; filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.5));">
                 </div>
 
-                <!-- SCRITTA TITOLO BRAND (CASHBACK IN VERDE) -->
-                <h1 style="color: #ffffff; font-size: 1.8rem; font-weight: 900; line-height: 1.1; margin: 0 0 8px 0; letter-spacing: -0.5px; text-transform: uppercase;">
-                    CarbonCredit <span style="color: #10b981; text-shadow: 0 0 15px rgba(16,185,129,0.6);">CashBack</span>
+                <!-- SCRITTA TITOLO BRAND (CASHBACK IN VERDE BRILANTE) -->
+                <h1 style="color: #ffffff; font-size: 1.9rem; font-weight: 900; line-height: 1.1; margin: 0 0 10px 0; letter-spacing: -0.5px; text-transform: uppercase;">
+                    CARBONCREDIT <span style="color: #10b981; text-shadow: 0 0 18px rgba(16,185,129,0.7);">CASHBACK</span>
                 </h1>
                 
                 <div style="margin-bottom: 16px;">
-                    <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; padding: 5px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;">
-                        🌱 B2B GHG Scope 3 Compliance
+                    <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;">
+                        🌱 B2B GHG SCOPE 3 COMPLIANCE
                     </span>
                 </div>
 
-                <h2 style="color: #f8fafc; font-size: 1.35rem; font-weight: 800; line-height: 1.25; margin: 12px 0; text-transform: uppercase;">
-                    Did you know your green habits can <span style="color: #ef4444; font-weight: 900;">PAY YOU BACK REAL CASH?</span>
+                <h2 style="color: #f8fafc; font-size: 1.35rem; font-weight: 800; line-height: 1.25; margin: 14px 0; text-transform: uppercase;">
+                    DID YOU KNOW YOUR GREEN HABITS CAN <span style="color: #FF3B30; font-weight: 900;">PAY YOU BACK REAL CASH?</span>
                 </h2>
                 
-                <p style="color: #94a3b8; font-size: 0.9rem; margin: 10px 0 20px 0; line-height: 1.4;">
+                <p style="color: #94a3b8; font-size: 0.92rem; margin: 10px 0 20px 0; line-height: 1.4;">
                     From walking and plant-based food to solar panels and land ownership: calculate how much daily cashback you are leaving on the table.
                 </p>
                 
-                <a href="#initial-test" style="text-decoration: none; display: block;">
-                    <div class="btn-cta-giant" style="margin-top: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 16px; border-radius: 12px; font-weight: 900; font-size: 1rem; color: white; box-shadow: 0 4px 20px rgba(16,185,129,0.4);">
-                        ⚡ START INITIAL TEST NOW (30 SEC) ⚡
+                <!-- MACRO-TASTO HERO PULSANTE E CLICCABILE -->
+                <a href="#initial-test" class="pulse-macro-btn" style="text-decoration: none; display: block;">
+                    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 18px 16px; border-radius: 12px; font-weight: 900; font-size: 1.05rem; color: #ffffff; border: 1px solid #34d399; text-transform: uppercase; letter-spacing: 0.5px;">
+                        ⚡ WANT YOUR CASHBACK BACK? CALCULATE NOW →
                     </div>
                 </a>
             </div>
         </header>
 
+        <!-- CALCOLATORE CASHBACK -->
         <main class="quiz-card" id="initial-test">
-            <h2>⏱️ Initial CashBack Calculator</h2>
-
+            <h2 style="font-size: 1.3rem; font-weight: 800; color: #f8fafc; margin-bottom: 20px;">⏱️ Initial CashBack Calculator</h2>
             <form id="quizForm">
                 
-                <div class="category-title">1. Daily Sustainable Habits</div>
+                <div class="category-title" style="color: #38bdf8; font-weight: 800; font-size: 0.95rem; margin-top: 10px;">1. DAILY SUSTAINABLE HABITS</div>
                 <div class="option-group">
                     <label class="option-label">
                         <input type="checkbox" value="120" data-co2="180">
@@ -81,7 +83,7 @@
                     </label>
                 </div>
 
-                <div class="category-title">2. Energy & Home Efficiency</div>
+                <div class="category-title" style="color: #38bdf8; font-weight: 800; font-size: 0.95rem; margin-top: 18px;">2. ENERGY & HOME EFFICIENCY</div>
                 <div class="option-group">
                     <label class="option-label">
                         <input type="checkbox" value="450" data-co2="900">
@@ -93,7 +95,7 @@
                     </label>
                 </div>
 
-                <div class="category-title">3. Land & Green Spaces</div>
+                <div class="category-title" style="color: #38bdf8; font-weight: 800; font-size: 0.95rem; margin-top: 18px;">3. LAND & GREEN SPACES</div>
                 <div class="option-group">
                     <label class="option-label">
                         <input type="checkbox" value="600" data-co2="1500">
@@ -101,28 +103,33 @@
                     </label>
                 </div>
 
-                <!-- CARD RISULTATO CLICCABILE PER ANDARE AL PAGAMENTO -->
-                <div class="result-box" 
+                <!-- CARD RISULTATO CLICCABILE CON SCRITTE INGRANDITE -->
+                <div class="result-box pulse-macro-btn" 
                      onclick="document.getElementById('quizForm').requestSubmit()" 
-                     style="cursor: pointer;" title="Click to claim cashback">
-                    <div class="result-title">Estimated Annual CashBack</div>
-                    <div class="cashback-amount">€ <span id="cashbackVal">0.00</span> / yr</div>
-                    <div class="co2-amount">🌱 Estimated Avoided CO₂: <strong id="co2Val">0</strong> kg</div>
+                     style="margin-top: 24px; padding: 22px 16px; border: 2px solid #10b981; border-radius: 16px; background: rgba(16, 185, 129, 0.08); text-align: center;" 
+                     title="Click to claim your cashback">
+                    <div class="result-title" style="font-size: 1.1rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                        ESTIMATED ANNUAL CASHBACK
+                    </div>
+                    <div class="cashback-amount" style="font-size: 2.2rem; font-weight: 900; color: #10b981; margin: 8px 0;">
+                        € <span id="cashbackVal">0.00</span> / yr
+                    </div>
+                    <div class="co2-amount" style="font-size: 0.95rem; font-weight: 700; color: #cbd5e1; margin-top: 6px;">
+                        🌱 Estimated Avoided CO₂: <strong id="co2Val" style="color: #34d399;">0</strong> kg
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-cta-giant" style="margin-bottom: 0;">
-                    🚀 CLAIM YOUR CASHBACK — SUBSCRIBE NOW →
+                <!-- MACRO-TASTO DI CONVERSIONE FINALE (NO SUBSCRIBE TEXT) -->
+                <button type="submit" class="btn-cta-giant pulse-macro-btn" style="width: 100%; margin-top: 16px; margin-bottom: 0; padding: 18px; font-size: 1.1rem; font-weight: 900; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: 1px solid #f87171; border-radius: 12px; color: white; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); text-transform: uppercase; letter-spacing: 0.5px;">
+                    🚀 CLAIM YOUR CASHBACK NOW →
                 </button>
-
             </form>
         </main>
 
-        <footer class="footer-text">
+        <footer class="footer-text" style="text-align: center; margin-top: 30px; font-size: 0.8rem; color: #64748b;">
             © 2026 EcoCredits Inc. All rights reserved.
         </footer>
-
     </div>
-
     <script src="/js/landing.js"></script>
 </body>
 </html>
