@@ -155,10 +155,11 @@ body {
 .category-title {
   font-size: 12px;
   font-weight: 800;
-  color: #38bdf8;
+  color: #a3e635;
   text-transform: uppercase;
   letter-spacing: 1px;
   margin: 18px 0 10px 0;
+  text-shadow: 0 0 10px rgba(163, 230, 53, 0.3);
 }
 
 .option-group {
