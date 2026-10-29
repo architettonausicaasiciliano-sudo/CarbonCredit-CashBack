@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="/css/style.css">
     <style>
         @keyframes safeHavenPulse {
-            0% { transform: scale(1); box-shadow: 0 0 15px rgba(163, 230, 53, 0.3); }
-            50% { transform: scale(1.028); box-shadow: 0 0 28px rgba(163, 230, 53, 0.6); }
-            100% { transform: scale(1); box-shadow: 0 0 15px rgba(163, 230, 53, 0.3); }
+            0% { transform: scale(1); box-shadow: inset 0 0 20px rgba(163, 230, 53, 0.2), 0 0 15px rgba(163, 230, 53, 0.2); }
+            50% { transform: scale(1.02); box-shadow: inset 0 0 35px rgba(163, 230, 53, 0.4), 0 0 30px rgba(163, 230, 53, 0.5); }
+            100% { transform: scale(1); box-shadow: inset 0 0 20px rgba(163, 230, 53, 0.2), 0 0 15px rgba(163, 230, 53, 0.2); }
         }
         .pulse-macro-btn {
             animation: safeHavenPulse 2.8s infinite ease-in-out;
@@ -17,42 +17,40 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .pulse-macro-btn:hover {
-            transform: scale(1.035) !important;
+            transform: scale(1.03) !important;
+        }
+
+        @keyframes goldBlinkText {
+            0% { color: #facc15; text-shadow: 0 0 12px rgba(250,204,21,0.5); }
+            50% { color: #fef08a; text-shadow: 0 0 28px rgba(250,204,21,0.9); }
+            100% { color: #facc15; text-shadow: 0 0 12px rgba(250,204,21,0.5); }
+        }
+        .gold-blinking-title {
+            animation: goldBlinkText 2.2s infinite ease-in-out;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
     <div class="container">
         
-<!-- BLOCCO HERO PRINCIPALE -->
+        <!-- BLOCCO HERO PRINCIPALE CON BORDI MORBIDI E SFUMATURA VERSO L'INTERNO -->
         <header class="hero" style="margin-bottom: 24px; text-align: center;">
-            <style>
-                @keyframes goldBlinkText {
-                    0% { color: #facc15; text-shadow: 0 0 10px rgba(250,204,21,0.4); }
-                    50% { color: #fef08a; text-shadow: 0 0 25px rgba(250,204,21,0.9); transform: scale(1.02); }
-                    100% { color: #facc15; text-shadow: 0 0 10px rgba(250,204,21,0.4); }
-                }
-                .gold-blinking-title {
-                    animation: goldBlinkText 2.5s infinite ease-in-out;
-                    display: inline-block;
-                }
-            </style>
-            
-            <div style="border: 2px solid #a3e635; border-radius: 20px; padding: 28px 16px; background: rgba(163, 230, 53, 0.04); box-shadow: 0 0 25px rgba(163, 230, 53, 0.2);">
+            <div style="border: 2px solid rgba(163, 230, 53, 0.4); border-radius: 28px; padding: 32px 18px; background: radial-gradient(circle at center, rgba(163, 230, 53, 0.08) 0%, rgba(15, 23, 42, 0.8) 85%); box-shadow: inset 0 0 30px rgba(163, 230, 53, 0.15), 0 15px 35px rgba(0, 0, 0, 0.5);">
                 
-                <!-- LOGO GRANDE SENZA BORDI NÉ QUADRATI, FUSIONE NERA PERFETTA -->
+                <!-- LOGO INGRANDITO SENZA BORDI ESTERNI -->
                 <div style="margin-bottom: 16px; display: flex; justify-content: center; align-items: center;">
                     <a href="/checkout.html" class="pulse-macro-btn" style="display: inline-block; line-height: 0; text-decoration: none;" title="Go to Checkout">
-                        <img src="/images/logo.png" alt="Carbon Credit Cashback Logo" style="width: 100%; max-width: 270px; height: auto; object-fit: contain; background: #070d1a; padding: 0; border: none; box-shadow: none; mix-blend-mode: luminosity;">
+                        <img src="/images/logo.png" alt="Carbon Credit Cashback Logo" style="width: 100%; max-width: 280px; height: auto; object-fit: contain; background: transparent; padding: 0; border: none; box-shadow: none;">
                     </a>
                 </div>
 
-                <!-- TITOLO ESTREMAMENTE BOLD CON SCRITTA CASHBACK IN ORO CHE BLINKA -->
+                <!-- TITOLO EXTRA BOLD CON CASHBACK IN ORO LAMPEGGIANTE -->
                 <h1 style="color: #ffffff; font-size: 2.1rem; font-weight: 900; line-height: 1.1; margin: 0 0 12px 0; letter-spacing: -0.5px; text-transform: uppercase; -webkit-text-stroke: 0.8px #ffffff;">
                     CARBONCREDIT <span class="gold-blinking-title" style="font-weight: 900; -webkit-text-stroke: 0.8px #facc15;">CASHBACK</span>
                 </h1>
                 
-                <!-- MACRO-TASTO PILLOLA B2B CLICCABILE E PULSANTE -->
+                <!-- MACRO-TASTO B2B -->
                 <div style="margin-bottom: 18px;">
                     <a href="/checkout.html" class="pulse-macro-btn" style="text-decoration: none; display: inline-block;">
                         <span style="background: rgba(163, 230, 53, 0.15); color: #a3e635; border: 1px solid #a3e635; padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; box-shadow: 0 0 12px rgba(163, 230, 53, 0.3);">
@@ -61,39 +59,41 @@
                     </a>
                 </div>
 
+                <!-- TESTO CON ARANCIONE UNIFICATO (SENZA ROSSO) -->
                 <h2 style="color: #f8fafc; font-size: 1.35rem; font-weight: 800; line-height: 1.25; margin: 14px 0; text-transform: uppercase;">
-                    DID YOU KNOW YOUR GREEN HABITS CAN <span style="color: #FF3B30; font-weight: 900;">PAY YOU BACK REAL CASH?</span>
+                    DID YOU KNOW YOUR GREEN HABITS CAN <span style="color: #f97316; font-weight: 900; text-shadow: 0 0 10px rgba(249,115,22,0.4);">PAY YOU BACK REAL CASH?</span>
                 </h2>
                 
-                <p style="color: #94a3b8; font-size: 0.92rem; margin: 10px 0 20px 0; line-height: 1.4;">
+                <!-- DESCRIZIONE SOTTOSTANTE RESA BEN LEGGIBILE E CHIARA -->
+                <p style="color: #e2e8f0; font-size: 0.96rem; font-weight: 500; margin: 12px 0 22px 0; line-height: 1.5;">
                     From walking and plant-based food to solar panels and land ownership: calculate how much daily cashback you are leaving on the table.
                 </p>
                 
-                <!-- MACRO-TASTO HERO ARANCIONE CON EMOJI DENARO -->
+                <!-- MACRO-TASTO HERO ARANCIONE CON TESTO E EMOJI DENARO PIÙ GRANDI -->
                 <a href="/checkout.html" class="pulse-macro-btn" style="text-decoration: none; display: block;">
-                    <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 18px 16px; border-radius: 12px; font-weight: 900; font-size: 1.05rem; color: #ffffff; border: 1px solid #fb923c; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 20px rgba(249, 115, 22, 0.4);">
-                        💵 WANT YOUR CASHBACK BACK? CALCULATE NOW →
+                    <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 20px 16px; border-radius: 16px; font-weight: 900; font-size: 1.15rem; color: #ffffff; border: 1.5px solid #fb923c; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 6px 25px rgba(249, 115, 22, 0.5);">
+                        <span style="font-size: 1.4rem; vertical-align: middle; margin-right: 6px;">💵</span> WANT YOUR CASHBACK BACK? CALCULATE NOW <span style="font-size: 1.2rem; vertical-align: middle;">→</span>
                     </div>
                 </a>
             </div>
         </header>
 
         <!-- CALCOLATORE CASHBACK -->
-        <main class="quiz-card" id="initial-test">
+        <main class="quiz-card" id="initial-test" style="border-radius: 24px; border: 1px solid rgba(163, 230, 53, 0.2); background: rgba(30, 41, 59, 0.85);">
             <h2 style="font-size: 1.3rem; font-weight: 800; color: #f8fafc; margin-bottom: 20px;">⏱️ Initial CashBack Calculator</h2>
             <form id="quizForm">
                 
                 <div class="category-title" style="color: #a3e635; font-weight: 800; font-size: 0.95rem; margin-top: 10px;">1. DAILY SUSTAINABLE HABITS</div>
                 <div class="option-group">
-                    <label class="option-label">
+                    <label class="option-label" style="border-radius: 14px;">
                         <input type="checkbox" value="120" data-co2="180">
                         <span class="option-text">🥛 Plant-Based Milk / Organic Food</span>
                     </label>
-                    <label class="option-label">
+                    <label class="option-label" style="border-radius: 14px;">
                         <input type="checkbox" value="150" data-co2="220">
                         <span class="option-text">🍎 Km 0 Grocery / Farmers Market</span>
                     </label>
-                    <label class="option-label">
+                    <label class="option-label" style="border-radius: 14px;">
                         <input type="checkbox" value="200" data-co2="350">
                         <span class="option-text">🚲 Eco Mobility (Bike, EV, Walking)</span>
                     </label>
@@ -101,11 +101,11 @@
 
                 <div class="category-title" style="color: #a3e635; font-weight: 800; font-size: 0.95rem; margin-top: 18px;">2. ENERGY & HOME EFFICIENCY</div>
                 <div class="option-group">
-                    <label class="option-label">
+                    <label class="option-label" style="border-radius: 14px;">
                         <input type="checkbox" value="450" data-co2="900">
                         <span class="option-text">☀️ Solar Panels / Heat Pump Systems</span>
                     </label>
-                    <label class="option-label">
+                    <label class="option-label" style="border-radius: 14px;">
                         <input type="checkbox" value="250" data-co2="400">
                         <span class="option-text">🔌 A+++ Smart Appliances / Smart Heating</span>
                     </label>
@@ -113,33 +113,33 @@
 
                 <div class="category-title" style="color: #a3e635; font-weight: 800; font-size: 0.95rem; margin-top: 18px;">3. LAND & GREEN SPACES</div>
                 <div class="option-group">
-                    <label class="option-label">
+                    <label class="option-label" style="border-radius: 14px;">
                         <input type="checkbox" value="600" data-co2="1500">
                         <span class="option-text">🌳 Own Land, Large Garden, or Orchards</span>
                     </label>
                 </div>
 
-                <!-- CARD RISULTATO CLICCABILE DIRETTAMENTE AL CHECKOUT -->
+                <!-- CARD RISULTATO CLICCABILE -->
                 <a href="/checkout.html" style="text-decoration: none; display: block;">
                     <div class="result-box pulse-macro-btn" 
-                         style="margin-top: 24px; padding: 22px 16px; border: 2px solid #a3e635; border-radius: 16px; background: rgba(163, 230, 53, 0.08); text-align: center;" 
+                         style="margin-top: 26px; padding: 24px 16px; border: 2px solid #a3e635; border-radius: 20px; background: rgba(163, 230, 53, 0.08); text-align: center;" 
                          title="Click to claim your cashback">
-                        <div class="result-title" style="font-size: 1.1rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                        <div class="result-title" style="font-size: 1.1rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
                             ESTIMATED ANNUAL CASHBACK
                         </div>
-                        <div class="cashback-amount" style="font-size: 2.2rem; font-weight: 900; color: #a3e635; margin: 8px 0;">
+                        <div class="cashback-amount" style="font-size: 2.3rem; font-weight: 900; color: #a3e635; margin: 8px 0;">
                             € <span id="cashbackVal">0.00</span> / yr
                         </div>
-                        <div class="co2-amount" style="font-size: 0.95rem; font-weight: 700; color: #cbd5e1; margin-top: 6px;">
+                        <div class="co2-amount" style="font-size: 0.98rem; font-weight: 700; color: #e2e8f0; margin-top: 6px;">
                             🌱 Estimated Avoided CO₂: <strong id="co2Val" style="color: #a3e635;">0</strong> kg
                         </div>
                     </div>
                 </a>
 
-                <!-- MACRO-TASTO FINALE ARANCIONE CON EMOJI DENARO -->
-                <a href="/checkout.html" class="pulse-macro-btn" style="text-decoration: none; display: block; margin-top: 16px;">
-                    <div style="width: 100%; box-sizing: border-box; padding: 18px; font-size: 1.1rem; font-weight: 900; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: 1px solid #f87171; border-radius: 12px; color: white; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">
-                        🚀 CLAIM YOUR CASHBACK NOW →
+                <!-- MACRO-TASTO FINALE ARANCIONE -->
+                <a href="/checkout.html" class="pulse-macro-btn" style="text-decoration: none; display: block; margin-top: 18px;">
+                    <div style="width: 100%; box-sizing: border-box; padding: 20px; font-size: 1.15rem; font-weight: 900; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); border: 1.5px solid #fb923c; border-radius: 16px; color: white; box-shadow: 0 6px 25px rgba(249, 115, 22, 0.5); text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">
+                        <span style="font-size: 1.4rem; vertical-align: middle; margin-right: 6px;">🚀</span> CLAIM YOUR CASHBACK NOW <span style="font-size: 1.2rem; vertical-align: middle;">→</span>
                     </div>
                 </a>
             </form>
