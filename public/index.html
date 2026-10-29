@@ -26,21 +26,33 @@
         
 <!-- BLOCCO HERO PRINCIPALE -->
         <header class="hero" style="margin-bottom: 24px; text-align: center;">
+            <style>
+                @keyframes goldBlinkText {
+                    0% { color: #facc15; text-shadow: 0 0 10px rgba(250,204,21,0.4); }
+                    50% { color: #fef08a; text-shadow: 0 0 25px rgba(250,204,21,0.9); transform: scale(1.02); }
+                    100% { color: #facc15; text-shadow: 0 0 10px rgba(250,204,21,0.4); }
+                }
+                .gold-blinking-title {
+                    animation: goldBlinkText 2.5s infinite ease-in-out;
+                    display: inline-block;
+                }
+            </style>
+            
             <div style="border: 2px solid #a3e635; border-radius: 20px; padding: 28px 16px; background: rgba(163, 230, 53, 0.04); box-shadow: 0 0 25px rgba(163, 230, 53, 0.2);">
                 
-                <!-- LOGO GRANDE SENZA BORDI O CERCHI, CLICCABILE AL CHECKOUT CON EFFETTO PULSE -->
-                <div style="margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
+                <!-- LOGO GRANDE SENZA BORDI NÉ QUADRATI, FUSIONE NERA PERFETTA -->
+                <div style="margin-bottom: 16px; display: flex; justify-content: center; align-items: center;">
                     <a href="/checkout.html" class="pulse-macro-btn" style="display: inline-block; line-height: 0; text-decoration: none;" title="Go to Checkout">
-                        <img src="/images/logo.png" alt="Carbon Credit Cashback Logo" style="width: 100%; max-width: 260px; height: auto; object-fit: contain; background: transparent; padding: 0; border: none; box-shadow: none;">
+                        <img src="/images/logo.png" alt="Carbon Credit Cashback Logo" style="width: 100%; max-width: 270px; height: auto; object-fit: contain; background: #070d1a; padding: 0; border: none; box-shadow: none; mix-blend-mode: luminosity;">
                     </a>
                 </div>
 
-                <!-- TITOLO: CARBONCREDIT IN BIANCO EXTRA BOLD, CASHBACK IN VERDE ACIDO DEL LOGO -->
-                <h1 style="color: #ffffff; font-size: 2.1rem; font-weight: 900; line-height: 1.1; margin: 0 0 12px 0; letter-spacing: -0.5px; text-transform: uppercase; -webkit-text-stroke: 0.6px #ffffff;">
-                    CARBONCREDIT <span style="color: #a3e635; text-shadow: 0 0 20px rgba(163,230,53,0.8); font-weight: 900; -webkit-text-stroke: 0.6px #a3e635;">CASHBACK</span>
+                <!-- TITOLO ESTREMAMENTE BOLD CON SCRITTA CASHBACK IN ORO CHE BLINKA -->
+                <h1 style="color: #ffffff; font-size: 2.1rem; font-weight: 900; line-height: 1.1; margin: 0 0 12px 0; letter-spacing: -0.5px; text-transform: uppercase; -webkit-text-stroke: 0.8px #ffffff;">
+                    CARBONCREDIT <span class="gold-blinking-title" style="font-weight: 900; -webkit-text-stroke: 0.8px #facc15;">CASHBACK</span>
                 </h1>
                 
-                <!-- MACRO-TASTO PILLOLA B2B CLICCABILE, PULSANTE E DIRETTAMENTE AL CHECKOUT -->
+                <!-- MACRO-TASTO PILLOLA B2B CLICCABILE E PULSANTE -->
                 <div style="margin-bottom: 18px;">
                     <a href="/checkout.html" class="pulse-macro-btn" style="text-decoration: none; display: inline-block;">
                         <span style="background: rgba(163, 230, 53, 0.15); color: #a3e635; border: 1px solid #a3e635; padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; box-shadow: 0 0 12px rgba(163, 230, 53, 0.3);">
