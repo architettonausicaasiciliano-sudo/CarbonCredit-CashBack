@@ -7,31 +7,35 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-        <div class="container">
-<!-- HEADER UNIFICATO CON LOGO UFFICIALE -->
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; border-radius: 12px; margin-bottom: 20px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <img src="/images/logo.png" alt="CarbonCredit CashBack Logo" style="height: 38px; width: auto; display: block; border-radius: 50%;">
-                <span style="font-weight: 800; font-size: 1.05rem; color: #f8fafc; letter-spacing: -0.3px;">CarbonCredit <span style="color: #10b981;">CashBack</span></span>
-            </div>
-            <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 500; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 4px 10px; border-radius: 20px;">
-                B2B GHG Scope 3
-            </div>
-        </div>
-
+<div class="container">
         
-<!-- HEADER PRINCIPALE GRANDE CON LOGO BIANCO/ORO/VERDE (STILE MYSAFEHAVEN) -->
+        <!-- HEADER PRINCIPALE ANIMATO (STILE MYSAFEHAVEN CON LOGO SU FONDO SCURO) -->
         <header class="hero" style="margin-bottom: 24px; text-align: center;">
-            <div style="border: 2px solid #10b981; border-radius: 20px; padding: 28px 16px; background: rgba(16, 185, 129, 0.05); box-shadow: 0 0 25px rgba(16, 185, 129, 0.2); transition: all 0.2s ease;">
+            <style>
+                @keyframes safeHavenPulse {
+                    0% { transform: scale(1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+                    50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(16, 185, 129, 0.4); }
+                    100% { transform: scale(1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+                }
+                .hero-animated-card {
+                    animation: safeHavenPulse 3s infinite ease-in-out;
+                    border: 2px solid #10b981;
+                    border-radius: 20px;
+                    padding: 28px 16px;
+                    background: rgba(16, 185, 129, 0.05);
+                }
+            </style>
+            
+            <div class="hero-animated-card">
                 
-                <!-- CONTENITORE LOGO UFFICIALE (SFONDO BIANCO PER RISALTARE L'ORO) -->
+                <!-- LOGO GRANDE SENZA SFONDO BIANCO (FUSIONE SCURA) -->
                 <div style="margin-bottom: 16px; display: flex; justify-content: center; align-items: center;">
-                    <img src="/images/logo.png" alt="CarbonCredit CashBack" style="width: 130px; height: 130px; object-fit: contain; border-radius: 50%; background: #ffffff; padding: 4px; border: 3px solid #eab308; box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), 0 0 10px rgba(234, 179, 8, 0.5);">
+                    <img src="/images/logo.png" alt="CarbonCredit CashBack" style="width: 140px; height: 140px; object-fit: contain; border-radius: 50%; background: #0b132b; padding: 6px; border: 2px solid #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);">
                 </div>
 
-                <!-- SCRITTA TITOLO GRANDE BRAND (STILE MYSAFEHAVEN) -->
+                <!-- SCRITTA TITOLO BRAND (CASHBACK IN VERDE) -->
                 <h1 style="color: #ffffff; font-size: 1.8rem; font-weight: 900; line-height: 1.1; margin: 0 0 8px 0; letter-spacing: -0.5px; text-transform: uppercase;">
-                    CarbonCredit <span style="color: #10b981; text-shadow: 0 0 15px rgba(16,185,129,0.5);">CashBack</span>
+                    CarbonCredit <span style="color: #10b981; text-shadow: 0 0 15px rgba(16,185,129,0.6);">CashBack</span>
                 </h1>
                 
                 <div style="margin-bottom: 16px;">
