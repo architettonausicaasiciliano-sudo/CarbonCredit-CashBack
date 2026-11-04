@@ -611,7 +611,7 @@ app.get("/api/users/profile/:email", (req, res) => {
 /* =====================================================
    CORE ENGINE: REGISTRAZIONE AZIONE ECO & VALIDAZIONE dMRV
    ===================================================== */
-app.post("/api/eco-actions", upload.single("image"), async (req, res) => {
+app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
   try {
     const { user_email, title, merchant, amount, dateTime } = req.body;
     const file = req.file;
@@ -1002,7 +1002,17 @@ app.get("/api/dashboard/global-stats", (req, res) => {
     });
   });
 });
+app.get("/dashboard", (req, res) => {
+  res.sendFile(path.join(__dirname, "protected", "dashboard.html"));
+});
 
+app.get("/add-asset", (req, res) => {
+  res.sendFile(path.join(__dirname, "protected", "add-asset.html"));
+});
+
+app.get("/success", (req, res) => {
+  res.sendFile(path.join(__dirname, "protected", "success.html"));
+});
 /* =====================================================
    FALLBACK ROTTE STATICHE & FRONTEND HYBRID
    ===================================================== */
