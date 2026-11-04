@@ -485,11 +485,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const currentScore = localStorage.getItem("carbonCredit_score") || localStorage.getItem("mySafeHaven_score") || localStorage.getItem("riskScore") || "50";
 
       /* ROTTA RELATIVA PER L'INTENT DI PAGAMENTO */
-      const response = await fetch("/create-initial-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, variant, score: currentScore })
-      });
+ const response = await fetch("/api/create-initial-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, variant, score: currentScore })
+    });
 
       const data = await response.json();
 
