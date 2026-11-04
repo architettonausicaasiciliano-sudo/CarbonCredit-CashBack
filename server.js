@@ -96,6 +96,11 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+app.get("/api/stripe-config", (req, res) => {
+  res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
+});
 
 /* =====================================================
    CARTELLA UPLOADS & CONFIGURAZIONE MULTER
@@ -1013,7 +1018,7 @@ app.get("/add-asset", (req, res) => {
 app.get("/success", (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "success.html"));
 });
-app.post("/create-initial-payment", async (req, res) => {
+app.post("api/create-initial-payment", async (req, res) => {
   try {
     const { email, variant, score } = req.body;
     if (!email) return res.status(400).json({ error: "L'indirizzo email è obbligatorio." });
