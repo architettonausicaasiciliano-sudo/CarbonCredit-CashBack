@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ===================================================== */
     async function deleteEcoAction(actionId) {
         try {
-            const res = await fetch(`/api/eco-actions/${actionId}?email=${encodeURIComponent(userEmail)}`, {
+            const res = await fetch(`/api/eco-actions/user/${encodeURIComponent(userEmail)}`, {
                 method: 'DELETE'
             });
             const result = await res.json();
