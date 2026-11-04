@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!userEmail) return;
 
         try {
-            const res = await fetch(`/api/user?email=${encodeURIComponent(userEmail)}`);
+            const res = await fetch(`/api/users/profile/${encodeURIComponent(userEmail)}`);
             const data = await res.json();
 
             if (data && !data.error) {
