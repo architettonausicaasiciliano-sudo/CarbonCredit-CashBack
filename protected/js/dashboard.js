@@ -187,14 +187,20 @@ async function checkThousandThreshold() {
                         <p style="margin: 0; font-size: 0.85em; color: var(--text-muted);">
                             Categoria: <strong>${action.category}</strong> | Fonte: ${action.source || 'Inserimento Manuale'} | Stato: <em>${statusBadge}</em>
                         </p>
-                        <p style="margin: 6px 0 0 0; font-size: 0.9em; color: #f8fafc;">
-                            CO₂ Evitata: <strong>${co2Kg} kg</strong> | 
-                            Crediti: <strong>+${action.credits_earned} CC</strong> | 
-                            Valore B2B Stimato: <strong style="color: var(--accent-yellow);">€ ${estB2bValue}</strong>
-                        </p>
-                        <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center;">
-                            <a href="/verify/${action.id}" target="_blank" style="color: var(--accent-blue); font-size: 0.8em; text-decoration: underline;">🔍 Audit dMRV</a>
-                            <button class="btn-delete-asset" data-id="${action.id}" style="background: transparent; border: none; color: var(--danger-red); font-size: 0.8em; cursor: pointer; padding: 0;">🗑 Rimuovi</button>
+<p style="margin: 6px 0 0 0; font-size: 0.95em; color: #f8fafc;">
+                                🌱 Avoided CO₂: <strong>${co2Kg} kg</strong> &nbsp;|&nbsp; <span style="font-size: 1.3em; animation: blink 1.5s infinite; display: inline-block;">🪙</span> Credits: <strong style="color: var(--accent-yellow);">+${action.credits_earned} CC</strong>
+                            </p>
+                            <p style="margin: 6px 0 0 0; font-size: 0.85em; color: var(--accent-green-bright); font-weight: 500;">
+                                <span style="font-size: 1.3em; animation: blink 1.5s infinite; display: inline-block;">💰</span> Cash Value & Social Credits based on pool market fluctuation
+                            </p>
+                        </div>
+<div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 12px; align-items: center; justify-content: space-between;">
+                            <a href="/verify/${action.id}" target="_blank" style="background: rgba(132, 204, 22, 0.15); color: var(--accent-green-bright); border: 1px solid var(--accent-green-bright); padding: 10px 18px; border-radius: 8px; font-size: 0.95em; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                🔍 dMRV Certified Audit
+                            </a>
+                            <button class="btn-delete-asset" data-id="${action.id}" style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger-red); color: var(--danger-red); font-size: 0.95em; font-weight: bold; cursor: pointer; padding: 10px 18px; border-radius: 8px;">
+                                🗑 Remove Asset
+                            </button>
                         </div>
                     </div>
                     ${action.photo_url ? `<img src="${action.photo_url}" class="asset-thumb" alt="Allegato" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px; margin-left: 12px; border: 1px solid var(--accent-green);">` : ''}
