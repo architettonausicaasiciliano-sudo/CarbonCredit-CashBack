@@ -153,7 +153,7 @@ async function checkThousandThreshold() {
         try {
             const res = await fetch(`/api/eco-actions/user/${encodeURIComponent(userEmail)}`);
             const data = await res.json();
-            const actions = data.ecoActions || [];
+            const actions = data.actions || [];
 
             if (!assetsList) return;
 
