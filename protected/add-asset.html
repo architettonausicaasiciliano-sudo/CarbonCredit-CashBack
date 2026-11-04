@@ -463,25 +463,25 @@
     e.preventDefault();
     document.getElementById('errorBox').style.display = 'none';
 
-    const userEmail = localStorage.getItem('userEmail') || localStorage.getItem('email') || 'user@example.com';
+// Forziamo direttamente la tua email di test per azzerare qualsiasi errore di localStorage vuoto
+    const userEmail = 'nausicaa.siciliano@virgilio.it';
     const title = document.getElementById('title').value;
     const category = document.getElementById('category').value;
     const amountSpend = parseFloat(document.getElementById('amountSpend').value) || 0;
     const file = photoInput.files[0];
     const cashbackCredit = amountSpend * 0.10;
-
+    
     if (!file) {
       showError("⚠️ Prima di procedere devi caricare la foto dello scontrino o prova.");
       return;
     }
-
     try {
       submitBtn.innerText = "🔍 Audit Forense AI in corso (Gemini Flash)...";
       submitBtn.disabled = true;
-
       const imageHash = await calculateImageHash(file);
+      
       const formData = new FormData();
-      formData.append('email', userEmail);
+      formData.append('user_email', userEmail); // <-- CORRETTO: adesso usa 'user_email' come atteso dal backend
       formData.append('title', title);
       formData.append('category', category);
       formData.append('amountSpend', amountSpend);
