@@ -1013,6 +1013,42 @@ app.get("/add-asset", (req, res) => {
 app.get("/success", (req, res) => {
   res.sendFile(path.join(__dirname, "protected", "success.html"));
 });
+app.post("/create-initial-payment", async (req, res) => {
+  try {
+    const { email, variant, score } = req.body;
+    if (!email) return res.status(400).json({ error: "L'indirizzo email è obbligatorio." });
+    
+    let customer;
+    const existingCustomers = await stripe.customers.list({ email, limit: 1 });
+    if (existingCustomers.data.length > 0) {
+      customer = existingCustomers.data[0];
+    } else {
+      customer = await stripe.customers.create({
+        email,
+        metadata: { platform: "CarbonCredit_dMRV", variant, score }
+      });
+    }
+    
+    db.run("UPDATE users SET stripe_customer_id = ? WHERE email = ?", [customer.id, email]);
+    
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 69, // 0.69 EUR
+      currency: "eur",
+      customer: customer.id,
+      automatic_payment_methods: { enabled: true },
+      metadata: { email, variant, score }
+    });
+    
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      customerId: customer.id,
+      paymentIntentId: paymentIntent.id
+    });
+  } catch (error) {
+    console.error("❌ ERRORE CREAZIONE INITIAL PAYMENT:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
 /* =====================================================
    FALLBACK ROTTE STATICHE & FRONTEND HYBRID
    ===================================================== */
