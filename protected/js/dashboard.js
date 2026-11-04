@@ -131,14 +131,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     /* =====================================================
        3. VERIFICA SOGLIA €1000 E GENERAZIONE TICKET
     ===================================================== */
-    async function checkThousandThreshold() {
+async function checkThousandThreshold() {
         if (!userEmail) return;
         try {
-            const res = await fetch('/api/check-thousand-threshold', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: userEmail })
-            });
+            const res = await fetch('/api/check-thousand-threshold'); // <-- Sostituito con GET pulita
             const data = await res.json();
             if (data.thresholdReached && data.ticketCode) {
                 console.log(`🎯 Soglia €1000 raggiunta! Ticket generato: ${data.ticketCode}`);
@@ -155,7 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!userEmail) return;
 
         try {
-            const res = await fetch(`/api/eco-actions?email=${encodeURIComponent(userEmail)}`);
+            const res = await fetch(`/api/eco-actions/user/${encodeURIComponent(userEmail)}`);
             const data = await res.json();
             const actions = data.ecoActions || [];
 
