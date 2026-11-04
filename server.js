@@ -25,6 +25,13 @@ try {
 }
 
 const app = express();
+const requireAuth = (req, res, next) => {
+  const userSession = req.cookies?.user_session || req.headers.cookie;
+  if (!userSession) {
+    return res.status(401).redirect("/index.html");
+  }
+  next();
+};
 
 /* =====================================================
    CONFIGURAZIONE MIDDLEWARE & STRIPE WEBHOOK
