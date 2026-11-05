@@ -76,65 +76,56 @@ async function loadUserData() {
     /* =====================================================
        2. CALCOLO E RENDER AVANZAMENTO TRANCHE (PROGRESS BAR & MODAL)
     ===================================================== */
-    function renderTranchesProgress(data) {
-        const totalCreditAccumulated = data.totalCreditAccumulated || data.totalSpentEur || 0;
-        const tranchesList = data.tranches || [];
+function renderTranchesProgress(data) {
+        const totalAccumulated = Number(data.totalCreditAccumulated || 0);
+        const completedTranches = Math.floor(totalAccumulated / 1000);
+        const currentProgress = parseFloat((totalAccumulated % 1000).toFixed(2));
+        const currentPercentage = parseFloat(((currentProgress / 1000) * 100).toFixed(1));
 
-        const completedTranches = Math.floor(totalCreditAccumulated / 1000);
-        const currentTrancheProgress = parseFloat((totalCreditAccumulated % 1000).toFixed(2));
-        const currentTranchePercentage = parseFloat(((currentTrancheProgress / 1000) * 100).toFixed(1));
-        const unlockedCashback = completedTranches * 100;
-
-        // Aggiornamento Card Principale Dashboard
-// Aggiornamento Card Principale Dashboard
         if (dashTrancheLabel) dashTrancheLabel.innerText = `Active Tranche: #${completedTranches + 1}`;
-        if (dashProgressBarFill) dashProgressBarFill.style.width = `${currentTranchePercentage}%`;
-        if (dashProgressText) dashProgressText.innerText = `€${currentTrancheProgress.toFixed(2)} / €1,000.00 (${currentTranchePercentage}%)`;
+        if (dashProgressBarFill) dashProgressBarFill.style.width = `${currentPercentage}%`;
+        if (dashProgressText) dashProgressText.innerText = `€${currentProgress.toFixed(2)} / €1,000.00 (${currentPercentage}%)`;
         if (dashUnlockedCashback) dashUnlockedCashback.innerText = `Unlocked Tranches: ${completedTranches}`;
 
-        // Render Elenco Tranche dentro la Modale
         if (tranchesContainerEl) {
             tranchesContainerEl.innerHTML = '';
+            for (let i = 0; i <= completedTranches; i++) {
+                const isCompleted = i < completedTranches;
+                const trancheVal = isCompleted ? 1000 : currentProgress;
+                const pct = isCompleted ? 100 : currentPercentage;
 
-            // Se il backend invia una lista predefinita la usiamo, altrimenti la generiamo dinamicamente
-            if (tranchesList.length > 0) {
-                tranchesContainerEl.innerHTML = tranchesList.map(t => `
-                    <div class="tranche-item ${t.unlocked ? 'completed' : ''}">
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-weight:bold; margin-bottom: 6px;">
-                            <span>Tranche #${t.id} (€${t.targetEur})</span>
-                            <span style="color: ${t.unlocked ? 'var(--accent-green-bright)' : 'var(--text-muted)'};">
-                                ${t.unlocked ? '✓ Unlocked Tranche' : '🔒 In Progress'}
-                            </span>
-                        </div>
+                const item = document.createElement('div');
+                item.className = `tranche-item ${isCompleted ? 'completed' : ''}`;
+                item.style.cssText = 'background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 10px;';
+                
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px;">
+                        <span style="color: var(--accent-green-bright);">Tranche #${i + 1} ${isCompleted ? '✅ Unlocked' : '⏳ In Progress'}</span>
+                        <span style="color: ${isCompleted ? 'var(--accent-yellow)' : 'var(--text-muted)'};">
+                            ${isCompleted ? '🎉 Milestone €1,000 Reached!' : 'Target: €1,000.00'}
+                        </span>
                     </div>
-                `).join('');
-            } else {
-                for (let i = 0; i <= completedTranches; i++) {
-                    const isCompleted = i < completedTranches;
-                    const trancheVal = isCompleted ? 1000 : currentTrancheProgress;
-                    const pct = isCompleted ? 100 : currentTranchePercentage;
-
-                    const item = document.createElement('div');
-                    item.className = `tranche-item ${isCompleted ? 'completed' : ''}`;
-                    item.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px;">
-                            <span style="color: var(--accent-green-bright);">Tranche #${i + 1} ${isCompleted ? '✅ (Completed)' : '⏳ (In Progress)'}</span>
-                            <span style="color: ${isCompleted ? 'var(--accent-yellow)' : 'var(--text-muted)'};">
-                                ${isCompleted ? 'Tranche Unlocked' : 'Unlock Target at €1,000'}
-                            </span>
+                    <div class="progress-track" style="height: 8px; margin: 6px 0; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
+                        <div class="progress-fill" style="width: ${pct}%; background: ${isCompleted ? 'var(--accent-yellow)' : 'var(--accent-green-bright)'}; height: 100%;"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                        <span>Progress: €${trancheVal.toFixed(2)} / €1,000.00</span>
+                        <span>${pct}%</span>
+                    </div>
+                    ${isCompleted ? `
+                        <div style="margin-top: 10px; padding: 10px; background: rgba(234, 179, 8, 0.1); border: 1px solid var(--accent-yellow); border-radius: 8px; text-align: center;">
+                            <p style="margin: 0 0 6px 0; font-size: 0.8em; color: var(--accent-yellow); font-weight: bold;">
+                                <span style="font-size: 1.2em; animation: blink 1.5s infinite; display: inline-block;">🪙</span> Tranche #${i + 1} Reward Ticket & QR Code Ready
+                            </p>
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=TRANCHE-${i+1}-${userEmail}" alt="Tranche QR Code" style="width: 80px; height: 80px; border-radius: 6px; border: 1px solid var(--accent-yellow); padding: 4px; background: white;" />
+                            <p style="margin: 4px 0 0 0; font-size: 0.7em; color: var(--text-muted);">Present QR code for B2B pool payout validation</p>
                         </div>
-                        <div class="progress-track" style="height: 8px; margin: 6px 0; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
-                            <div class="progress-fill" style="width: ${pct}%; background: var(--accent-green-bright); height: 100%;"></div>
-                        </div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
-                            <span>Progress: €${trancheVal.toFixed(2)} / €1,000.00</span>
-                            <span>Rate: ${pct}%</span>
-                        </div>
-                    `;
-                    tranchesContainerEl.appendChild(item);
-                }
+                    ` : ''}
+                `;
+                tranchesContainerEl.appendChild(item);
             }
         }
+    }
     }
 
     /* =====================================================
@@ -181,7 +172,7 @@ async function loadEcoActions() {
             if (totalTreesEl) totalTreesEl.textContent = `${treesAcc} 🌳`;
             if (treeBannerTextEl) treeBannerTextEl.textContent = `${treesAcc} Tree Equivalent`;
 
-            renderTranchesProgress({
+renderTranchesProgress({
                 ...data,
                 totalCreditAccumulated: totalCreditsAcc * 10
             });
