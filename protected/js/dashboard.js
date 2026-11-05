@@ -152,12 +152,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (!assetsList) return;
 
-            let totalCreditsAcc = 0;
+let totalCreditsAcc = 0;
             let totalCo2Acc = 0;
+            let totalSpentValue = 0; // Valore economico totale per le tranche
 
             actions.forEach(act => {
                 totalCreditsAcc += Number(act.credits_earned || 0);
                 totalCo2Acc += Number(act.co2_saved_kg || 0);
+                // Recupera il valore speso o stima basata sui crediti (10% del bene)
+                totalSpentValue += Number(act.credits_earned || 0) * 10; 
             });
 
             const treesAcc = Math.floor(totalCo2Acc / 25);
@@ -167,10 +170,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (totalTreesEl) totalTreesEl.textContent = `${treesAcc} 🌳`;
             if (treeBannerTextEl) treeBannerTextEl.textContent = `${treesAcc} Tree Equivalent`;
 
-            renderTranchesProgress({
-                ...data,
-                totalCreditAccumulated: totalCreditsAcc * 10
-            });
+renderTranchesProgress({
+    ...data,
+    totalCreditAccumulated: totalSpentValue
+});
 
             if (actions.length === 0) {
                 assetsList.innerHTML = `
