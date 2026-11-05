@@ -276,14 +276,14 @@ function generateReceiptHash(merchant, dateTime, amount) {
 }
 
 function calculateTranches(totalEur) {
-  const tranche1 = Math.min(totalEur, 100);
-  const tranche2 = Math.min(Math.max(totalEur - 100, 0), 400);
-  const tranche3 = Math.max(totalEur - 500, 0);
+  const tranche1 = Math.min(totalEur, 500);
+  const tranche2 = Math.min(Math.max(totalEur - 500, 0), 500);
+  const tranche3 = Math.max(totalEur - 1000, 0);
   
-  let nextGoal = 100;
-  if (totalEur >= 100 && totalEur < 500) {
-    nextGoal = 500;
-  } else if (totalEur >= 500) {
+  let nextGoal = 500;
+  if (totalEur >= 500 && totalEur < 1000) {
+    nextGoal = 1000;
+  } else if (totalEur >= 1000) {
     nextGoal = Math.ceil((totalEur + 1) / 500) * 500;
   }
 
