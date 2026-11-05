@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aggiungi Bene / Azione Sostenibile — dMRV</title>
+  <title>Add Sustainable Asset / dMRV Action — Carbon Credit Cashback</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     :root {
@@ -84,7 +84,7 @@
     }
 
     input:focus, select:focus {
-      border-color: var(--accent-green);
+      border-color: var(--accent-green-bright);
       outline: none;
     }
 
@@ -132,18 +132,25 @@
       object-fit: cover;
     }
 
+    @keyframes blink {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.85; }
+    }
+
     .btn-submit {
       width: 100%;
-      padding: 14px;
+      padding: 16px;
       background: #374151;
       color: #9ca3af;
       border: 1px solid #4b5563;
-      border-radius: 10px;
+      border-radius: 12px;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 15px;
       cursor: pointer;
       transition: all 0.3s ease;
       margin-top: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .btn-submit.ready {
@@ -151,12 +158,7 @@
       color: #ffffff !important;
       border: 1px solid #34d399 !important;
       box-shadow: 0 0 20px rgba(16, 185, 129, 0.6) !important;
-      animation: pulse-green-btn 1.6s infinite ease-in-out;
-    }
-
-    @keyframes pulse-green-btn {
-      0%, 100% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.5); }
-      50% { box-shadow: 0 0 26px rgba(52, 211, 153, 0.9); }
+      animation: blink 1.8s infinite ease-in-out;
     }
 
     .btn-submit:disabled {
@@ -188,13 +190,12 @@
     }
 
     .badge-tier1 {
-      background: rgba(234, 179, 8, 0.2);
       color: var(--accent-yellow);
-      border: 1px solid var(--accent-yellow);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: bold;
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 10px rgba(234, 179, 8, 0.4);
     }
 
     .reward-box {
@@ -207,7 +208,7 @@
     }
 
     .reward-amount-hero {
-      font-size: 34px;
+      font-size: 32px;
       font-weight: 900;
       color: var(--accent-green-bright);
       margin: 4px 0;
@@ -250,41 +251,47 @@
     .btn-secondary {
       display: block;
       width: 100%;
-      padding: 12px;
-      background: #2563eb;
-      color: white;
+      padding: 14px;
+      background: var(--accent-green);
+      color: #000;
       text-align: center;
-      border-radius: 8px;
+      border-radius: 10px;
       text-decoration: none;
       font-size: 14px;
       font-weight: bold;
       box-sizing: border-box;
-      margin-top: 10px;
-      border: 1px solid #3b82f6;
+      margin-top: 12px;
+      border: 1px solid var(--accent-green-bright);
+      animation: blink 2s infinite ease-in-out;
+      text-transform: uppercase;
     }
 
     .cert-link {
       display: block;
       text-align: center;
-      color: var(--accent-green);
+      color: var(--accent-green-bright);
       font-weight: bold;
       font-size: 13px;
       text-decoration: none;
-      padding: 10px;
+      padding: 12px;
       border: 1px solid var(--accent-green);
       border-radius: 8px;
+      background: rgba(16, 185, 129, 0.08);
+      margin-top: 10px;
     }
 
-    .unlocked-banner {
-      background: rgba(234, 179, 8, 0.15);
-      border: 1px solid #eab308;
-      color: #fef08a;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: bold;
+    .unlocked-container {
+      margin-top: 14px;
+    }
+
+    .tranche-ticket-box {
+      margin-top: 14px;
+      padding: 16px;
+      background: rgba(234, 179, 8, 0.12);
+      border: 2px solid var(--accent-yellow);
+      border-radius: 12px;
       text-align: center;
-      margin-bottom: 12px;
+      box-shadow: 0 4px 20px rgba(234, 179, 8, 0.2);
     }
 
     .result-desc {
@@ -308,80 +315,81 @@
 
 <div class="card">
   <div class="header-bar">
-    <h2 style="color: #34d399; margin: 0; font-size: 1.25rem;">🌱 Registra Impatto dMRV</h2>
+    <h2 style="color: var(--accent-green-bright); margin: 0; font-size: 1.25rem;">🌱 Register dMRV Impact</h2>
     <a href="/dashboard" class="back-link">← Dashboard</a>
   </div>
 
   <p style="color: var(--text-muted); font-size: 13px; margin-top: 0; margin-bottom: 20px;">
-    L'AI Forensics verificherà la prova caricata per il registro dMRV e il valore di cashback spettante.
+    AI Forensics will verify the uploaded proof for the dMRV registry and aggregate your sustainable asset value.
   </p>
 
   <form id="addAssetForm" enctype="multipart/form-data">
     <div class="form-group">
-      <label for="title">Nome Bene / Azione Eco</label>
-      <input type="text" id="title" name="title" placeholder="Es. Pannello Solare 400W / Bici Elettrica / Scontrino Mezzi" required>
+      <label for="title">Asset Name / Eco Action</label>
+      <input type="text" id="title" name="title" placeholder="e.g., Solar Panel 400W / Electric Bike / Receipt" required>
     </div>
 
     <div class="form-group">
-      <label for="category">Categoria dMRV</label>
+      <label for="category">dMRV Category</label>
       <select id="category" name="category">
-        <option value="ENERGY_SAVING">Energia Solare / Efficienza Domestica</option>
-        <option value="FLIGHT_OFFSET">Mobilità Sostenibile / Trasporti</option>
-        <option value="LAND_MANAGEMENT">Gestione Terreno / Riforestazione</option>
-        <option value="RECYCLING">Riciclo / Circolarità Industriale</option>
-        <option value="GENERAL">Generale / Gamification Personal</option>
+        <option value="ENERGY_SAVING">Solar Energy / Home Efficiency</option>
+        <option value="FLIGHT_OFFSET">Sustainable Mobility / Public Transport</option>
+        <option value="LAND_MANAGEMENT">Land Management / Reforestation</option>
+        <option value="RECYCLING">Recycling / Industrial Circularity</option>
+        <option value="GENERAL">General / Personal Gamification</option>
       </select>
     </div>
 
     <div class="form-group">
-      <label for="amountSpend">Valore Acquisto / Spesa del Bene (€)</label>
-      <input type="number" id="amountSpend" step="0.01" min="0.01" name="amountSpend" placeholder="Es. 500.00" required>
-      <span style="font-size: 11px; color: #9ca3af; display: block; margin-top: 4px;">
-        💡 Genera il <strong>10% di Cashback</strong> (es. €500 spesi = €50 di valore accumulato).
+      <label for="amountSpend">Asset Value / Purchase Expense (€)</label>
+      <input type="number" id="amountSpend" step="0.01" min="0.01" name="amountSpend" placeholder="e.g., 500.00" required>
+      <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px; font-style: italic;">
+        * Asset values are aggregated into pools for macro-category market liquidation.
       </span>
     </div>
 
     <div class="form-group">
-      <label style="color: #34d399; font-weight: 800;">📸 PROVA FOTOGRAFICA (OBBLIGATORIA)</label>
+      <label style="color: var(--accent-green-bright); font-weight: 800;">📸 MANDATORY PROOF / RECEIPT</label>
       <div id="dropZone" class="file-drop-zone" onclick="document.getElementById('photo').click()">
-        <span id="filePromptText" style="font-size: 13px; color: #34d399; font-weight: bold;">
-          ⚡ CLICCA QUI PER CARICARE LO SCONTRINO / RICEVUTA ⚡
+        <span id="filePromptText" style="font-size: 13px; color: var(--accent-green-bright); font-weight: bold;">
+          ⚡ CLICK HERE TO UPLOAD RECEIPT / PROOF ⚡
         </span>
         <input type="file" id="photo" name="photo" accept="image/*" style="display: none;" required>
       </div>
 
       <div id="previewContainer">
-        <img id="imagePreview" src="" alt="Anteprima Prova">
+        <img id="imagePreview" src="" alt="Proof Preview">
       </div>
     </div>
 
-    <button type="submit" id="submitBtn" class="btn-submit">AVVIA AUDIT AI & GENERAZIONE dMRV ➔</button>
+    <button type="submit" id="submitBtn" class="btn-submit">START AI AUDIT & dMRV GENERATION ➔</button>
   </form>
 
   <div id="errorBox" class="error-box"></div>
 
-  <!-- Modale Risultati -->
+  <!-- Result Modal -->
   <div id="resultModal" class="result-modal">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-      <span style="font-weight: bold; color: #34d399; font-size: 14px;">Azione Registrata con Successo!</span>
-      <span id="tierBadge" class="badge-tier1">Tier 1 — Community</span>
+      <span style="font-weight: bold; color: var(--accent-green-bright); font-size: 14px;">Action Registered Successfully!</span>
+      <span id="tierBadge" class="badge-tier1">Tier 1 Community</span>
     </div>
 
     <div class="reward-box">
       <div style="font-size: 11px; color: #d1d5db; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">
-        Valore Totale Credito Cashback Accumulato
+        Total Accumulated Value Pool
       </div>
       <div id="rewardAmountHero" class="reward-amount-hero">€0.00</div>
-      <div id="rewardSubtext" style="font-size: 12px; color: #34d399; font-weight: 700; margin-bottom: 6px;"></div>
+      <div id="rewardSubtext" style="font-size: 12px; color: var(--accent-green-bright); font-weight: 700; margin-bottom: 6px;"></div>
     </div>
 
-    <div id="unlockedBanner" class="unlocked-banner" style="display: none;"></div>
+    <!-- Tranches QR Codes & Receipts Container -->
+    <div id="unlockedTranchesContainer" class="unlocked-container"></div>
 
-    <!-- Barra Progressiva Riscatto Cashback per Tranche -->
-    <div class="progress-section">
+    <!-- Tranche Progress Bar -->
+    <div class="progress-section" style="margin-top: 14px;">
       <div class="progress-header">
-        <span id="trancheLabel">PROGRESSO TRANCHE ATTIVA</span>
-        <span id="progressText">€0,00 / €1.000,00 (0%)</span>
+        <span id="trancheLabel">ACTIVE TRANCHE PROGRESS</span>
+        <span id="progressText">€0,00 / €1,000.00 (0%)</span>
       </div>
       <div class="progress-track">
         <div id="progressBarFill" class="progress-fill"></div>
@@ -390,15 +398,15 @@
 
     <div id="resultDesc" class="result-desc"></div>
 
-    <button type="button" id="btnLoadAnother" class="btn-submit ready" style="margin-top: 0; margin-bottom: 6px;">
-      ➕ CARICA SUBITO UN ALTRO BENE ➔
+    <button type="button" id="btnLoadAnother" class="btn-submit ready" style="margin-top: 4px; margin-bottom: 6px;">
+      <span style="font-size: 1.2em; animation: blink 1.5s infinite; display: inline-block;">💰</span> REGISTER ANOTHER ASSET ➔
     </button>
-    <div style="font-size: 11px; color: #9ca3af; text-align: center; margin-bottom: 16px; font-style: italic;">
-      * Ogni 1.000,00 € accumulati si sbloccano 100,00 € di cashback riscattabile. L'eccedenza avanza nella tranche successiva.
+    <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; font-style: italic;">
+      * Every €1,000.00 accumulated unlocks an official Tranche Receipt with a secure QR code. Value is returned in cash, social credits, and planted trees through overnight pool batch processing.
     </div>
 
-    <a id="certUrl" href="#" target="_blank" class="cert-link" style="margin: 12px 0;">📄 Visualizza Certificato dMRV Pubblico ➔</a>
-    <a href="/dashboard" class="btn-secondary">📊 Vai alla Dashboard (Ispeziona Tranche) ➔</a>
+    <a id="certUrl" href="#" target="_blank" class="cert-link">📄 View Public dMRV Certificate ➔</a>
+    <a href="/dashboard" class="btn-secondary">📊 Go to Dashboard (Inspect Tranches) ➔</a>
   </div>
 </div>
 
@@ -412,7 +420,6 @@
   const addAssetForm = document.getElementById('addAssetForm');
   const resultModal = document.getElementById('resultModal');
 
-  // Gestione selezione foto ed anteprima
   photoInput.addEventListener('change', function () {
     const file = this.files[0];
     if (file) {
@@ -420,7 +427,7 @@
       reader.onload = function (e) {
         imagePreview.src = e.target.result;
         previewContainer.style.display = 'block';
-        filePromptText.innerText = `✅ Foto caricata: ${file.name}`;
+        filePromptText.innerText = `✅ Photo loaded: ${file.name}`;
         dropZone.classList.add('has-file');
         submitBtn.classList.add('ready');
       };
@@ -428,17 +435,16 @@
     }
   });
 
-  // Funzione di reset pulito per evitare ri-caricamento infinito di scontrini vecchi
   function resetForm() {
     addAssetForm.reset();
     photoInput.value = '';
     imagePreview.src = '';
     previewContainer.style.display = 'none';
-    filePromptText.innerText = '⚡ CLICCA QUI PER CARICARE LO SCONTRINO / RICEVUTA ⚡';
+    filePromptText.innerText = '⚡ CLICK HERE TO UPLOAD RECEIPT / PROOF ⚡';
     dropZone.classList.remove('has-file');
     submitBtn.classList.remove('ready');
     submitBtn.disabled = false;
-    submitBtn.innerText = 'AVVIA AUDIT AI & GENERAZIONE dMRV ➔';
+    submitBtn.innerText = 'START AI AUDIT & dMRV GENERATION ➔';
     document.getElementById('errorBox').style.display = 'none';
     resultModal.style.display = 'none';
     addAssetForm.style.display = 'block';
@@ -463,7 +469,6 @@
     e.preventDefault();
     document.getElementById('errorBox').style.display = 'none';
 
-// Forziamo direttamente la tua email di test per azzerare qualsiasi errore di localStorage vuoto
     const userEmail = 'nausicaa.siciliano@virgilio.it';
     const title = document.getElementById('title').value;
     const category = document.getElementById('category').value;
@@ -472,16 +477,17 @@
     const cashbackCredit = amountSpend * 0.10;
     
     if (!file) {
-      showError("⚠️ Prima di procedere devi caricare la foto dello scontrino o prova.");
+      showError("⚠️ Please upload a photo of your receipt or proof before proceeding.");
       return;
     }
+
     try {
-      submitBtn.innerText = "🔍 Audit Forense AI in corso (Gemini Flash)...";
+      submitBtn.innerText = "🔍 AI Forensic Audit in progress (Gemini Flash)...";
       submitBtn.disabled = true;
       const imageHash = await calculateImageHash(file);
       
       const formData = new FormData();
-      formData.append('user_email', userEmail); // <-- CORRETTO: adesso usa 'user_email' come atteso dal backend
+      formData.append('user_email', userEmail);
       formData.append('title', title);
       formData.append('category', category);
       formData.append('amountSpend', amountSpend);
@@ -511,46 +517,71 @@
         assets.push(newAsset);
         localStorage.setItem('dmrv_user_assets_list', JSON.stringify(assets));
 
-        let currentAccumulatedCredit = assets.reduce((sum, item) => sum + item.credit, 0);
+        // Total calculated value across assets
+        let currentAccumulatedCredit = assets.reduce((sum, item) => sum + item.spend, 0);
         localStorage.setItem('dmrv_user_accumulated_total_value', currentAccumulatedCredit.toFixed(2));
 
-        const trancheData = data.trancheData || {
-          completedTranches: Math.floor(currentAccumulatedCredit / 1000),
-          currentTrancheProgress: parseFloat((currentAccumulatedCredit % 1000).toFixed(2)),
-          currentTranchePercentage: parseFloat(((currentAccumulatedCredit % 1000) / 10).toFixed(1)),
-          unlockedCashback: Math.floor(currentAccumulatedCredit / 1000) * 100
-        };
+        const completedTranches = Math.floor(currentAccumulatedCredit / 1000);
+        const currentTrancheProgress = parseFloat((currentAccumulatedCredit % 1000).toFixed(2));
+        const currentTranchePercentage = parseFloat(((currentTrancheProgress / 1000) * 100).toFixed(1));
 
         document.getElementById('rewardAmountHero').innerText = `€${currentAccumulatedCredit.toFixed(2)}`;
-        document.getElementById('rewardSubtext').innerText = `(+€${cashbackCredit.toFixed(2)} dal 10% del bene di €${amountSpend.toFixed(2)})`;
+        document.getElementById('rewardSubtext').innerText = `(Asset Registered: €${amountSpend.toFixed(2)})`;
 
-        if (trancheData.completedTranches > 0) {
-          const banner = document.getElementById('unlockedBanner');
-          banner.style.display = 'block';
-          banner.innerText = `🎉 Complimenti! Hai completato ${trancheData.completedTranches} tranche (${trancheData.completedTranches * 1000} €). Cashback Sbloccato: €${trancheData.unlockedCashback.toFixed(2)}!`;
+        // Generate QR code receipts for each completed €1,000 tranche
+        const unlockedContainer = document.getElementById('unlockedTranchesContainer');
+        unlockedContainer.innerHTML = '';
+
+        if (completedTranches > 0) {
+          let tranchesHtml = `<div style="margin-bottom: 12px; font-weight: bold; color: var(--accent-yellow); font-size: 13px; text-align: center;">
+            🎉 Congratulations! You have completed ${completedTranches} tranche(s) (€1,000 milestone each)!
+          </div>`;
+
+          for (let i = 1; i <= completedTranches; i++) {
+            tranchesHtml += `
+              <div class="tranche-ticket-box">
+                <p style="margin: 0 0 6px 0; font-size: 0.9em; color: var(--accent-yellow); font-weight: bold;">
+                  <span style="font-size: 1.4em; animation: blink 1.2s infinite; display: inline-block;">🪙</span> TRANCHE #${i} VALUE REWARD TICKET & QR CODE READY
+                </p>
+                <div style="display: flex; justify-content: center; margin: 8px 0;">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=dMRV-TRANCHE-${i}-${encodeURIComponent(userEmail)}" alt="Tranche QR Code" style="width: 100px; height: 100px; border-radius: 8px; border: 2px solid var(--accent-yellow); padding: 4px; background: white;" />
+                </div>
+                <p style="margin: 4px 0 8px 0; font-size: 0.8em; color: #f8fafc; font-weight: bold;">
+                  Official Ticket ID: <span style="color: var(--accent-yellow);">dMRV-TR-${i}-${Date.now().toString().slice(-6)}</span>
+                </p>
+                <button onclick="window.print()" style="background: var(--accent-yellow); color: #000; border: none; font-weight: bold; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8em; display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%;">
+                  <span style="font-size: 1.2em;">💰</span> PRINT / DOWNLOAD TRANCHE RECEIPT
+                </button>
+                <p style="margin: 8px 0 0 0; font-size: 0.7em; color: var(--text-muted); font-style: italic;">
+                  * Hold this QR code receipt. Pool liquidity matching and return payouts are processed securely overnight.
+                </p>
+              </div>
+            `;
+          }
+          unlockedContainer.innerHTML = tranchesHtml;
         }
 
-        document.getElementById('trancheLabel').innerText = `PROGRESSO TRANCHE ${trancheData.completedTranches + 1}`;
-        document.getElementById('progressBarFill').style.width = `${trancheData.currentTranchePercentage}%`;
-        document.getElementById('progressText').innerText = `€${trancheData.currentTrancheProgress.toFixed(2)} / €1.000,00 (${trancheData.currentTranchePercentage}%)`;
+        document.getElementById('trancheLabel').innerText = `ACTIVE TRANCHE #${completedTranches + 1}`;
+        document.getElementById('progressBarFill').style.width = `${currentTranchePercentage}%`;
+        document.getElementById('progressText').innerText = `€${currentTrancheProgress.toFixed(2)} / €1,000.00 (${currentTranchePercentage}%)`;
 
         const resultDesc = document.getElementById('resultDesc');
-        resultDesc.innerHTML = `🛡️ <strong>Verifica AI Forensics completata:</strong> Hash SHA-256 registrato (${imageHash.substring(0, 12)}...). ` + 
-                               (data.aiNote || "La prova fotografica è coerente con la spesa dichiarata.");
+        resultDesc.innerHTML = `🛡️ <strong>AI Forensics Audit Completed:</strong> SHA-256 hash registered (${imageHash.substring(0, 12)}...). ` + 
+                              (data.aiNote || "Proof image is consistent with the declared asset value.");
 
         const certLink = document.getElementById('certUrl');
         certLink.href = `/verify/${data.id || 1}`;
 
       } else {
-        showError(`❌ Audit AI Fallito: ${data.message || data.error || 'Errore durante la verifica.'}`);
-        submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
+        showError(`❌ AI Audit Failed: ${data.message || data.error || 'Verification error.'}`);
+        submitBtn.innerText = "START AI AUDIT & dMRV GENERATION ➔";
         submitBtn.disabled = false;
       }
 
     } catch (err) {
       console.error(err);
-      showError("Errore di connessione durante l'invio.");
-      submitBtn.innerText = "AVVIA AUDIT AI & GENERAZIONE dMRV ➔";
+      showError("Connection error during submission.");
+      submitBtn.innerText = "START AI AUDIT & dMRV GENERATION ➔";
       submitBtn.disabled = false;
     }
   });
