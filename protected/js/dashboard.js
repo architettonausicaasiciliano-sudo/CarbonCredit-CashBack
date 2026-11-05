@@ -32,9 +32,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /* =====================================================
-       1. RECUPERO E RENDER STATISTICHE UTENTE
+        1. RECUPERO E RENDER STATISTICHE UTENTE
     ===================================================== */
-async function loadUserData() {
+    async function loadUserData() {
         if (!userEmail) return;
 
         try {
@@ -42,25 +42,21 @@ async function loadUserData() {
             const data = await res.json();
 
             if (data && !data.error) {
-                // Supporto esteso per tutte le varianti di chiavi restituite dal backend
                 const credits = data.carbon_credits ?? data.credits ?? data.totalCreditAccumulated ?? 0;
                 const pendingCc = data.pendingCc ?? data.pending_cc ?? 0;
                 const co2Kg = data.totalCo2Kg ?? data.co2_saved_kg ?? data.total_co2 ?? 0;
                 const trees = data.treesEquivalent ?? data.trees ?? Math.floor(co2Kg / 25) ?? 0;
 
-                // Saldo Crediti e CO2 aggiornati dinamicamente
                 if (userCreditsEl) userCreditsEl.textContent = `${Number(credits).toFixed(1)} CC`;
                 if (pendingCcValEl) pendingCcValEl.textContent = `${Number(pendingCc).toFixed(1)} CC`;
                 if (totalCo2El) totalCo2El.textContent = `${Number(co2Kg).toFixed(1)} kg`;
                 if (totalTreesEl) totalTreesEl.textContent = `${trees} 🌳`;
                 if (treeBannerTextEl) treeBannerTextEl.textContent = `${trees} Tree Equivalent`;
 
-                // Dati Batch B2B
                 if (batchIdEl) batchIdEl.textContent = data.batchId || "BATCH-2026-104";
                 if (pendingEurEl) pendingEurEl.textContent = `€ ${(data.pendingB2bEur || 0).toFixed(2)}`;
                 if (batchStatusEl) batchStatusEl.textContent = data.batchStatus || "Aggregating for Cashback Payout";
 
-                // Calcolo e Render Tranche basato sul totale accumulato
                 renderTranchesProgress({
                     ...data,
                     totalCreditAccumulated: credits
@@ -74,9 +70,9 @@ async function loadUserData() {
     }
 
     /* =====================================================
-       2. CALCOLO E RENDER AVANZAMENTO TRANCHE (PROGRESS BAR & MODAL)
+        2. CALCOLO E RENDER AVANZAMENTO TRANCHE (PROGRESS BAR & MODAL)
     ===================================================== */
-function renderTranchesProgress(data) {
+    function renderTranchesProgress(data) {
         const totalAccumulated = Number(data.totalCreditAccumulated || 0);
         const completedTranches = Math.floor(totalAccumulated / 1000);
         const currentProgress = parseFloat((totalAccumulated % 1000).toFixed(2));
@@ -124,15 +120,16 @@ function renderTranchesProgress(data) {
                 `;
                 tranchesContainerEl.appendChild(item);
             }
+        }
     }
 
     /* =====================================================
-       3. VERIFICA SOGLIA €1000 E GENERAZIONE TICKET
+        3. VERIFICA SOGLIA €1000 E GENERAZIONE TICKET
     ===================================================== */
-async function checkThousandThreshold() {
+    async function checkThousandThreshold() {
         if (!userEmail) return;
         try {
-            const res = await fetch('/api/check-thousand-threshold'); // <-- Sostituito con GET pulita
+            const res = await fetch('/api/check-thousand-threshold');
             const data = await res.json();
             if (data.thresholdReached && data.ticketCode) {
                 console.log(`🎯 Soglia €1000 raggiunta! Ticket generato: ${data.ticketCode}`);
@@ -143,9 +140,9 @@ async function checkThousandThreshold() {
     }
 
     /* =====================================================
-       4. RECUPERO BENI ED AZIONI ECO REGISTRATE
+        4. RECUPERO BENI ED AZIONI ECO REGISTRATE
     ===================================================== */
-async function loadEcoActions() {
+    async function loadEcoActions() {
         if (!userEmail) return;
 
         try {
@@ -170,7 +167,7 @@ async function loadEcoActions() {
             if (totalTreesEl) totalTreesEl.textContent = `${treesAcc} 🌳`;
             if (treeBannerTextEl) treeBannerTextEl.textContent = `${treesAcc} Tree Equivalent`;
 
-renderTranchesProgress({
+            renderTranchesProgress({
                 ...data,
                 totalCreditAccumulated: totalCreditsAcc * 10
             });
@@ -240,7 +237,7 @@ renderTranchesProgress({
     }
 
     /* =====================================================
-       5. ELIMINAZIONE AZIONE ECO / BENE
+        5. ELIMINAZIONE AZIONE ECO / BENE
     ===================================================== */
     async function deleteEcoAction(actionId) {
         try {
@@ -261,7 +258,7 @@ renderTranchesProgress({
     }
 
     /* =====================================================
-       6. GESTIONE RICHIESTA CASHBACK (MONETIZZAZIONE)
+        6. GESTIONE RICHIESTA CASHBACK (MONETIZZAZIONE)
     ===================================================== */
     if (btnRedeem) {
         btnRedeem.addEventListener('click', async () => {
@@ -305,7 +302,7 @@ renderTranchesProgress({
     }
 
     /* =====================================================
-       7. CONTROL EVENTI MODALE TRANCHE
+        7. CONTROL EVENTI MODALE TRANCHE
     ===================================================== */
     if (btnOpenTrancheModal && trancheModal) {
         btnOpenTrancheModal.addEventListener('click', () => {
