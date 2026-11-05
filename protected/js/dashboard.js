@@ -156,7 +156,7 @@ async function checkThousandThreshold() {
     /* =====================================================
        4. RECUPERO BENI ED AZIONI ECO REGISTRATE
     ===================================================== */
-    async function loadEcoActions() {
+async function loadEcoActions() {
         if (!userEmail) return;
 
         try {
@@ -166,10 +166,30 @@ async function checkThousandThreshold() {
 
             if (!assetsList) return;
 
+            let totalCreditsAcc = 0;
+            let totalCo2Acc = 0;
+
+            actions.forEach(act => {
+                totalCreditsAcc += Number(act.credits_earned || 0);
+                totalCo2Acc += Number(act.co2_saved_kg || 0);
+            });
+
+            const treesAcc = Math.floor(totalCo2Acc / 25);
+
+            if (userCreditsEl) userCreditsEl.textContent = `${totalCreditsAcc.toFixed(1)} CC`;
+            if (totalCo2El) totalCo2El.textContent = `${totalCo2Acc.toFixed(1)} kg`;
+            if (totalTreesEl) totalTreesEl.textContent = `${treesAcc} 🌳`;
+            if (treeBannerTextEl) treeBannerTextEl.textContent = `${treesAcc} Tree Equivalent`;
+
+            renderTranchesProgress({
+                ...data,
+                totalCreditAccumulated: totalCreditsAcc * 10
+            });
+
             if (actions.length === 0) {
                 assetsList.innerHTML = `
                     <p class="empty-msg" style="text-align: center; color: var(--text-muted); padding: 24px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
-                        Nessun bene green o acquisto registrato. Clicca sul pulsante in alto per registrare la tua prima azione dMRV!
+                        No green assets or receipts registered yet. Click the button above to register your first dMRV action!
                     </p>`;
                 return;
             }
@@ -177,11 +197,10 @@ async function checkThousandThreshold() {
             assetsList.innerHTML = '';
             actions.forEach(action => {
                 const co2Kg = action.co2_saved_kg || 0;
-                const estB2bValue = ((co2Kg / 1000) * 25.00).toFixed(2);
                 const isB2B = action.tier === 'B2B_INSTITUTIONAL';
-                const statusBadge = action.status === 'in_review_batch' ? '⏳ In Valutazione Batch' : '✓ Attivo';
+                const statusBadge = action.status === 'in_review_batch' ? '⏳ Under Batch Review' : '✓ Active';
 
-const card = document.createElement('div');
+                const card = document.createElement('div');
                 card.className = 'asset-item';
                 card.style.cssText = 'display: flex; flex-direction: column; padding: 16px; border: 1px solid var(--accent-green-bright); margin-bottom: 14px; background: var(--card-bg); border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
 
@@ -194,7 +213,7 @@ const card = document.createElement('div');
                             </span>
                         </div>
                         <p style="margin: 0 0 8px 0; font-size: 0.85em; color: var(--text-muted);">
-                            Category: <strong>${action.category}</strong> | Source: ${action.source || 'Manual Input'} | Status: <em style="color: var(--accent-green-bright);">✓ Active</em>
+                            Category: <strong>${action.category}</strong> | Source: ${action.source || 'Manual Input'} | Status: <em style="color: var(--accent-green-bright);">${statusBadge}</em>
                         </p>
                         <p style="margin: 6px 0; font-size: 0.95em; color: #f8fafc;">
                             🌱 Avoided CO₂: <strong>${co2Kg} kg</strong> &nbsp;|&nbsp; <span style="font-size: 1.3em; animation: blink 1.5s infinite; display: inline-block;">🪙</span> Credits: <strong style="color: var(--accent-yellow);">+${action.credits_earned} CC</strong>
@@ -214,12 +233,11 @@ const card = document.createElement('div');
                     </div>
                 `;
 
-                // Event listener eliminazione
                 const deleteBtn = card.querySelector('.btn-delete-asset');
                 if (deleteBtn) {
                     deleteBtn.addEventListener('click', async (e) => {
                         const actionId = e.target.getAttribute('data-id');
-                        if (confirm("Sei sicuro di voler eliminare questo bene registrato? I crediti accumulati verranno stornati dal saldo.")) {
+                        if (confirm("Are you sure you want to remove this registered asset? Earned credits will be deducted.")) {
                             await deleteEcoAction(actionId);
                         }
                     });
@@ -228,7 +246,7 @@ const card = document.createElement('div');
                 assetsList.appendChild(card);
             });
         } catch (err) {
-            console.error("Errore durante il recupero delle azioni eco:", err);
+            console.error("Error loading eco actions:", err);
         }
     }
 
