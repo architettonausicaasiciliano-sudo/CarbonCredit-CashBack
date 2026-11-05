@@ -195,11 +195,11 @@ async function checkThousandThreshold() {
                                 <span style="font-size: 1.3em; animation: blink 1.5s infinite; display: inline-block;">💰</span> Cash Value & Social Credits based on pool market fluctuation
                             </p>
                         </div>
-<div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 10px;">
-                            <a href="/verify/${action.id}" target="_blank" style="background: rgba(132, 204, 22, 0.15); color: var(--accent-green-bright); border: 1px solid var(--accent-green-bright); padding: 12px 16px; border-radius: 8px; font-size: 0.95em; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center;">
+<div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;">
+                            <a href="/verify/${action.id}" target="_blank" style="background: rgba(132, 204, 22, 0.15); color: var(--accent-green-bright); border: 1px solid var(--accent-green-bright); padding: 12px 14px; border-radius: 8px; font-size: 0.9em; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; text-align: center;">
                                 🔍 dMRV Certified Audit
                             </a>
-                            <button class="btn-delete-asset" data-id="${action.id}" style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger-red); color: var(--danger-red); font-size: 0.95em; font-weight: bold; cursor: pointer; padding: 12px 16px; border-radius: 8px; width: 100%; text-align: center;">
+                            <button class="btn-delete-asset" data-id="${action.id}" style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger-red); color: var(--danger-red); font-size: 0.9em; font-weight: bold; cursor: pointer; padding: 12px 14px; border-radius: 8px; width: 100%; box-sizing: border-box; text-align: center;">
                                 🗑 Remove Asset
                             </button>
                         </div>
