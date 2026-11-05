@@ -78,10 +78,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const unlockedCashback = completedTranches * 100;
 
         // Aggiornamento Card Principale Dashboard
-        if (dashTrancheLabel) dashTrancheLabel.innerText = `Tranche Attiva: #${completedTranches + 1}`;
+// Aggiornamento Card Principale Dashboard
+        if (dashTrancheLabel) dashTrancheLabel.innerText = `Active Tranche: #${completedTranches + 1}`;
         if (dashProgressBarFill) dashProgressBarFill.style.width = `${currentTranchePercentage}%`;
-        if (dashProgressText) dashProgressText.innerText = `€${currentTrancheProgress.toFixed(2)} / €1.000,00 (${currentTranchePercentage}%)`;
-        if (dashUnlockedCashback) dashUnlockedCashback.innerText = `Sbloccati: €${unlockedCashback.toFixed(2)}`;
+        if (dashProgressText) dashProgressText.innerText = `€${currentTrancheProgress.toFixed(2)} / €1,000.00 (${currentTranchePercentage}%)`;
+        if (dashUnlockedCashback) dashUnlockedCashback.innerText = `Unlocked Tranches: ${completedTranches}`;
 
         // Render Elenco Tranche dentro la Modale
         if (tranchesContainerEl) {
@@ -94,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div style="display:flex; justify-content:space-between; align-items:center; font-weight:bold; margin-bottom: 6px;">
                             <span>Tranche #${t.id} (€${t.targetEur})</span>
                             <span style="color: ${t.unlocked ? 'var(--accent-green-bright)' : 'var(--text-muted)'};">
-                                ${t.unlocked ? '✓ Sbloccata (€100)' : '🔒 In Corso'}
+                                ${t.unlocked ? '✓ Unlocked Tranche' : '🔒 In Progress'}
                             </span>
                         </div>
                     </div>
@@ -109,17 +110,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     item.className = `tranche-item ${isCompleted ? 'completed' : ''}`;
                     item.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px;">
-                            <span>Tranche #${i + 1} ${isCompleted ? '✅ (Completata)' : '⏳ (In corso)'}</span>
+                            <span style="color: var(--accent-green-bright);">Tranche #${i + 1} ${isCompleted ? '✅ (Completed)' : '⏳ (In Progress)'}</span>
                             <span style="color: ${isCompleted ? 'var(--accent-yellow)' : 'var(--text-muted)'};">
-                                ${isCompleted ? 'Cashback Sbloccato: €100.00' : 'Sblocco a 1.000 €'}
+                                ${isCompleted ? 'Tranche Unlocked' : 'Unlock Target at €1,000'}
                             </span>
                         </div>
-                        <div class="progress-track" style="height: 8px; margin: 6px 0;">
-                            <div class="progress-fill" style="width: ${pct}%;"></div>
+                        <div class="progress-track" style="height: 8px; margin: 6px 0; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
+                            <div class="progress-fill" style="width: ${pct}%; background: var(--accent-green-bright); height: 100%;"></div>
                         </div>
                         <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
-                            <span>Credito: €${trancheVal.toFixed(2)} / €1.000,00</span>
-                            <span>Avanzamento: ${pct}%</span>
+                            <span>Progress: €${trancheVal.toFixed(2)} / €1,000.00</span>
+                            <span>Rate: ${pct}%</span>
                         </div>
                     `;
                     tranchesContainerEl.appendChild(item);
@@ -194,11 +195,11 @@ async function checkThousandThreshold() {
                                 <span style="font-size: 1.3em; animation: blink 1.5s infinite; display: inline-block;">💰</span> Cash Value & Social Credits based on pool market fluctuation
                             </p>
                         </div>
-<div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 12px; align-items: center; justify-content: space-between;">
-                            <a href="/verify/${action.id}" target="_blank" style="background: rgba(132, 204, 22, 0.15); color: var(--accent-green-bright); border: 1px solid var(--accent-green-bright); padding: 10px 18px; border-radius: 8px; font-size: 0.95em; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+<div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 10px;">
+                            <a href="/verify/${action.id}" target="_blank" style="background: rgba(132, 204, 22, 0.15); color: var(--accent-green-bright); border: 1px solid var(--accent-green-bright); padding: 12px 16px; border-radius: 8px; font-size: 0.95em; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center;">
                                 🔍 dMRV Certified Audit
                             </a>
-                            <button class="btn-delete-asset" data-id="${action.id}" style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger-red); color: var(--danger-red); font-size: 0.95em; font-weight: bold; cursor: pointer; padding: 10px 18px; border-radius: 8px;">
+                            <button class="btn-delete-asset" data-id="${action.id}" style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger-red); color: var(--danger-red); font-size: 0.95em; font-weight: bold; cursor: pointer; padding: 12px 16px; border-radius: 8px; width: 100%; text-align: center;">
                                 🗑 Remove Asset
                             </button>
                         </div>
