@@ -57,10 +57,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (pendingEurEl) pendingEurEl.textContent = `€ ${(data.pendingB2bEur || 0).toFixed(2)}`;
                 if (batchStatusEl) batchStatusEl.textContent = data.batchStatus || "Aggregating for Cashback Payout";
 
+/* 
                 renderTranchesProgress({
                     ...data,
                     totalCreditAccumulated: credits
                 });
+                */
 
                 await checkThousandThreshold();
             }
@@ -72,24 +74,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     /* =====================================================
         2. CALCOLO E RENDER AVANZAMENTO TRANCHE (PROGRESS BAR & MODAL)
     ===================================================== */
-    function renderTranchesProgress(data) {
+function renderTranchesProgress(data) {
         const totalAccumulated = Number(data.totalCreditAccumulated || 0);
         const completedTranches = Math.floor(totalAccumulated / 1000);
         const currentProgress = parseFloat((totalAccumulated % 1000).toFixed(2));
         const currentPercentage = parseFloat(((currentProgress / 1000) * 100).toFixed(1));
-
+        
         if (dashTrancheLabel) dashTrancheLabel.innerText = `Active Tranche: #${completedTranches + 1}`;
         if (dashProgressBarFill) dashProgressBarFill.style.width = `${currentPercentage}%`;
         if (dashProgressText) dashProgressText.innerText = `€${currentProgress.toFixed(2)} / €1,000.00 (${currentPercentage}%)`;
         if (dashUnlockedCashback) dashUnlockedCashback.innerText = `Unlocked Tranches: ${completedTranches}`;
-
+        
         if (tranchesContainerEl) {
             tranchesContainerEl.innerHTML = '';
             for (let i = 0; i <= completedTranches; i++) {
                 const isCompleted = i < completedTranches;
                 const trancheVal = isCompleted ? 1000 : currentProgress;
                 const pct = isCompleted ? 100 : currentPercentage;
-
                 const item = document.createElement('div');
                 item.className = `tranche-item ${isCompleted ? 'completed' : ''}`;
                 item.style.cssText = 'background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 10px;';

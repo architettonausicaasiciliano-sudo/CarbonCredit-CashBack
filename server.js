@@ -293,24 +293,24 @@ function estimateCo2ForAction(title) {
   return 55.0;    // Valore base differenziato per generici
 }
 
-function calculateTranches(totalKg) {
-  const targetTranche = 1000.0; // Target della tranche in kg di CO2
+function calculateTranches(totalSpent) {
+  const targetTranche = 1000.0; // Target fisso a 1000€ basato sul valore dei beni/scontrini
   
-  const tranche1 = Math.min(totalKg, targetTranche);
-  const tranche2 = Math.min(Math.max(totalKg - targetTranche, 0), targetTranche);
-  const tranche3 = Math.max(totalKg - (targetTranche * 2), 0);
+  const tranche1 = Math.min(totalSpent, targetTranche);
+  const tranche2 = Math.min(Math.max(totalSpent - targetTranche, 0), targetTranche);
+  const tranche3 = Math.max(totalSpent - (targetTranche * 2), 0);
   
   let nextGoal = targetTranche;
-  if (totalKg >= targetTranche) {
-    nextGoal = Math.ceil((totalKg + 1) / targetTranche) * targetTranche;
+  if (totalSpent >= targetTranche) {
+    nextGoal = Math.ceil((totalSpent + 1) / targetTranche) * targetTranche;
   }
 
   return {
-    totalKg: parseFloat(totalKg.toFixed(2)),
+    totalSpent: parseFloat(totalSpent.toFixed(2)),
     tranche1: parseFloat(tranche1.toFixed(2)),
     tranche2: parseFloat(tranche2.toFixed(2)),
     tranche3: parseFloat(tranche3.toFixed(2)),
-    nextGoalKg: nextGoal,
+    nextGoalEur: nextGoal,
   };
 }
 
