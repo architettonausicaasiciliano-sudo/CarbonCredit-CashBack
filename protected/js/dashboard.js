@@ -161,9 +161,9 @@ let totalCreditsAcc = 0;
                 totalCreditsAcc += Number(act.credits_earned || 0);
                 totalCo2Acc += Number(act.co2_saved_kg || 0);
                 
-                // Legge l'importo economico reale salvato nell'asset (amount, price, total o stima basata sui crediti)
-                const itemValue = Number(act.amount || act.price || act.total_amount || act.value || (Number(act.credits_earned || 0) * 100));
-                totalSpentValue += itemValue; 
+// Prende solo il valore economico reale dello scontrino/bene, senza fallback sui crediti
+                const itemValue = Number(act.amount || act.price || act.total_amount || act.value || 0);
+                totalSpentValue += itemValue;
             });
 
             const treesAcc = Math.floor(totalCo2Acc / 25);
