@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Recupero credenziali utente da localStorage
-    const userEmail = localStorage.getItem('email') || localStorage.getItem('userEmail');
+    const userEmail = localStorage.getItem('email') || localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail') || 'nausicaa.siciliano@40virgilio.it';
 
     // 2. Elementi DOM - Statistiche Principali
     const userCreditsEl = document.getElementById('userCredits');
