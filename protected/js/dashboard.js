@@ -160,7 +160,8 @@ let totalCreditsAcc = 0;
                 totalCreditsAcc += Number(act.credits_earned || 0);
                 totalCo2Acc += Number(act.co2_saved_kg || 0);
                 // Recupera il valore speso o stima basata sui crediti (10% del bene)
-                totalSpentValue += Number(act.credits_earned || 0) * 10; 
+const itemValue = Number(act.amount || act.total_amount || (Number(act.credits_earned || 0) * 10));
+totalSpentValue += itemValue; 
             });
 
             const treesAcc = Math.floor(totalCo2Acc / 25);
