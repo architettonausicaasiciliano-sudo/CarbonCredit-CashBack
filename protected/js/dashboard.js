@@ -124,8 +124,6 @@ function renderTranchesProgress(data) {
                 `;
                 tranchesContainerEl.appendChild(item);
             }
-        }
-    }
     }
 
     /* =====================================================
