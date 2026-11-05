@@ -225,14 +225,14 @@ renderTranchesProgress({
                     </div>
                 `;
 
-const deleteBtn = card.querySelector(`button[data-id="${action.id}"]`);
-    if (deleteBtn) {
-      deleteBtn.addEventListener('click', async () => {
-        if (confirm("Are you sure you want to remove this registered asset? Earned credits will be deducted.")) {
-          await deleteEcoAction(action.id);
-        }
-      });
+const deleteBtn = card.querySelector('.btn-delete-asset');
+if (deleteBtn) {
+  deleteBtn.addEventListener('click', async () => {
+    if (confirm("Are you sure you want to remove this registered asset? Earned credits will be deducted.")) {
+      await deleteEcoAction(action.id);
     }
+  });
+}
 
                 assetsList.appendChild(card);
             });
