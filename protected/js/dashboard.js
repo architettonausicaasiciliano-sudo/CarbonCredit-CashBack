@@ -244,23 +244,28 @@ renderTranchesProgress({
     /* =====================================================
         5. ELIMINAZIONE AZIONE ECO / BENE
     ===================================================== */
-    async function deleteEcoAction(actionId) {
-        try {
-            const res = await fetch(`/api/eco-actions/user/${encodeURIComponent(userEmail)}`, {
-                method: 'DELETE'
-            });
-            const result = await res.json();
-            if (result.success) {
-                await loadUserData();
-                await loadEcoActions();
-            } else {
-                alert(`Errore nella rimozione: ${result.message || result.error}`);
-            }
-        } catch (err) {
-            console.error("Errore durante l'eliminazione:", err);
-            alert("Si è verificato un errore durante l'eliminazione del bene.");
-        }
+async function deleteEcoAction(actionId) {
+  try {
+    const res = await fetch(`/api/eco-actions/${actionId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ user_email: userEmail })
+    });
+    
+    const result = await res.json();
+    if (result.success) {
+      await loadUserData();
+      await loadEcoActions();
+    } else {
+      alert(`Errore nella rimozione: ${result.message || result.error}`);
     }
+  } catch (err) {
+    console.error("Errore durante l'eliminazione:", err);
+    alert("Si è verificato un errore durante l'eliminazione del bene.");
+  }
+}
 
     /* =====================================================
         6. GESTIONE RICHIESTA CASHBACK (MONETIZZAZIONE)
