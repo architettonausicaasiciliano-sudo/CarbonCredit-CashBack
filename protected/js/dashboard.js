@@ -154,15 +154,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 let totalCreditsAcc = 0;
             let totalCo2Acc = 0;
-            let totalSpentValue = 0; // Valore economico totale per le tranche
-
-            actions.forEach(act => {
-                totalCreditsAcc += Number(act.credits_earned || 0);
-                totalCo2Acc += Number(act.co2_saved_kg || 0);
-                // Recupera il valore speso o stima basata sui crediti (10% del bene)
-const itemValue = Number(act.amount || act.price || act.total || act.value || act.total_amount || (Number(act.credits_earned || 0) * 10));
+let totalSpentValue = 0;
+actions.forEach(act => {
+    // Prende direttamente il valore monetario reale dell'asset registrato (es. l'importo dello scontrino)
+    const itemValue = Number(act.amount || act.total_amount || act.price || (Number(act.credits_earned || 0) * 10));
     totalSpentValue += itemValue;
-            });
+});
 
             const treesAcc = Math.floor(totalCo2Acc / 25);
 
