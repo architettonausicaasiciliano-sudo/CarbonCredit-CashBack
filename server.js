@@ -263,6 +263,9 @@ const CURRENT_BATCH_ID = "BATCH-2026-08";
 /* =====================================================
    FUNZIONI DI UTILITÀ FORENSE & CALCOLO METRICHE
    ===================================================== */
+/* =====================================================
+   FUNZIONI DI UTILITÀ FORENSE & CALCOLO METRICHE (KG CO2)
+   ===================================================== */
 function calculateBufferHash(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
 }
@@ -275,24 +278,39 @@ function generateReceiptHash(merchant, dateTime, amount) {
   return crypto.createHash("sha256").update(rawString).digest("hex");
 }
 
-function calculateTranches(totalEur) {
-  const tranche1 = Math.min(totalEur, 500);
-  const tranche2 = Math.min(Math.max(totalEur - 500, 0), 500);
-  const tranche3 = Math.max(totalEur - 1000, 0);
+// Funzione per stimare kg di CO2 realistici in base al tipo di bene/titolo
+function estimateCo2ForAction(title) {
+  const t = (title || "").toLowerCase();
+  if (t.includes("pannell") || t.includes("fotovolt") || t.includes("solare")) {
+    return 350.0; // Pannelli solari: impatto elevato
+  } else if (t.includes("bici") || t.includes("ebike") || t.includes("monopattino") || t.includes("mobilità")) {
+    return 150.0; // Bici elettrica / mobilità dolce
+  } else if (t.includes("ristorant") || t.includes("bio") || t.includes("km zero") || t.includes("cibo")) {
+    return 40.0;  // Prodotti locali / alimentari
+  } else if (t.includes("riciclo") || t.includes("riuso") || t.includes("abbigliamento")) {
+    return 65.0;  // Riuso / economia circolare
+  }
+  return 55.0;    // Valore base differenziato per generici
+}
+
+function calculateTranches(totalKg) {
+  const targetTranche = 1000.0; // Target della tranche in kg di CO2
   
-  let nextGoal = 500;
-  if (totalEur >= 500 && totalEur < 1000) {
-    nextGoal = 1000;
-  } else if (totalEur >= 1000) {
-    nextGoal = Math.ceil((totalEur + 1) / 500) * 500;
+  const tranche1 = Math.min(totalKg, targetTranche);
+  const tranche2 = Math.min(Math.max(totalKg - targetTranche, 0), targetTranche);
+  const tranche3 = Math.max(totalKg - (targetTranche * 2), 0);
+  
+  let nextGoal = targetTranche;
+  if (totalKg >= targetTranche) {
+    nextGoal = Math.ceil((totalKg + 1) / targetTranche) * targetTranche;
   }
 
   return {
-    totalEur: parseFloat(totalEur.toFixed(2)),
+    totalKg: parseFloat(totalKg.toFixed(2)),
     tranche1: parseFloat(tranche1.toFixed(2)),
     tranche2: parseFloat(tranche2.toFixed(2)),
     tranche3: parseFloat(tranche3.toFixed(2)),
-    nextGoalEur: nextGoal,
+    nextGoalKg: nextGoal,
   };
 }
 
@@ -752,9 +770,9 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
       });
     }
 
-    const category = aiResult.category || "GENERAL";
-    const co2SavedKg = aiResult.co2_saved_kg || 15.0;
-    const poolId = await getOrCreateDataPool(category);
+const category = aiResult.category || "GENERAL";
+const co2SavedKg = estimateCo2ForAction(title); // <-- Usa la stima personalizzata in base al bene
+const poolId = await getOrCreateDataPool(category);
 
     const creditsEarned = parseFloat((co2SavedKg / 10).toFixed(2));
     const ticketId = "DMRV-" + crypto.randomBytes(4).toString("hex").toUpperCase();
