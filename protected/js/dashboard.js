@@ -173,38 +173,37 @@ async function checkThousandThreshold() {
                 const isB2B = action.tier === 'B2B_INSTITUTIONAL';
                 const statusBadge = action.status === 'in_review_batch' ? '⏳ In Valutazione Batch' : '✓ Attivo';
 
-                const card = document.createElement('div');
+const card = document.createElement('div');
                 card.className = 'asset-item';
-                card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 12px; background: var(--card-bg); border-radius: 12px;';
+                card.style.cssText = 'display: flex; flex-direction: column; padding: 16px; border: 1px solid var(--accent-green-bright); margin-bottom: 14px; background: var(--card-bg); border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
 
                 card.innerHTML = `
-                    <div class="asset-info" style="flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                            <h4 style="margin: 0; color: var(--accent-green-bright); font-size: 1.05em;">${action.title}</h4>
-                            <span style="font-size: 0.7em; padding: 2px 8px; border-radius: 4px; font-weight: bold; background: ${isB2B ? 'rgba(56, 189, 248, 0.15)' : 'rgba(234, 179, 8, 0.15)'}; color: ${isB2B ? 'var(--accent-blue)' : 'var(--accent-yellow)'}; border: 1px solid ${isB2B ? 'var(--accent-blue)' : 'var(--accent-yellow)'};">
+                    <div class="asset-info" style="width: 100%;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                            <h4 style="margin: 0; color: var(--accent-green-bright); font-size: 1.1em;">${action.title}</h4>
+                            <span style="font-size: 0.7em; padding: 3px 8px; border-radius: 4px; font-weight: bold; background: ${isB2B ? 'rgba(56, 189, 248, 0.15)' : 'rgba(234, 179, 8, 0.15)'}; color: ${isB2B ? 'var(--accent-blue)' : 'var(--accent-yellow)'}; border: 1px solid ${isB2B ? 'var(--accent-blue)' : 'var(--accent-yellow)'};">
                                 ${isB2B ? 'TIER 2 B2B' : 'TIER 1 COMMUNITY'}
                             </span>
                         </div>
-                        <p style="margin: 0; font-size: 0.85em; color: var(--text-muted);">
-                            Categoria: <strong>${action.category}</strong> | Fonte: ${action.source || 'Inserimento Manuale'} | Stato: <em>${statusBadge}</em>
+                        <p style="margin: 0 0 8px 0; font-size: 0.85em; color: var(--text-muted);">
+                            Category: <strong>${action.category}</strong> | Source: ${action.source || 'Manual Input'} | Status: <em style="color: var(--accent-green-bright);">✓ Active</em>
                         </p>
-<p style="margin: 6px 0 0 0; font-size: 0.95em; color: #f8fafc;">
-                                🌱 Avoided CO₂: <strong>${co2Kg} kg</strong> &nbsp;|&nbsp; <span style="font-size: 1.3em; animation: blink 1.5s infinite; display: inline-block;">🪙</span> Credits: <strong style="color: var(--accent-yellow);">+${action.credits_earned} CC</strong>
-                            </p>
-                            <p style="margin: 6px 0 0 0; font-size: 0.85em; color: var(--accent-green-bright); font-weight: 500;">
-                                <span style="font-size: 1.3em; animation: blink 1.5s infinite; display: inline-block;">💰</span> Cash Value & Social Credits based on pool market fluctuation
-                            </p>
-                        </div>
-<div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;">
-                            <a href="/verify/${action.id}" target="_blank" style="background: rgba(132, 204, 22, 0.15); color: var(--accent-green-bright); border: 1px solid var(--accent-green-bright); padding: 12px 14px; border-radius: 8px; font-size: 0.9em; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; text-align: center;">
-                                🔍 dMRV Certified Audit
-                            </a>
-                            <button class="btn-delete-asset" data-id="${action.id}" style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger-red); color: var(--danger-red); font-size: 0.9em; font-weight: bold; cursor: pointer; padding: 12px 14px; border-radius: 8px; width: 100%; box-sizing: border-box; text-align: center;">
-                                🗑 Remove Asset
-                            </button>
-                        </div>
+                        <p style="margin: 6px 0; font-size: 0.95em; color: #f8fafc;">
+                            🌱 Avoided CO₂: <strong>${co2Kg} kg</strong> &nbsp;|&nbsp; <span style="font-size: 1.3em; animation: blink 1.5s infinite; display: inline-block;">🪙</span> Credits: <strong style="color: var(--accent-yellow);">+${action.credits_earned} CC</strong>
+                        </p>
+                        <p style="margin: 6px 0 0 0; font-size: 0.85em; color: var(--accent-green-bright); font-weight: 500;">
+                            <span style="font-size: 1.3em; animation: blink 1.5s infinite; display: inline-block;">💰</span> Cash Value & Social Credits based on pool market fluctuation
+                        </p>
                     </div>
-                    ${action.photo_url ? `<img src="${action.photo_url}" class="asset-thumb" alt="Allegato" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px; margin-left: 12px; border: 1px solid var(--accent-green);">` : ''}
+                    ${action.photo_url ? `<div style="margin: 12px 0;"><img src="${action.photo_url}" class="asset-thumb" alt="Attachment" style="width: 100%; max-height: 140px; object-fit: cover; border-radius: 8px; border: 1px solid var(--accent-green-bright);"></div>` : ''}
+                    <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;">
+                        <a href="/verify/${action.id}" target="_blank" style="background: rgba(132, 204, 22, 0.15); color: var(--accent-green-bright); border: 1px solid var(--accent-green-bright); padding: 12px 14px; border-radius: 8px; font-size: 0.9em; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; text-align: center;">
+                            🔍 dMRV Certified Audit
+                        </a>
+                        <button class="btn-delete-asset" data-id="${action.id}" style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger-red); color: var(--danger-red); font-size: 0.9em; font-weight: bold; cursor: pointer; padding: 12px 14px; border-radius: 8px; width: 100%; box-sizing: border-box; text-align: center;">
+                            🗑 Remove Asset
+                        </button>
+                    </div>
                 `;
 
                 // Event listener eliminazione
