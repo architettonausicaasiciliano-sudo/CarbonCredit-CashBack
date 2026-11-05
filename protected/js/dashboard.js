@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     /* =====================================================
        1. RECUPERO E RENDER STATISTICHE UTENTE
     ===================================================== */
-    async function loadUserData() {
+async function loadUserData() {
         if (!userEmail) return;
 
         try {
@@ -42,22 +42,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await res.json();
 
             if (data && !data.error) {
-                // Saldo Crediti e CO2
-                if (userCreditsEl) userCreditsEl.textContent = `${(data.carbon_credits || 0).toFixed(1)} CC`;
-                if (pendingCcValEl) pendingCcValEl.textContent = `${data.pendingCc || 0} CC`;
-                if (totalCo2El) totalCo2El.textContent = `${(data.totalCo2Kg || 0).toFixed(1)} kg`;
-                if (totalTreesEl) totalTreesEl.textContent = `${data.treesEquivalent || 0} 🌳`;
-                if (treeBannerTextEl) treeBannerTextEl.textContent = `${data.treesEquivalent || 0} Equivalente Alberi Piantati`;
+                // Supporto esteso per tutte le varianti di chiavi restituite dal backend
+                const credits = data.carbon_credits ?? data.credits ?? data.totalCreditAccumulated ?? 0;
+                const pendingCc = data.pendingCc ?? data.pending_cc ?? 0;
+                const co2Kg = data.totalCo2Kg ?? data.co2_saved_kg ?? data.total_co2 ?? 0;
+                const trees = data.treesEquivalent ?? data.trees ?? Math.floor(co2Kg / 25) ?? 0;
+
+                // Saldo Crediti e CO2 aggiornati dinamicamente
+                if (userCreditsEl) userCreditsEl.textContent = `${Number(credits).toFixed(1)} CC`;
+                if (pendingCcValEl) pendingCcValEl.textContent = `${Number(pendingCc).toFixed(1)} CC`;
+                if (totalCo2El) totalCo2El.textContent = `${Number(co2Kg).toFixed(1)} kg`;
+                if (totalTreesEl) totalTreesEl.textContent = `${trees} 🌳`;
+                if (treeBannerTextEl) treeBannerTextEl.textContent = `${trees} Tree Equivalent`;
 
                 // Dati Batch B2B
                 if (batchIdEl) batchIdEl.textContent = data.batchId || "BATCH-2026-104";
                 if (pendingEurEl) pendingEurEl.textContent = `€ ${(data.pendingB2bEur || 0).toFixed(2)}`;
-                if (batchStatusEl) batchStatusEl.textContent = data.batchStatus || "In aggregazione per Payout Cashback";
+                if (batchStatusEl) batchStatusEl.textContent = data.batchStatus || "Aggregating for Cashback Payout";
 
-                // Calcolo e Render Tranche (Backend Data o Tranches array)
-                renderTranchesProgress(data);
+                // Calcolo e Render Tranche basato sul totale accumulato
+                renderTranchesProgress({
+                    ...data,
+                    totalCreditAccumulated: credits
+                });
 
-                // Controllo soglia €1000
                 await checkThousandThreshold();
             }
         } catch (err) {
