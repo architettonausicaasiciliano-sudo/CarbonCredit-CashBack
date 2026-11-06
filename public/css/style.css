@@ -893,3 +893,31 @@ body {
     margin-top: 4px;
     opacity: 0.95;
 }
+/* --- PIANTINA INGRANDITA (🌱) --- */
+.large-plant-emoji {
+    font-size: 1.45rem;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+/* --- BANCONOTE E SACCO DI MONETE PIÙ GRANDI E AFFIANCATI --- */
+.big-money-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 1.4rem; /* Ingrandisce sia le banconote che il sacco monete */
+    vertical-align: middle;
+}
+
+/* --- TESTI DEI PULSANTI PIÙ GRANDI --- */
+.cta-text-large {
+    font-size: 1.2rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.5px;
+}
+
+.cta-line-1 .cta-text-large,
+.cta-line-2 .cta-text-large {
+    font-size: 1.25rem !important;
+}
