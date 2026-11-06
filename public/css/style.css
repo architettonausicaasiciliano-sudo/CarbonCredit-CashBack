@@ -732,3 +732,26 @@ body {
     margin-top: 6px;
     letter-spacing: 0.5px;
 }
+/* --- TASTO B2B GHG SCOPE 3 ANIMATO --- */
+.badge-b2b {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1.5px solid #10b981;
+    padding: 8px 18px;
+    border-radius: 24px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+.pulse-b2b-btn {
+    cursor: pointer;
+    animation: b2bPulse 1.8s infinite ease-in-out;
+}
+
+@keyframes b2bPulse {
+    0% { transform: scale(1); box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+    50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(16, 185, 129, 0.7); background: rgba(16, 185, 129, 0.3); }
+    100% { transform: scale(1); box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+}
