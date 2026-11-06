@@ -921,3 +921,26 @@ body {
 .cta-line-2 .cta-text-large {
     font-size: 1.25rem !important;
 }
+/* --- ANIMAZIONE PULSE & BLINK PER CARD UNLOCKED SUSTAINABLE REWARDS --- */
+.pulse-rewards {
+    animation: rewardsPulseBlink 2.2s infinite ease-in-out;
+}
+
+@keyframes rewardsPulseBlink {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(132, 204, 22, 0.25);
+        border-color: #84cc16;
+    }
+    50% {
+        transform: scale(1.03);                /* Ingrandimento leggero */
+        box-shadow: 0 0 30px rgba(163, 230, 53, 0.65); /* Bagliore verde/oro */
+        border-color: #a3e635;                /* Effetto blink del bordo */
+        background: rgba(20, 83, 45, 0.4);   /* Blink di luminosità dello sfondo */
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(132, 204, 22, 0.25);
+        border-color: #84cc16;
+    }
+}
