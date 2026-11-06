@@ -327,8 +327,8 @@
 <div class="card">
   <div class="header-bar">
     <h2 style="color: var(--accent-green-bright); margin: 0; font-size: 1.35rem; display: flex; align-items: center; gap: 8px;">
-      <span style="font-size: 1.6rem;">🌱</span> 
-      <span>Register dMRV Impact</span>
+      <span class="blink-anim" style="font-size: 1.6rem;">🌱</span> 
+      <span class="blink-anim">Register dMRV Impact</span>
     </h2>
     <a href="/dashboard" class="back-link">← Dashboard</a>
   </div>
@@ -363,14 +363,14 @@
     </div>
 
     <div class="form-group">
-      <label style="color: var(--accent-green-bright); font-weight: 800; display: flex; align-items: center; gap: 6px;">
-        <span class="blink-anim" style="font-size: 1.4rem;">📸</span> MANDATORY PROOF / RECEIPT
+      <label style="color: var(--accent-green-bright); font-weight: 800; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.5rem;">📸</span> MANDATORY PROOF / RECEIPT
       </label>
       <div id="dropZone" class="file-drop-zone" onclick="document.getElementById('photo').click()">
-        <span id="filePromptText" style="font-size: 15px; color: var(--accent-green-bright); font-weight: 900; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-          <span class="blink-anim" style="font-size: 1.6rem;">⚡</span> 
-          <span class="blink-anim">CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
-          <span class="blink-anim" style="font-size: 1.6rem;">⚡</span>
+        <span id="filePromptText" style="font-size: 15px; color: var(--accent-green-bright); font-weight: 900; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;" class="blink-anim">
+          <span style="font-size: 1.5rem;">⚡</span> 
+          <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
+          <span style="font-size: 1.5rem;">⚡</span>
         </span>
         <input type="file" id="photo" name="photo" accept="image/*" style="display: none;" required>
       </div>
@@ -445,6 +445,7 @@
       reader.onload = function (e) {
         imagePreview.src = e.target.result;
         previewContainer.style.display = 'block';
+        filePromptText.className = "";
         filePromptText.innerHTML = `<span class="blink-anim" style="font-size: 1.4rem;">✅</span> Photo loaded: ${file.name}`;
         dropZone.classList.add('has-file');
         submitBtn.classList.add('ready');
@@ -458,10 +459,11 @@
     photoInput.value = '';
     imagePreview.src = '';
     previewContainer.style.display = 'none';
+    filePromptText.className = "blink-anim";
     filePromptText.innerHTML = `
-      <span class="blink-anim" style="font-size: 1.6rem;">⚡</span> 
-      <span class="blink-anim">CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
-      <span class="blink-anim" style="font-size: 1.6rem;">⚡</span>
+      <span style="font-size: 1.5rem;">⚡</span> 
+      <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
+      <span style="font-size: 1.5rem;">⚡</span>
     `;
     dropZone.classList.remove('has-file');
     submitBtn.classList.remove('ready');
