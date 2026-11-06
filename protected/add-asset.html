@@ -43,12 +43,11 @@
       box-sizing: border-box;
     }
 
-    /* Nuova struttura dell'intestazione a due righe */
     .top-logo-container {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .header-bar {
@@ -67,7 +66,7 @@
       border: 1px solid #4b5563;
       color: #f3f4f6;
       text-decoration: none;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -318,6 +317,7 @@
     }
 
     .tranche-ticket-box {
+      position: relative;
       margin-top: 14px;
       padding: 16px;
       background: rgba(234, 179, 8, 0.12);
@@ -348,18 +348,18 @@
 <body>
 
 <div class="card">
-  <!-- Riga superiore: Logo principale lampeggiante -->
+  <!-- Riga superiore: Logo principale lampeggiante ingrandito -->
   <div class="top-logo-container">
-<img src="/images/logo.png" alt="Carbon Credit Cashback Logo" class="blink-slow" style="width: 180px; height: 180px; object-fit: contain;" />
+    <img src="/images/logo.png" alt="Carbon Credit Cashback Logo" class="blink-slow" style="width: 180px; height: 180px; object-fit: contain;" />
   </div>
 
   <!-- Riga inferiore: Titolo rimpicciolito e tasto dashboard più piccolo -->
   <div class="header-bar">
     <h2 style="color: var(--accent-green-bright); margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 6px;" class="blink-slow">
-      <span style="font-size: 1.5rem;">🌱</span> 
+      <span style="font-size: 2rem;">🌱</span> 
       <span>Register dMRV Impact</span>
     </h2>
-    <a href="/dashboard" class="back-link"><span style="font-size: 1.2em; font-weight: 800; line-height: 1; margin-right: 3px;">←</span> Dashboard</a>
+    <a href="/dashboard" class="back-link"><span style="font-size: 1.4em; font-weight: 800; line-height: 1; margin-right: 3px;">←</span> Dashboard</a>
   </div>
 
   <p style="color: var(--text-muted); font-size: 13px; margin-top: 0; margin-bottom: 20px;">
@@ -393,13 +393,13 @@
 
     <div class="form-group">
       <label style="color: var(--accent-green-bright); font-weight: 800; display: flex; align-items: center; gap: 10px;" class="blink-slow">
-        <span style="font-size: 2rem;">📸</span> MANDATORY PROOF / RECEIPT
+        <span style="font-size: 2.5rem;">📸</span> MANDATORY PROOF / RECEIPT
       </label>
       <div id="dropZone" class="file-drop-zone" onclick="document.getElementById('photo').click()">
         <span id="filePromptText" style="font-size: 16px; color: var(--accent-green-bright); font-weight: 900; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 10px;" class="blink-slow">
-          <span style="font-size: 2rem;">⚡</span> 
+          <span style="font-size: 2.5rem;">⚡</span> 
           <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
-          <span style="font-size: 2rem;">⚡</span>
+          <span style="font-size: 2.5rem;">⚡</span>
         </span>
         <input type="file" id="photo" name="photo" accept="image/*" style="display: none;" required>
       </div>
@@ -417,7 +417,7 @@
   <!-- Result Modal -->
   <div id="resultModal" class="result-modal">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-      <span style="font-weight: bold; color: var(--accent-green-bright); font-size: 16px;" class="blink-slow">✅ Action Registered Successfully!</span>
+      <span style="font-weight: bold; color: var(--accent-green-bright); font-size: 16px;" class="blink-slow"><span style="font-size: 1.5rem;">✅</span> Action Registered Successfully!</span>
       <span id="tierBadge" class="badge-tier1">Tier 1 Community</span>
     </div>
 
@@ -444,16 +444,16 @@
 
     <div id="resultDesc" class="result-desc"></div>
 
-    <!-- Tasti finali con blinking sincronizzato e nuove emoji (banconote e successo) -->
+    <!-- Tasti finali con emoji grandi e blinking sincronizzato -->
     <button type="button" id="btnLoadAnother" class="btn-submit ready blink-slow" style="margin-top: 6px; margin-bottom: 8px;">
-      <span style="font-size: 1.4em; display: inline-block;">💵</span> REGISTER ANOTHER ASSET <span style="font-size: 1.4em;">🚀</span>
+      <span style="font-size: 1.8em; display: inline-block;">💵</span> REGISTER ANOTHER ASSET <span style="font-size: 1.8em;">🚀</span>
     </button>
     <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; font-style: italic;">
       * Every €1,000.00 accumulated unlocks an official Tranche Receipt with a secure QR code. Value is returned in cash, social credits, and planted trees through overnight pool batch processing.
     </div>
 
-    <a id="certUrl" href="#" target="_blank" class="cert-link blink-slow"><span style="font-size: 1.3em;">📄</span> View Public dMRV Certificate <span style="font-size: 1.3em;">✨</span></a>
-    <a href="/dashboard" class="btn-secondary blink-slow"><span style="font-size: 1.3em;">📊</span> Go to Dashboard (Inspect Tranches) <span style="font-size: 1.3em;">💰</span></a>
+    <a id="certUrl" href="#" target="_blank" class="cert-link blink-slow"><span style="font-size: 1.8em;">📄</span> View Public dMRV Certificate <span style="font-size: 1.8em;">✨</span></a>
+    <a href="/dashboard" class="btn-secondary blink-slow"><span style="font-size: 1.8em;">📊</span> Go to Dashboard (Inspect Tranches) <span style="font-size: 1.8em;">💰</span></a>
   </div>
 </div>
 
@@ -475,7 +475,7 @@
         imagePreview.src = e.target.result;
         previewContainer.style.display = 'block';
         filePromptText.className = "";
-        filePromptText.innerHTML = `<span style="font-size: 1.6rem;">✅</span> Photo loaded: ${file.name}`;
+        filePromptText.innerHTML = `<span style="font-size: 2rem;">✅</span> Photo loaded: ${file.name}`;
         dropZone.classList.add('has-file');
         submitBtn.classList.add('ready');
       };
@@ -490,9 +490,9 @@
     previewContainer.style.display = 'none';
     filePromptText.className = "blink-slow";
     filePromptText.innerHTML = `
-      <span style="font-size: 2rem;">⚡</span> 
+      <span style="font-size: 2.5rem;">⚡</span> 
       <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
-      <span style="font-size: 2rem;">⚡</span>
+      <span style="font-size: 2.5rem;">⚡</span>
     `;
     dropZone.classList.remove('has-file');
     submitBtn.classList.add('ready', 'blink-subtle');
@@ -585,29 +585,31 @@
 
         if (completedTranches > 0) {
           let tranchesHtml = `<div style="margin-bottom: 14px; font-weight: bold; color: var(--accent-yellow); font-size: 16px; text-align: center;" class="blink-slow">
-            🎉 Congratulations! You have completed ${completedTranches} tranche(s) (€1,000 milestone each)! 🌟
+            <span style="font-size: 1.8em;">🎉</span> Congratulations! You have completed ${completedTranches} tranche(s) (€1,000 milestone each)! <span style="font-size: 1.8em;">🌟</span>
           </div>`;
 
           for (let i = 1; i <= completedTranches; i++) {
             tranchesHtml += `
               <div class="tranche-ticket-box">
-                <!-- Logo esterno a fondo nero posizionato elegantemente nel box della tranche -->
-                <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 8px;">
-                  <img src="/images/logo.png" alt="Logo" style="width: 32px; height: 32px; object-fit: contain;" />
-                  <span style="font-size: 1.1em; color: var(--accent-yellow); font-weight: 800; letter-spacing: 0.5px;">
-                    TRANCHE #${i} VALUE REWARD TICKET & QR CODE READY
-                  </span>
+                <!-- Logo raddoppiato (64px) posizionato in alto a sinistra, fuori dal QR code -->
+                <img src="/images/logo.png" alt="Logo" style="position: absolute; top: 12px; left: 12px; width: 64px; height: 64px; object-fit: contain;" />
+                
+                <div style="margin-left: 70px; text-align: center;">
+                  <p style="margin: 0 0 8px 0; font-size: 0.95em; color: var(--accent-yellow); font-weight: 800; letter-spacing: 0.5px;">
+                    <span style="font-size: 1.5em;">🪙</span> TRANCHE #${i} VALUE REWARD TICKET & QR CODE READY
+                  </p>
+                  <div style="display: flex; justify-content: center; margin: 10px 0;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=dMRV-TRANCHE-${i}-${encodeURIComponent(userEmail)}" alt="Tranche QR Code" style="width: 110px; height: 110px; border-radius: 8px; border: 2px solid var(--accent-yellow); padding: 4px; background: white;" />
+                  </div>
+                  <p style="margin: 6px 0 10px 0; font-size: 0.9em; color: #f8fafc; font-weight: bold;">
+                    Official Ticket ID: <span style="color: var(--accent-yellow);">dMRV-TR-${i}-${Date.now().toString().slice(-6)}</span>
+                  </p>
+                  <button onclick="window.print()" style="background: var(--accent-yellow); color: #000; border: none; font-weight: bold; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 0.9em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; text-transform: uppercase;">
+                    <span style="font-size: 1.5em;">💰</span> PRINT / DOWNLOAD TRANCHE RECEIPT
+                  </button>
                 </div>
-                <div style="display: flex; justify-content: center; margin: 10px 0;">
-                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=dMRV-TRANCHE-${i}-${encodeURIComponent(userEmail)}" alt="Tranche QR Code" style="width: 110px; height: 110px; border-radius: 8px; border: 2px solid var(--accent-yellow); padding: 4px; background: white;" />
-                </div>
-                <p style="margin: 6px 0 10px 0; font-size: 0.9em; color: #f8fafc; font-weight: bold;">
-                  Official Ticket ID: <span style="color: var(--accent-yellow);">dMRV-TR-${i}-${Date.now().toString().slice(-6)}</span>
-                </p>
-                <button onclick="window.print()" style="background: var(--accent-yellow); color: #000; border: none; font-weight: bold; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 0.9em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; text-transform: uppercase;">
-                  <span style="font-size: 1.3em;">💰</span> PRINT / DOWNLOAD TRANCHE RECEIPT
-                </button>
-                <p style="margin: 8px 0 0 0; font-size: 0.75em; color: var(--text-muted); font-style: italic;">
+                
+                <p style="margin: 12px 0 0 0; font-size: 0.75em; color: var(--text-muted); font-style: italic; text-align: center;">
                   * Hold this QR code receipt. Pool liquidity matching and return payouts are processed securely overnight.
                 </p>
               </div>
