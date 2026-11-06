@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CarbonCredit CashBack - Access Granted & Certificato dMRV</title>
+  <title>CarbonCredit CashBack - Access Granted & Audit dMRV Certificate</title>
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f172a;
+      background: radial-gradient(circle at top, #022c22 0%, #064e3b 40%, #0f172a 100%);
       color: #f8fafc;
       display: flex;
       justify-content: center;
@@ -23,124 +24,212 @@
 
     .container {
       width: 100%;
-      max-width: 620px;
+      max-width: 640px;
     }
 
     .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 24px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border: 2px solid #10b981;
+      border-radius: 28px;
       padding: 32px 24px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 30px rgba(16, 185, 129, 0.2);
       text-align: center;
     }
 
-    .badge {
-      display: inline-block;
-      background: rgba(22, 163, 74, 0.15);
-      border: 1px solid #16a34a;
-      color: #4ade80;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 14px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
-      margin-bottom: 16px;
+    /* --- LOGO INTESTAZIONE ANIMATO --- */
+    .header-logo-box {
+      text-align: center;
+      margin-bottom: 20px;
     }
 
-    .icon-box {
-      font-size: 44px;
+    .logo-animated {
+      max-width: 250px;
+      width: 100%;
+      height: auto;
+      display: inline-block;
+      animation: logoBlinkPulse 2.2s infinite ease-in-out;
+      filter: drop-shadow(0 0 14px rgba(16, 185, 129, 0.5));
+    }
+
+    @keyframes logoBlinkPulse {
+      0% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.3)); }
+      50% { transform: scale(1.08); opacity: 0.8; filter: drop-shadow(0 0 24px rgba(16, 185, 129, 0.8)); }
+      100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.3)); }
+    }
+
+    /* --- EMOJI GRANDI & LAMPEGGIANTI --- */
+    .blink-emoji {
+      display: inline-block;
+      font-size: 1.6rem;
+      vertical-align: middle;
+      animation: blinkScale 1.4s infinite ease-in-out;
+    }
+
+    .giant-emoji {
+      font-size: 2.8rem;
+      display: inline-block;
       margin-bottom: 8px;
+      animation: blinkScale 1.4s infinite ease-in-out;
+    }
+
+    .large-plant-emoji {
+      font-size: 1.5rem;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 4px;
+      animation: blinkScale 1.8s infinite ease-in-out;
+    }
+
+    .big-money-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 1.45rem;
+      vertical-align: middle;
+      margin: 0 4px;
+    }
+
+    @keyframes blinkScale {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.75; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* --- BADGE B2B / ACTIVE --- */
+    .badge {
+      display: inline-block;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1.5px solid #10b981;
+      color: #34d399;
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 8px 18px;
+      border-radius: 24px;
+      letter-spacing: 0.5px;
+      margin-bottom: 18px;
+      cursor: pointer;
+      animation: b2bPulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes b2bPulse {
+      0% { transform: scale(1); box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+      50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(16, 185, 129, 0.7); background: rgba(16, 185, 129, 0.3); }
+      100% { transform: scale(1); box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
     }
 
     .title {
-      font-size: 22px;
-      font-weight: 800;
+      font-size: 24px;
+      font-weight: 900;
       color: #ffffff;
       margin: 0 0 8px;
+      text-transform: uppercase;
     }
 
     .subtitle {
-      font-size: 14px;
-      color: #38bdf8;
-      font-weight: 600;
+      font-size: 15px;
+      color: #fbbf24;
+      font-weight: 700;
       line-height: 1.4;
       margin-bottom: 24px;
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
     }
 
-    /* AZIONE PRINCIPALE DI CARICAMENTO GIGANTE */
+    /* --- HERO UPLOAD BOX ARANCIONE & ANIMATO --- */
     .cta-hero-box {
-      background: rgba(16, 185, 129, 0.08);
-      border: 2px solid #10b981;
+      background: rgba(251, 191, 36, 0.08);
+      border: 2px solid #fbbf24;
       border-radius: 20px;
       padding: 20px 16px;
       margin-bottom: 24px;
+      animation: pulseGoldCard 2.5s infinite ease-in-out;
+    }
+
+    @keyframes pulseGoldCard {
+      0% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.2); }
+      50% { box-shadow: 0 0 25px rgba(251, 191, 36, 0.6); }
+      100% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.2); }
     }
 
     .btn-giant-upload {
-      display: block;
-      background: #10b981;
-      color: #022c22;
-      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #ff7043 0%, #ff5722 50%, #f4511e 100%);
+      color: #ffffff;
+      font-weight: 900;
       text-decoration: none;
       padding: 18px 16px;
-      border-radius: 14px;
-      font-size: 1.1rem;
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+      border-radius: 16px;
+      font-size: 1.15rem;
+      border: 1.5px solid #ff7043;
+      box-shadow: 0 0 20px rgba(255, 87, 34, 0.6);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      transition: transform 0.2s, background 0.2s;
+      cursor: pointer;
+      animation: pulseButton 2s infinite ease-in-out;
+      transition: transform 0.2s;
     }
 
     .btn-giant-upload:hover {
-      background: #34d399;
-      transform: translateY(-2px);
+      transform: scale(1.03);
+      box-shadow: 0 0 30px rgba(255, 87, 34, 0.85);
     }
 
     .btn-secondary-link {
       display: block;
       background: #0f172a;
-      color: #94a3b8;
+      color: #a3e635;
       text-decoration: none;
       padding: 12px;
-      border-radius: 10px;
-      font-size: 0.88rem;
-      border: 1px solid #334155;
-      margin-top: 12px;
-      font-weight: 600;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      border: 1.5px solid #84cc16;
+      margin-top: 14px;
+      font-weight: 800;
+      animation: b2bPulse 2s infinite ease-in-out;
       transition: color 0.2s, border-color 0.2s;
     }
 
-    .btn-secondary-link:hover {
-      color: #f8fafc;
-      border-color: #64748b;
+    @keyframes pulseButton {
+      0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 87, 34, 0.4); }
+      50% { transform: scale(1.04); box-shadow: 0 0 28px rgba(255, 87, 34, 0.85); }
+      100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 87, 34, 0.4); }
     }
 
-    /* BOX RASSICURAZIONE PROCESSAMENTO */
+    /* --- REASSURANCE BOX --- */
     .reassurance-box {
       background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 14px;
-      padding: 14px;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 16px;
+      padding: 16px;
       margin-bottom: 28px;
       text-align: left;
     }
 
     .reassurance-text {
       margin: 0;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: #e2e8f0;
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
-    /* SEZIONE CERTIFICATO dMRV AUDITABILE */
+    /* --- CERTIFICATO dMRV --- */
     .cert-container {
       background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 20px;
+      border: 2px solid #84cc16;
+      border-radius: 20px;
+      padding: 22px;
       margin-bottom: 24px;
       text-align: left;
+      animation: rewardsPulseBlink 2.4s infinite ease-in-out;
+    }
+
+    @keyframes rewardsPulseBlink {
+      0% { transform: scale(1); box-shadow: 0 0 15px rgba(132, 204, 22, 0.25); border-color: #84cc16; }
+      50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(163, 230, 53, 0.65); border-color: #a3e635; }
+      100% { transform: scale(1); box-shadow: 0 0 15px rgba(132, 204, 22, 0.25); border-color: #84cc16; }
     }
 
     .cert-header {
@@ -153,9 +242,9 @@
     }
 
     .cert-title {
-      font-size: 13px;
-      font-weight: 800;
-      color: #10b981;
+      font-size: 14px;
+      font-weight: 900;
+      color: #a3e635;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -164,10 +253,10 @@
       background: rgba(56, 189, 248, 0.15);
       border: 1px solid #38bdf8;
       color: #38bdf8;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 8px;
     }
 
     .cert-grid {
@@ -182,24 +271,27 @@
       display: block;
       color: #94a3b8;
       font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .cert-item strong {
       color: #ffffff;
       font-size: 13px;
+      font-weight: 800;
     }
 
     .hash-box {
       background: #020617;
       border: 1px solid #1e293b;
-      border-radius: 8px;
-      padding: 10px;
+      border-radius: 10px;
+      padding: 12px;
       margin-bottom: 16px;
     }
 
     .hash-label {
       font-size: 10px;
-      font-weight: 700;
+      font-weight: 800;
       color: #64748b;
       text-transform: uppercase;
       margin-bottom: 4px;
@@ -217,86 +309,91 @@
       align-items: center;
       gap: 14px;
       background: #1e293b;
-      padding: 12px;
-      border-radius: 12px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid #334155;
     }
 
     .qr-section img {
       width: 80px;
       height: 80px;
-      border-radius: 6px;
+      border-radius: 8px;
       background: #fff;
       padding: 4px;
     }
 
     .qr-text {
-      font-size: 11px;
+      font-size: 11.5px;
       color: #cbd5e1;
       line-height: 1.4;
     }
 
-    /* BOX INFORMATIVO B2B E NOTE LEGALI COMPATTE */
+    /* --- INFO BOX & BUTTONS --- */
     .info-box {
       background: #0b132b;
       border: 1px solid #1e293b;
-      border-radius: 12px;
-      padding: 14px;
+      border-radius: 14px;
+      padding: 16px;
       margin-bottom: 20px;
       text-align: left;
     }
 
     .info-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #4ade80;
+      font-size: 13px;
+      font-weight: 800;
+      color: #a3e635;
       margin: 0 0 8px 0;
+      text-transform: uppercase;
     }
 
     .info-list {
       color: #cbd5e1;
-      font-size: 11px;
+      font-size: 11.5px;
       margin: 0;
       padding-left: 16px;
       line-height: 1.5;
     }
 
     .info-list li {
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .btn-pdf {
-      background: #334155;
-      color: #f8fafc;
-      border: none;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: 1.5px solid #34d399;
       width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 900;
       cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      animation: b2bPulse 2s infinite ease-in-out;
       transition: background 0.2s;
     }
 
     .btn-pdf:hover {
-      background: #475569;
+      background: #059669;
     }
 
     .footer-note {
       font-size: 10.5px;
       color: #64748b;
       margin-top: 18px;
-      line-height: 1.35;
+      line-height: 1.4;
       text-align: justify;
     }
 
-    /* REGOLA PER LA STAMPA DEL CERTIFICATO PDF */
+    /* PRINT STYLES FOR AUDIT CERTIFICATE */
     @media print {
       body {
         background: #ffffff !important;
         color: #000000 !important;
         padding: 0;
       }
-      .no-print, .badge, .icon-box, .title, .subtitle, .cta-hero-box, .reassurance-box, .info-box, .btn-pdf, .footer-note {
+      .no-print, .badge, .title, .subtitle, .cta-hero-box, .reassurance-box, .info-box, .btn-pdf, .footer-note, .header-logo-box {
         display: none !important;
       }
       .card {
@@ -309,6 +406,7 @@
         border: 2px solid #000000 !important;
         background: #ffffff !important;
         color: #000000 !important;
+        animation: none !important;
       }
       .cert-item strong, .cert-title {
         color: #000000 !important;
@@ -334,91 +432,112 @@
 
 <div class="container">
   <div class="card">
-    <div class="badge no-print">🌱 SUBSCRIPTION ACTIVE — ACCOUNT VERIFIED</div>
-    <div class="icon-box no-print">🎉</div>
-    <h1 class="title no-print">Benvenuto in CarbonCredit!</h1>
+    
+    <!-- 0. CENTRAL LOGO HEADER (ANIMATED & BLINKING) -->
+    <div class="header-logo-box no-print">
+      <img src="/images/logo.png" alt="CarbonCredit CashBack Logo" class="logo-animated">
+    </div>
+
+    <div class="badge no-print">
+      <span class="large-plant-emoji">🌱</span> SUBSCRIPTION ACTIVE — ACCOUNT VERIFIED
+    </div>
+    
+    <div class="giant-emoji no-print">🎉</div>
+    
+    <h1 class="title no-print">
+      <span class="big-money-group"><span class="blink-emoji">💵</span><span class="blink-emoji">💰</span></span>
+      WELCOME TO CARBONCREDIT!
+      <span class="big-money-group"><span class="blink-emoji">💵</span><span class="blink-emoji">💰</span></span>
+    </h1>
+    
     <p class="subtitle no-print">
-      Il tuo abbonamento è attivo. Inizia subito a costruire il tuo cashback ecologico!
+      Your subscription is active. Start building your eco cashback rewards right now!
     </p>
 
-    <!-- 1. AZIONE IMMEDIATA: CARICAMENTO SPESE -->
+    <!-- 1. UPLOAD HERO ACTION -->
     <div class="cta-hero-box no-print">
       <a href="/add-asset" class="btn-giant-upload">
-        📸 CARICA ORA LE TUE SPESE & FOTO →
+        <span class="big-money-group"><span class="blink-emoji">📸</span><span class="blink-emoji">💵</span></span> 
+        UPLOAD YOUR RECEIPTS & PHOTOS NOW → 
+        <span class="big-money-group"><span class="blink-emoji">💰</span></span>
       </a>
       <a href="/dashboard" class="btn-secondary-link">
-        Oppure vai alla tua Area Riservata (Dashboard)
+        <span class="blink-emoji">💰</span> Or go directly to your Dashboard <span class="blink-emoji">💰</span>
       </a>
     </div>
 
-    <!-- 2. RASSICURAZIONE SUL PROCESSAMENTO AI -->
+    <!-- 2. REASSURANCE BOX -->
     <div class="reassurance-box no-print">
       <p class="reassurance-text">
-        ⚡ <strong>Cosa succede adesso?</strong> Tu carica ogni tua prova d'acquisto ecologica! Il nostro sistema Gemini AI analizzerà e verificherà i metadati per calcolare il cashback e assegnare i premi nel minor tempo possibile.
+        ⚡ <strong>What happens next?</strong> Simply upload your green proof of purchase! Our Gemini AI system will analyze and verify metadata to calculate your cashback and issue rewards as quickly as possible.
       </p>
     </div>
 
-    <!-- 3. CERTIFICATO dMRV CONFORME ESG / SCOPE 3 -->
+    <!-- 3. dMRV AUDITABLE CERTIFICATE (IN ENGLISH) -->
     <div class="cert-container" id="certArea">
       <div class="cert-header">
-        <div class="cert-title">Certificato dMRV Impatto Ambientale</div>
+        <div class="cert-title">
+          <span class="large-plant-emoji">🌱</span> Environmental Impact dMRV Certificate
+        </div>
         <div class="esg-badge">GHG Scope 3 Compliant</div>
       </div>
 
       <div class="cert-grid">
         <div class="cert-item">
-          <span>Identificativo Registro:</span>
+          <span>Registry Identifier:</span>
           <strong id="certIdVal">CERT-LOADING...</strong>
         </div>
         <div class="cert-item">
-          <span>Beneficiario / Email:</span>
+          <span>Beneficiary / Email:</span>
           <strong id="emailVal">--</strong>
         </div>
         <div class="cert-item">
-          <span>CO₂ Evitata Quantificata:</span>
-          <strong id="co2Val" style="color: #4ade80;">-- kg CO₂</strong>
+          <span>Quantified Avoided CO₂:</span>
+          <strong id="co2Val" style="color: #a3e635;">-- kg CO₂</strong>
         </div>
         <div class="cert-item">
-          <span>Algoritmo AI Validatore:</span>
+          <span>Validator AI Algorithm:</span>
           <strong>Gemini-2.5-Flash (98.4%)</strong>
         </div>
         <div class="cert-item" style="grid-column: span 2;">
-          <span>Stato Audit Forense & Fiduciario:</span>
+          <span>Forensic & Fiduciary Audit Status:</span>
           <strong id="tierVal" style="color: #38bdf8;">Tier 2 — High-Rigidity B2B Institutional Grade</strong>
         </div>
       </div>
 
       <div class="hash-box">
-        <div class="hash-label">Hash Immutabile dMRV (SHA-256 Crittografico):</div>
+        <div class="hash-label">Immutable dMRV Hash (SHA-256 Cryptographic):</div>
         <div class="hash-value" id="hashVal">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
       </div>
 
       <div class="qr-section">
-        <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://carboncredit-cashback.onrender.com" alt="QR Audit dMRV">
+        <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://carboncredit-cashback.onrender.com" alt="dMRV Audit QR">
         <div class="qr-text">
-          <strong>Audit ESG Terze Parti:</strong><br>
-          Scansiona il codice QR per verificare l'autenticità nel registro B2B e la tracciabilità della transazione.
+          <strong>Third-Party ESG Audit:</strong><br>
+          Scan the QR code to verify authenticity within the B2B registry and check transaction traceability.
         </div>
       </div>
     </div>
 
-    <!-- 4. BOX INFORMATIVO & NOTE TECNICHE -->
+    <!-- 4. B2B INFO BOX -->
     <div class="info-box no-print">
-      <div class="info-title">💡 Come funziona il riscatto del tuo valore:</div>
+      <div class="info-title">💡 How Value Redemption Works:</div>
       <ul class="info-list">
         <li>
-          <strong>Cashback Monetario B2B:</strong> Le prove verificate dall'AI (Tier 2) vengono aggregate nel Batch B2B. Alla liquidazione del pool col broker, potrai richiedere il payout dalla Dashboard.
+          <strong>B2B Monetary Cashback:</strong> Proofs verified by AI (Tier 2) are aggregated into B2B Batches. Upon liquidity settlement with the broker, payouts can be claimed from the Dashboard.
         </li>
         <li>
-          <strong>Standard Anti-Greenwashing:</strong> L'AI applica filtri di audit rigorosi sui metadati. Le immagini senza prova d'acquisto diretta restano riservate alla Gamification (Tier 1).
+          <strong>Anti-Greenwashing Standards:</strong> The AI applies strict metadata audit filters. Images without direct proof of purchase remain reserved for Community Gamification (Tier 1).
         </li>
       </ul>
     </div>
 
-    <button onclick="window.print()" class="btn-pdf no-print">📄 Scarica Certificato Audit (PDF)</button>
+    <button onclick="window.print()" class="btn-pdf no-print">
+      <span class="blink-emoji">📄</span> DOWNLOAD AUDIT CERTIFICATE (PDF)
+    </button>
 
     <div class="footer-note no-print">
-      * Indicazioni sul riscatto e valore: Il valore di cashback monetario B2B o l'assegnazione dei crediti dipende dal grado di verifica delle immagini caricate. L'erogazione avviene in base ai lotti B2B aggregati e in conformità con i protocolli internazionali GHG Protocol Scope 3.
+      * Value and redemption terms: Monetary cashback value and credit allocations depend on the verification grade of uploaded files. Distribution occurs according to aggregated B2B batches in compliance with international GHG Protocol Scope 3 standards.
     </div>
   </div>
 </div>
@@ -429,7 +548,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("emailVal").innerText = userEmail;
 
   try {
-    // Recupera le informazioni reali dell'utente e delle azioni verificate dal server
     const userRes = await fetch(`/api/user?email=${encodeURIComponent(userEmail)}`);
     const userData = await userRes.json();
 
@@ -456,7 +574,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("certIdVal").innerText = "CERT-2026-" + certId;
 
-    // Calcolo Hash SHA-256 locale per la visualizzazione nel certificato
     const msgUint8 = new TextEncoder().encode(rawHashSource);
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -464,13 +581,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("hashVal").innerText = hashHex;
 
-    // Generazione del link dinamico al server per l'audit del certificato
     const currentHost = window.location.origin;
     const verifyUrl = `${currentHost}/verify/${certId}`;
     document.getElementById("qrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(verifyUrl)}`;
 
   } catch (err) {
-    console.warn("Inizializzazione dMRV in modalità offline o primo accesso:", err);
+    console.warn("dMRV initialization offline or initial access:", err);
     document.getElementById("certIdVal").innerText = "CERT-2026-INIT";
     document.getElementById("co2Val").innerText = "0.0 kg CO₂";
   }
