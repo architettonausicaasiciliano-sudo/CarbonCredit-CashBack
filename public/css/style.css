@@ -392,3 +392,174 @@ body {
 .payout-note strong {
   color: #cbd5e1;
 }
+/* ==========================================================================
+   PALETTE & ANIMAZIONI PALPITANTI (CARBONCREDIT CASHBACK)
+   ========================================================================== */
+
+/* Hero Box Styling */
+.hero-card {
+    border: 2px solid #10b981;
+    border-radius: 20px;
+    padding: 24px 16px;
+    background: rgba(16, 185, 129, 0.05);
+    text-align: center;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.hero-card:hover {
+    transform: translateY(-2px);
+    border-color: #34d399;
+}
+
+.hero-headline {
+    color: #ffffff;
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.3;
+    margin: 12px 0;
+    text-transform: uppercase;
+}
+
+.hero-subheadline {
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 10px 0;
+    text-transform: uppercase;
+}
+
+.hero-description {
+    color: #94a3b8;
+    font-size: 0.88rem;
+    margin: 10px 0 16px 0;
+    line-height: 1.4;
+}
+
+/* Text Highlights */
+.highlight-red {
+    color: #ff3b30;
+    font-weight: 900;
+    text-shadow: 0 0 10px rgba(255, 59, 48, 0.4);
+}
+
+.highlight-gold {
+    color: #fbbf24;
+    background: linear-gradient(45deg, #f59e0b, #fbbf24, #fef08a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+}
+
+/* Badge B2B Scope 3 */
+.badge-b2b {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1.5px solid #10b981;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    display: inline-block;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+    letter-spacing: 0.5px;
+}
+
+/* Category Headers in Form */
+.category-title {
+    color: #a3e635 !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    margin-top: 18px !important;
+    margin-bottom: 8px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   ANIMAZIONI: PULSAZIONE & BLINK EMOJI
+   ========================================================================== */
+
+/* Tasti che pulsano e si ingrandiscono/rimpoccioliscono */
+.pulse-btn {
+    animation: pulseButton 2s infinite ease-in-out;
+    background: linear-gradient(135deg, #ff5722 0%, #ff3b30 100%) !important;
+    border: none !important;
+    box-shadow: 0 0 15px rgba(255, 59, 48, 0.5) !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.5px;
+}
+
+@keyframes pulseButton {
+    0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 59, 48, 0.4); }
+    50% { transform: scale(1.04); box-shadow: 0 0 25px rgba(255, 59, 48, 0.8); }
+    100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 59, 48, 0.4); }
+}
+
+/* Emoji del denaro che lampeggiano e ingrandiscono */
+.blink-emoji {
+    display: inline-block;
+    animation: blinkScale 1.4s infinite ease-in-out;
+}
+
+@keyframes blinkScale {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.35); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Card Risultato Palpitante */
+.pulse-card {
+    border: 2px solid #fbbf24 !important;
+    background: rgba(251, 191, 36, 0.08) !important;
+    animation: pulseGoldCard 2.5s infinite ease-in-out;
+}
+
+@keyframes pulseGoldCard {
+    0% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.2); }
+    50% { box-shadow: 0 0 22px rgba(251, 191, 36, 0.6); }
+    100% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.2); }
+}
+
+.cashback-status-text {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fbbf24;
+    margin: 10px 0;
+}
+
+/* ==========================================================================
+   BARRA DI PROGRESSO A 6 STEP (BIANCO -> GIALLO -> ARANCIO -> ROSSO)
+   ========================================================================== */
+
+.progress-container {
+    margin: 16px 0 24px 0;
+}
+
+.progress-bar-track {
+    width: 100%;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ffffff 0%, #fef08a 30%, #f59e0b 65%, #ff3b30 100%);
+    border-radius: 10px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 12px rgba(255, 59, 48, 0.6);
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 800;
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+}

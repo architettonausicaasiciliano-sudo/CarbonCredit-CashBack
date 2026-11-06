@@ -3,103 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCredits — Turn Sustainable Choices Into CashBack</title>
+    <title>CarbonCredit CashBack — Turn Sustainable Choices Into CashBack</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
     <div class="container">
         
-        <!-- INTERO BLOCCO HERO CLICCABILE CON BORDO -->
+        <!-- HEADER / HERO SECTION -->
         <header class="hero" style="margin-bottom: 24px;">
             <a href="#initial-test" style="text-decoration: none; color: inherit; display: block; cursor: pointer;">
-                <div style="border: 2px solid #10b981; border-radius: 16px; padding: 24px 16px; background: rgba(16, 185, 129, 0.05); text-align: center; box-shadow: 0 0 15px rgba(16, 185, 129, 0.15); transition: transform 0.2s, border-color 0.2s;">
+                <div class="hero-card">
                     
-                    <div>
-                        <span class="badge-eco" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-bottom: 12px;">
-                            🌱 EcoCredits & Carbon CashBack
+                    <!-- LOGO BRAND -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <img src="/images/logobianco.png" alt="CarbonCredit CashBack Logo" style="max-width: 180px; height: auto; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.4));">
+                    </div>
+
+                    <!-- HEADLINE -->
+                    <h1 class="hero-headline">
+                        TURN YOUR GREEN HABITS INTO <span class="blink-emoji">💰</span> <span class="highlight-red pulse-text">REAL CASHBACK</span>
+                    </h1>
+
+                    <!-- BADGE B2B -->
+                    <div style="margin: 14px 0;">
+                        <span class="badge-b2b">
+                            🌱 B2B GHG SCOPE 3 COMPLIANCE
                         </span>
                     </div>
 
-                    <h1 style="color: #ffffff; font-size: 1.5rem; font-weight: 800; line-height: 1.25; margin: 8px 0; text-transform: uppercase;">
-                        Did you know your green habits can <span class="cash-highlight" style="color: #FF3B30; text-shadow: none; font-weight: 900;">PAY YOU BACK REAL CASH?</span>
-                    </h1>
+                    <!-- SUB-HEADLINE -->
+                    <h3 class="hero-subheadline">
+                        DID YOU KNOW YOUR LIFESTYLE CAN <span class="highlight-gold">PAY YOU <span class="blink-emoji">💰</span> BACK?</span>
+                    </h3>
 
-                    <p style="color: #94a3b8; font-size: 0.88rem; margin: 10px 0 16px 0; line-height: 1.4;">
+                    <p class="hero-description">
                         From walking and plant-based food to solar panels and land ownership: calculate how much daily cashback you are leaving on the table.
                     </p>
                     
-                    <div class="btn-cta-giant" style="margin-top: 8px;">
-                        ⚡ START INITIAL TEST NOW (30 SEC) ⚡
+                    <!-- CTA BUTTON HERO -->
+                    <div class="btn-cta-giant pulse-btn" style="margin-top: 12px;">
+                        <span class="blink-emoji">⚡</span> WANT YOUR CASHBACK BACK? <span class="blink-emoji">⚡</span>
                     </div>
 
                 </div>
             </a>
         </header>
 
+        <!-- QUIZ / CALCULATOR SECTION -->
         <main class="quiz-card" id="initial-test">
             <h2>⏱️ Initial CashBack Calculator</h2>
 
+            <!-- BARRA DI PROGRESSO (6 STEP) -->
+            <div class="progress-container">
+                <div class="progress-bar-track">
+                    <div id="stepProgressBar" class="progress-bar-fill"></div>
+                </div>
+                <div class="progress-labels">
+                    <span>START</span>
+                    <span id="stepCounterText">0 / 6 STEPS COMPLETED</span>
+                    <span>MAX IMPACT</span>
+                </div>
+            </div>
+
             <form id="quizForm">
                 
-                <div class="category-title">1. Daily Sustainable Habits</div>
+                <div class="category-title">1. DAILY SUSTAINABLE HABITS</div>
                 <div class="option-group">
                     <label class="option-label">
-                        <input type="checkbox" value="120" data-co2="180">
+                        <input type="checkbox" class="step-check" value="120" data-co2="180">
                         <span class="option-text">🥛 Plant-Based Milk / Organic Food</span>
                     </label>
                     <label class="option-label">
-                        <input type="checkbox" value="150" data-co2="220">
+                        <input type="checkbox" class="step-check" value="150" data-co2="220">
                         <span class="option-text">🍎 Km 0 Grocery / Farmers Market</span>
                     </label>
                     <label class="option-label">
-                        <input type="checkbox" value="200" data-co2="350">
+                        <input type="checkbox" class="step-check" value="200" data-co2="350">
                         <span class="option-text">🚲 Eco Mobility (Bike, EV, Walking)</span>
                     </label>
                 </div>
 
-                <div class="category-title">2. Energy & Home Efficiency</div>
+                <div class="category-title">2. ENERGY & HOME EFFICIENCY</div>
                 <div class="option-group">
                     <label class="option-label">
-                        <input type="checkbox" value="450" data-co2="900">
+                        <input type="checkbox" class="step-check" value="450" data-co2="900">
                         <span class="option-text">☀️ Solar Panels / Heat Pump Systems</span>
                     </label>
                     <label class="option-label">
-                        <input type="checkbox" value="250" data-co2="400">
+                        <input type="checkbox" class="step-check" value="250" data-co2="400">
                         <span class="option-text">🔌 A+++ Smart Appliances / Smart Heating</span>
                     </label>
                 </div>
 
-                <div class="category-title">3. Land & Green Spaces</div>
+                <div class="category-title">3. LAND & GREEN SPACES</div>
                 <div class="option-group">
                     <label class="option-label">
-                        <input type="checkbox" value="600" data-co2="1500">
+                        <input type="checkbox" class="step-check" value="600" data-co2="1500">
                         <span class="option-text">🌳 Own Land, Large Garden, or Orchards</span>
                     </label>
                 </div>
 
-                <!-- CARD RISULTATO CLICCABILE PER ANDARE AL PAGAMENTO -->
-                <div class="result-box" 
+                <!-- RESULT BOX -->
+                <div class="result-box pulse-card" 
                      onclick="document.getElementById('quizForm').requestSubmit()" 
                      style="cursor: pointer;" title="Click to claim cashback">
-                    <div class="result-title">Estimated Annual CashBack</div>
-                    <div class="cashback-amount">€ <span id="cashbackVal">0.00</span> / yr</div>
-                    <div class="co2-amount">🌱 Estimated Avoided CO₂: <strong id="co2Val">0</strong> kg</div>
+                    <div class="result-title">ESTIMATED ANNUAL CASHBACK POTENTIAL</div>
+                    <div class="cashback-status-text">
+                        <span class="blink-emoji">💸</span> HIGH REWARD VALUE UNLOCKED <span class="blink-emoji">💸</span>
+                    </div>
+                    <div class="co2-amount">🌱 Environmental & Carbon Avoidance Certified</div>
                 </div>
 
-                <button type="submit" class="btn-cta-giant" style="margin-bottom: 0;">
-                    🚀 CLAIM YOUR CASHBACK — SUBSCRIBE NOW →
+                <button type="submit" class="btn-cta-giant pulse-btn" style="margin-bottom: 0;">
+                    🚀 UNLOCK & CLAIM YOUR CASHBACK NOW <span class="blink-emoji">💰</span> →
                 </button>
 
             </form>
         </main>
 
         <footer class="footer-text">
-            © 2026 EcoCredits Inc. All rights reserved.
+            © 2026 CarbonCredit CashBack Inc. All rights reserved.
         </footer>
 
     </div>
 
     <script src="/js/landing.js"></script>
+    <script>
+        // Gestione avanzata barra di progresso a 6 step
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkboxes = document.querySelectorAll('.step-check');
+            const progressBar = document.getElementById('stepProgressBar');
+            const counterText = document.getElementById('stepCounterText');
+            const totalSteps = 6;
+
+            function updateProgress() {
+                const checkedCount = document.querySelectorAll('.step-check:checked').length;
+                const percentage = (checkedCount / totalSteps) * 100;
+                
+                if (progressBar) {
+                    progressBar.style.width = percentage + '%';
+                }
+                if (counterText) {
+                    counterText.innerText = `${checkedCount} / ${totalSteps} STEPS UNLOCKED`;
+                }
+            }
+
+            checkboxes.forEach(chk => chk.addEventListener('change', updateProgress));
+            updateProgress();
+        });
+    </script>
 </body>
 </html>
