@@ -37,10 +37,12 @@
       margin-bottom: 16px;
     }
 
-    .header-bar {
+.header-bar {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      gap: 16px;
       margin-bottom: 24px;
     }
 
@@ -181,13 +183,13 @@
     <img src="/images/logo.png" alt="Carbon Credit Cashback Logo" class="blink-slow" style="width: 180px; height: 180px; object-fit: contain;" />
   </div>
 
-  <!-- Riga 2: Tasto a Sinistra con + e Scritta Dashboard a Destra -->
+<!-- Riga 2: Intestazione con pulsante a sinistra e titolo flessibile a destra -->
   <div class="header-bar">
-    <a href="/add-asset" class="btn-primary blink-slow">
-      <span style="font-size: 1.8em; line-height: 1;">➕</span> REGISTER NEW ASSET
+    <a href="/add-asset" class="btn-primary blink-slow" style="flex-shrink: 0;">
+      <span style="font-size: 1.5em; line-height: 1; vertical-align: middle;">➕</span> REGISTER NEW ASSET
     </a>
-    <h1 style="font-size: 1.4rem; color: var(--accent-green-bright); margin: 0; display: flex; align-items: center; gap: 8px;" class="blink-slow">
-      <span style="font-size: 1.8em;">🌱</span> 
+    <h1 style="font-size: 1.25rem; color: var(--accent-green-bright); margin: 0; display: flex; align-items: center; gap: 8px; text-align: right;" class="blink-slow">
+      <span style="font-size: 1.5em;">🌱</span> 
       <span>dMRV Impact & Assets Dashboard</span>
     </h1>
   </div>
