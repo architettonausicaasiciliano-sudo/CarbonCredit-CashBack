@@ -791,3 +791,105 @@ body {
     font-weight: 900 !important;
     padding: 18px 20px !important;
 }
+/* --- EMOJI DEI 6 STEP PIÙ GRANDI E LAMPEGGIANTI --- */
+.step-emoji {
+    font-size: 1.4rem;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+    animation: stepEmojiPulse 1.8s infinite ease-in-out;
+}
+
+@keyframes stepEmojiPulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.75; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* --- CARD UNLOCKED SUSTAINABLE REWARDS --- */
+.rewards-card {
+    border: 2px solid #84cc16;
+    border-radius: 20px;
+    padding: 24px 16px;
+    background: rgba(20, 83, 45, 0.25);
+    text-align: center;
+    margin: 24px 0 16px 0;
+    box-shadow: 0 0 20px rgba(132, 204, 22, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rewards-subtitle {
+    color: #a3e635;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.rewards-main-title {
+    color: #a3e635 !important;
+    font-size: 1.8rem !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    margin: 6px 0 !important;
+    justify-content: center;
+    letter-spacing: 0.5px;
+}
+
+.rewards-for-you {
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.tranche-progress-box {
+    margin: 14px 0;
+}
+
+.tranche-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: #a3e635;
+    font-weight: 900;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+.rewards-footnote {
+    font-size: 0.68rem;
+    color: #94a3b8;
+    margin-top: 12px;
+    font-style: italic;
+    line-height: 1.3;
+}
+
+/* --- CTA BOTTONE IMPILATO COME DA SCREENSHOT --- */
+.cta-stacked {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.35;
+    padding: 16px 20px !important;
+}
+
+.cta-line-1 {
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+.cta-line-2 {
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+.cta-line-3 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin-top: 4px;
+    opacity: 0.95;
+}
