@@ -51,13 +51,25 @@
     }
 
     .back-link {
-      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 2px solid var(--accent-green);
+      color: var(--accent-green-bright);
       text-decoration: none;
       font-size: 13px;
-      font-weight: 600;
-      transition: color 0.2s;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(16, 185, 129, 0.08);
+      animation: blinkScale 1.4s infinite ease-in-out;
+      transition: all 0.2s;
     }
-    .back-link:hover { color: #fff; }
+    .back-link:hover {
+      background: rgba(16, 185, 129, 0.2);
+      color: #fff;
+    }
 
     .form-group { margin-bottom: 18px; }
     
@@ -326,9 +338,9 @@
 
 <div class="card">
   <div class="header-bar">
-    <h2 style="color: var(--accent-green-bright); margin: 0; font-size: 1.35rem; display: flex; align-items: center; gap: 8px;">
-      <span class="blink-anim" style="font-size: 1.6rem;">🌱</span> 
-      <span class="blink-anim">Register dMRV Impact</span>
+    <h2 style="color: var(--accent-green-bright); margin: 0; font-size: 1.35rem; display: flex; align-items: center; gap: 8px;" class="blink-anim">
+      <span style="font-size: 1.6rem;">🌱</span> 
+      <span>Register dMRV Impact</span>
     </h2>
     <a href="/dashboard" class="back-link">← Dashboard</a>
   </div>
@@ -363,11 +375,11 @@
     </div>
 
     <div class="form-group">
-      <label style="color: var(--accent-green-bright); font-weight: 800; display: flex; align-items: center; gap: 8px;">
+      <label style="color: var(--accent-green-bright); font-weight: 800; display: flex; align-items: center; gap: 8px;" class="blink-anim">
         <span style="font-size: 1.5rem;">📸</span> MANDATORY PROOF / RECEIPT
       </label>
       <div id="dropZone" class="file-drop-zone" onclick="document.getElementById('photo').click()">
-        <span id="filePromptText" style="font-size: 15px; color: var(--accent-green-bright); font-weight: 900; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;" class="blink-anim">
+        <span id="filePromptText" style="font-size: 15px; color: var(--accent-green-bright); font-weight: 900; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
           <span style="font-size: 1.5rem;">⚡</span> 
           <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
           <span style="font-size: 1.5rem;">⚡</span>
@@ -445,7 +457,6 @@
       reader.onload = function (e) {
         imagePreview.src = e.target.result;
         previewContainer.style.display = 'block';
-        filePromptText.className = "";
         filePromptText.innerHTML = `<span class="blink-anim" style="font-size: 1.4rem;">✅</span> Photo loaded: ${file.name}`;
         dropZone.classList.add('has-file');
         submitBtn.classList.add('ready');
@@ -459,7 +470,6 @@
     photoInput.value = '';
     imagePreview.src = '';
     previewContainer.style.display = 'none';
-    filePromptText.className = "blink-anim";
     filePromptText.innerHTML = `
       <span style="font-size: 1.5rem;">⚡</span> 
       <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
