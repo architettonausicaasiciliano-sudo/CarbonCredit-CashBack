@@ -96,7 +96,7 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
-    /* --- 1. BADGE B2B / ACTIVE (CORRETTO: NO BORDO TASTO, BLINK SOLO TESTO) --- */
+    /* --- BADGE (SOLO TESTO FISSO O CON BLINK PULITO) --- */
     .badge {
       display: inline-block;
       color: #34d399;
@@ -104,7 +104,6 @@
       font-weight: 900;
       letter-spacing: 0.5px;
       margin-bottom: 18px;
-      animation: blinkScale 1.8s infinite ease-in-out;
     }
 
     .title {
@@ -187,7 +186,7 @@
       100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 87, 34, 0.4); }
     }
 
-    /* --- 2. REASSURANCE BOX (CORRETTO: NO BORDO TASTO, BLINK SOLO TITOLO TESTO) --- */
+    /* --- REASSURANCE BOX (TESTO FISSO, SOLO EMOJI LAMPEGGIA) --- */
     .reassurance-box {
       background: transparent;
       border: none;
@@ -205,11 +204,9 @@
 
     .reassurance-text strong {
       color: #38bdf8;
-      display: inline-block;
-      animation: blinkScale 1.8s infinite ease-in-out;
     }
 
-    /* --- 3. CERTIFICATO dMRV (CORRETTO: NO PULSAZIONE CONTENITORE, BLINK SOLO TITOLO) --- */
+    /* --- CERTIFICATO dMRV (TESTO FISSO, SOLO PIANTINA LAMPEGGIA) --- */
     .cert-container {
       background: #0f172a;
       border: 1px solid #334155;
@@ -235,7 +232,6 @@
       color: #a3e635;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      animation: blinkScale 2s infinite ease-in-out;
     }
 
     .esg-badge {
@@ -454,14 +450,14 @@
       </a>
     </div>
 
-    <!-- 2. REASSURANCE BOX -->
+    <!-- 2. REASSURANCE BOX (SOLO LAMPO BLINKA) -->
     <div class="reassurance-box no-print">
       <p class="reassurance-text">
-        ⚡ <strong>What happens next?</strong> Simply upload your green proof of purchase! Our Gemini AI system will analyze and verify metadata to calculate your cashback and issue rewards as quickly as possible.
+        <span class="blink-emoji">⚡</span> <strong>What happens next?</strong> Simply upload your green proof of purchase! Our Gemini AI system will analyze and verify metadata to calculate your cashback and issue rewards as quickly as possible.
       </p>
     </div>
 
-    <!-- 3. dMRV AUDITABLE CERTIFICATE (IN ENGLISH) -->
+    <!-- 3. dMRV AUDITABLE CERTIFICATE (SOLO PIANTINA BLINKA) -->
     <div class="cert-container" id="certArea">
       <div class="cert-header">
         <div class="cert-title">
