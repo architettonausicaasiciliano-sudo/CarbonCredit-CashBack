@@ -139,7 +139,7 @@
 
     @keyframes blinkScale {
       0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.3); opacity: 0.75; }
+      50% { transform: scale(1.15); opacity: 0.75; }
       100% { transform: scale(1); opacity: 1; }
     }
 
@@ -327,8 +327,8 @@
 <div class="card">
   <div class="header-bar">
     <h2 style="color: var(--accent-green-bright); margin: 0; font-size: 1.35rem; display: flex; align-items: center; gap: 8px;">
-      <span class="blink-emoji" style="font-size: 1.6rem; display: inline-block; animation: blinkScale 1.8s infinite ease-in-out;">🌱</span> 
-      <span class="blink-anim" style="display: inline-block;">Register dMRV Impact</span>
+      <span style="font-size: 1.6rem;">🌱</span> 
+      <span>Register dMRV Impact</span>
     </h2>
     <a href="/dashboard" class="back-link">← Dashboard</a>
   </div>
@@ -369,7 +369,7 @@
       <div id="dropZone" class="file-drop-zone" onclick="document.getElementById('photo').click()">
         <span id="filePromptText" style="font-size: 15px; color: var(--accent-green-bright); font-weight: 900; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
           <span class="blink-anim" style="font-size: 1.6rem;">⚡</span> 
-          <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
+          <span class="blink-anim">CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
           <span class="blink-anim" style="font-size: 1.6rem;">⚡</span>
         </span>
         <input type="file" id="photo" name="photo" accept="image/*" style="display: none;" required>
@@ -460,7 +460,7 @@
     previewContainer.style.display = 'none';
     filePromptText.innerHTML = `
       <span class="blink-anim" style="font-size: 1.6rem;">⚡</span> 
-      <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
+      <span class="blink-anim">CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
       <span class="blink-anim" style="font-size: 1.6rem;">⚡</span>
     `;
     dropZone.classList.remove('has-file');
