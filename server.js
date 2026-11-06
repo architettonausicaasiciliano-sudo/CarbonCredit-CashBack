@@ -467,7 +467,7 @@ app.get("/verify/:certId", (req, res) => {
           <div class="data-row"><span class="label">Action Title:</span> <span class="val">${row.title}</span></div>
           <div class="data-row"><span class="label">Category:</span> <span class="val">${row.category}</span></div>
           <div class="data-row"><span class="label">Validated CO₂ Impact:</span> <span class="val">${row.co2_saved_kg} kg CO2e</span></div>
-          <div class="data-row"><span class="label">AI Forensics Tier:</span> <span class="val">${row.tier} (${(row.confidence_score * 100).toFixed(0)}% Confidenza)</span></div>
+          <div class="data-row"><span class="label">AI Forensics Tier:</span> <span class="val">${row.tier} (${(row.confidence_score * 100).toFixed(0)}% Confidence)</span></div>
           <div class="data-row"><span class="label">Registration Date:</span> <span class="val">${row.created_at}</span></div>
           
           <p style="margin-top:24px; font-weight:600; font-size:14px; color:#475569;">SHA-256 Image Forensic Footprint:</p>
