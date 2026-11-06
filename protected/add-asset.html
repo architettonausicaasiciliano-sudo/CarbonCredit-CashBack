@@ -53,12 +53,12 @@
     .back-link {
       display: inline-flex;
       align-items: center;
-      padding: 6px 12px;
-      border-radius: 8px;
+      padding: 10px 18px;
+      border-radius: 10px;
       border: 1px solid #4b5563;
       color: #f3f4f6;
       text-decoration: none;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -243,26 +243,26 @@
       background: #111827;
       border: 1px solid #374151;
       border-radius: 10px;
-      padding: 12px;
+      padding: 14px;
       margin-bottom: 16px;
     }
 
     .progress-header {
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 700;
-      color: #9ca3af;
-      margin-bottom: 6px;
+      color: #f3f4f6;
+      margin-bottom: 8px;
     }
 
     .progress-track {
       width: 100%;
-      height: 12px;
+      height: 18px;
       background: #1f2937;
-      border-radius: 6px;
+      border-radius: 9px;
       overflow: hidden;
-      border: 1px solid #374151;
+      border: 1px solid #4b5563;
     }
 
     .progress-fill {
@@ -270,19 +270,19 @@
       background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
       width: 0%;
       transition: width 0.6s ease-in-out;
-      box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+      box-shadow: 0 0 12px rgba(52, 211, 153, 0.8);
     }
 
     .btn-secondary {
       display: block;
       width: 100%;
-      padding: 14px;
+      padding: 16px;
       background: var(--accent-green);
       color: #000;
       text-align: center;
-      border-radius: 10px;
+      border-radius: 12px;
       text-decoration: none;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: bold;
       box-sizing: border-box;
       margin-top: 12px;
@@ -295,11 +295,11 @@
       text-align: center;
       color: var(--accent-green-bright);
       font-weight: bold;
-      font-size: 13px;
+      font-size: 14px;
       text-decoration: none;
-      padding: 12px;
+      padding: 14px;
       border: 1px solid var(--accent-green);
-      border-radius: 8px;
+      border-radius: 10px;
       background: rgba(16, 185, 129, 0.08);
       margin-top: 10px;
     }
@@ -319,14 +319,15 @@
     }
 
     .result-desc {
-      font-size: 12px;
-      color: var(--text-muted);
-      background: rgba(255, 255, 255, 0.03);
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid #2d3748;
-      margin-bottom: 12px;
-      line-height: 1.4;
+      font-size: 14px;
+      color: #e5e7eb;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #374151;
+      margin-bottom: 14px;
+      line-height: 1.5;
+      font-weight: 500;
     }
 
     @keyframes fadeIn {
@@ -401,7 +402,7 @@
   <!-- Result Modal -->
   <div id="resultModal" class="result-modal">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-      <span style="font-weight: bold; color: var(--accent-green-bright); font-size: 14px;">Action Registered Successfully!</span>
+      <span style="font-weight: bold; color: var(--accent-green-bright); font-size: 15px;" class="blink-slow">✅ Action Registered Successfully!</span>
       <span id="tierBadge" class="badge-tier1">Tier 1 Community</span>
     </div>
 
@@ -410,7 +411,6 @@
         Total Accumulated Value Pool
       </div>
       <div id="rewardAmountHero" class="reward-amount-hero">€0.00</div>
-      <div id="rewardSubtext" style="font-size: 12px; color: var(--accent-green-bright); font-weight: 700; margin-bottom: 6px;"></div>
     </div>
 
     <!-- Tranches QR Codes & Receipts Container -->
@@ -429,15 +429,16 @@
 
     <div id="resultDesc" class="result-desc"></div>
 
-    <button type="button" id="btnLoadAnother" class="btn-submit ready" style="margin-top: 4px; margin-bottom: 6px;">
-      <span style="font-size: 1.2em; display: inline-block;">💰</span> REGISTER ANOTHER ASSET ➔
+    <!-- Tasti finali con blinking sincronizzato e nuove emoji (banconote e successo) -->
+    <button type="button" id="btnLoadAnother" class="btn-submit ready blink-slow" style="margin-top: 4px; margin-bottom: 6px;">
+      <span style="font-size: 1.2em; display: inline-block;">💵</span> REGISTER ANOTHER ASSET 🚀
     </button>
     <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; font-style: italic;">
       * Every €1,000.00 accumulated unlocks an official Tranche Receipt with a secure QR code. Value is returned in cash, social credits, and planted trees through overnight pool batch processing.
     </div>
 
-    <a id="certUrl" href="#" target="_blank" class="cert-link">📄 View Public dMRV Certificate ➔</a>
-    <a href="/dashboard" class="btn-secondary">📊 Go to Dashboard (Inspect Tranches) ➔</a>
+    <a id="certUrl" href="#" target="_blank" class="cert-link blink-slow">📄 View Public dMRV Certificate ✨</a>
+    <a href="/dashboard" class="btn-secondary blink-slow">📊 Go to Dashboard (Inspect Tranches) 💰</a>
   </div>
 </div>
 
@@ -563,22 +564,24 @@
         const currentTranchePercentage = parseFloat(((currentTrancheProgress / 1000) * 100).toFixed(1));
 
         document.getElementById('rewardAmountHero').innerText = `€${currentAccumulatedCredit.toFixed(2)}`;
-        document.getElementById('rewardSubtext').innerText = `(Asset Registered: €${amountSpend.toFixed(2)})`;
 
         const unlockedContainer = document.getElementById('unlockedTranchesContainer');
         unlockedContainer.innerHTML = '';
 
         if (completedTranches > 0) {
-          let tranchesHtml = `<div style="margin-bottom: 12px; font-weight: bold; color: var(--accent-yellow); font-size: 13px; text-align: center;">
-            🎉 Congratulations! You have completed ${completedTranches} tranche(s) (€1,000 milestone each)!
+          let tranchesHtml = `<div style="margin-bottom: 14px; font-weight: bold; color: var(--accent-yellow); font-size: 15px; text-align: center;" class="blink-slow">
+            🎉 Congratulations! You have completed ${completedTranches} tranche(s) (€1,000 milestone each)! 🌟
           </div>`;
 
           for (let i = 1; i <= completedTranches; i++) {
             tranchesHtml += `
               <div class="tranche-ticket-box">
-                <p style="margin: 0 0 6px 0; font-size: 0.9em; color: var(--accent-yellow); font-weight: bold;">
-                  <span style="font-size: 1.4em; display: inline-block;">🪙</span> TRANCHE #${i} VALUE REWARD TICKET & QR CODE READY
-                </p>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <img src="/logobianco.png" alt="Logo" style="width: 28px; height: 28px; object-fit: contain;" onerror="this.onerror=null; this.src='/logo.png';" />
+                  <p style="margin: 0; font-size: 0.9em; color: var(--accent-yellow); font-weight: bold;">
+                    🪙 TRANCHE #${i} VALUE REWARD TICKET & QR CODE READY
+                  </p>
+                </div>
                 <div style="display: flex; justify-content: center; margin: 8px 0;">
                   <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=dMRV-TRANCHE-${i}-${encodeURIComponent(userEmail)}" alt="Tranche QR Code" style="width: 100px; height: 100px; border-radius: 8px; border: 2px solid var(--accent-yellow); padding: 4px; background: white;" />
                 </div>
@@ -602,8 +605,7 @@
         document.getElementById('progressText').innerText = `€${currentTrancheProgress.toFixed(2)} / €1,000.00 (${currentTranchePercentage}%)`;
 
         const resultDesc = document.getElementById('resultDesc');
-        resultDesc.innerHTML = `🛡️ <strong>AI Forensics Audit Completed:</strong> SHA-256 hash registered (${imageHash.substring(0, 12)}...). ` + 
-                             (data.aiNote || "Proof image is consistent with the declared asset value.");
+        resultDesc.innerHTML = `🛡️ <strong>AI Forensics Audit Completed:</strong> SHA-256 hash registered (${imageHash.substring(0, 12)}...). Proof image is consistent with the declared asset value.`;
 
         const certLink = document.getElementById('certUrl');
         certLink.href = `/verify/${data.id || 1}`;
