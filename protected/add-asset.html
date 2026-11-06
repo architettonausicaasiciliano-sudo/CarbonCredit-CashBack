@@ -137,6 +137,17 @@
       50% { transform: scale(1.08); opacity: 0.85; }
     }
 
+    @keyframes blinkScale {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.75; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .blink-anim {
+      display: inline-block;
+      animation: blinkScale 1.4s infinite ease-in-out;
+    }
+
     .btn-submit {
       width: 100%;
       padding: 16px;
@@ -315,7 +326,10 @@
 
 <div class="card">
   <div class="header-bar">
-    <h2 style="color: var(--accent-green-bright); margin: 0; font-size: 1.25rem;">🌱 Register dMRV Impact</h2>
+    <h2 style="color: var(--accent-green-bright); margin: 0; font-size: 1.35rem; display: flex; align-items: center; gap: 8px;">
+      <span class="blink-emoji" style="font-size: 1.6rem; display: inline-block; animation: blinkScale 1.8s infinite ease-in-out;">🌱</span> 
+      <span class="blink-anim" style="display: inline-block;">Register dMRV Impact</span>
+    </h2>
     <a href="/dashboard" class="back-link">← Dashboard</a>
   </div>
 
@@ -349,10 +363,14 @@
     </div>
 
     <div class="form-group">
-      <label style="color: var(--accent-green-bright); font-weight: 800;">📸 MANDATORY PROOF / RECEIPT</label>
+      <label style="color: var(--accent-green-bright); font-weight: 800; display: flex; align-items: center; gap: 6px;">
+        <span class="blink-anim" style="font-size: 1.4rem;">📸</span> MANDATORY PROOF / RECEIPT
+      </label>
       <div id="dropZone" class="file-drop-zone" onclick="document.getElementById('photo').click()">
-        <span id="filePromptText" style="font-size: 13px; color: var(--accent-green-bright); font-weight: bold;">
-          ⚡ CLICK HERE TO UPLOAD RECEIPT / PROOF ⚡
+        <span id="filePromptText" style="font-size: 15px; color: var(--accent-green-bright); font-weight: 900; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+          <span class="blink-anim" style="font-size: 1.6rem;">⚡</span> 
+          <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
+          <span class="blink-anim" style="font-size: 1.6rem;">⚡</span>
         </span>
         <input type="file" id="photo" name="photo" accept="image/*" style="display: none;" required>
       </div>
@@ -427,7 +445,7 @@
       reader.onload = function (e) {
         imagePreview.src = e.target.result;
         previewContainer.style.display = 'block';
-        filePromptText.innerText = `✅ Photo loaded: ${file.name}`;
+        filePromptText.innerHTML = `<span class="blink-anim" style="font-size: 1.4rem;">✅</span> Photo loaded: ${file.name}`;
         dropZone.classList.add('has-file');
         submitBtn.classList.add('ready');
       };
@@ -440,7 +458,11 @@
     photoInput.value = '';
     imagePreview.src = '';
     previewContainer.style.display = 'none';
-    filePromptText.innerText = '⚡ CLICK HERE TO UPLOAD RECEIPT / PROOF ⚡';
+    filePromptText.innerHTML = `
+      <span class="blink-anim" style="font-size: 1.6rem;">⚡</span> 
+      <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
+      <span class="blink-anim" style="font-size: 1.6rem;">⚡</span>
+    `;
     dropZone.classList.remove('has-file');
     submitBtn.classList.remove('ready');
     submitBtn.disabled = false;
@@ -517,7 +539,6 @@
         assets.push(newAsset);
         localStorage.setItem('dmrv_user_assets_list', JSON.stringify(assets));
 
-        // Total calculated value across assets
         let currentAccumulatedCredit = assets.reduce((sum, item) => sum + item.spend, 0);
         localStorage.setItem('dmrv_user_accumulated_total_value', currentAccumulatedCredit.toFixed(2));
 
@@ -528,7 +549,6 @@
         document.getElementById('rewardAmountHero').innerText = `€${currentAccumulatedCredit.toFixed(2)}`;
         document.getElementById('rewardSubtext').innerText = `(Asset Registered: €${amountSpend.toFixed(2)})`;
 
-        // Generate QR code receipts for each completed €1,000 tranche
         const unlockedContainer = document.getElementById('unlockedTranchesContainer');
         unlockedContainer.innerHTML = '';
 
@@ -567,7 +587,7 @@
 
         const resultDesc = document.getElementById('resultDesc');
         resultDesc.innerHTML = `🛡️ <strong>AI Forensics Audit Completed:</strong> SHA-256 hash registered (${imageHash.substring(0, 12)}...). ` + 
-                              (data.aiNote || "Proof image is consistent with the declared asset value.");
+                             (data.aiNote || "Proof image is consistent with the declared asset value.");
 
         const certLink = document.getElementById('certUrl');
         certLink.href = `/verify/${data.id || 1}`;
