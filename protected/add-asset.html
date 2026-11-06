@@ -55,19 +55,18 @@
       align-items: center;
       padding: 6px 12px;
       border-radius: 8px;
-      border: 2px solid var(--accent-green);
-      color: var(--accent-green-bright);
+      border: 1px solid #4b5563;
+      color: #f3f4f6;
       text-decoration: none;
       font-size: 13px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      background: rgba(16, 185, 129, 0.08);
-      animation: blinkScale 1.4s infinite ease-in-out;
-      transition: all 0.2s;
+      background: #374151;
+      transition: background 0.2s;
     }
     .back-link:hover {
-      background: rgba(16, 185, 129, 0.2);
+      background: #4b5563;
       color: #fff;
     }
 
@@ -121,7 +120,7 @@
       background: rgba(16, 185, 129, 0.08);
       cursor: pointer;
       transition: all 0.3s ease;
-      animation: pulse-green-border 1.4s infinite ease-in-out;
+      animation: pulse-green-border 2.2s infinite ease-in-out;
     }
     
     .file-drop-zone.has-file {
@@ -144,20 +143,24 @@
       object-fit: cover;
     }
 
-    @keyframes blink {
+    @keyframes slowBlinkScale {
       0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.08); opacity: 0.85; }
+      50% { transform: scale(1.08); opacity: 0.75; }
     }
 
-    @keyframes blinkScale {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.15); opacity: 0.75; }
-      100% { transform: scale(1); opacity: 1; }
+    @keyframes subtleBlink {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.03); opacity: 0.85; }
     }
 
-    .blink-anim {
+    .blink-slow {
       display: inline-block;
-      animation: blinkScale 1.4s infinite ease-in-out;
+      animation: slowBlinkScale 2.2s infinite ease-in-out;
+    }
+
+    .blink-subtle {
+      display: inline-block;
+      animation: subtleBlink 2.5s infinite ease-in-out;
     }
 
     .btn-submit {
@@ -181,7 +184,6 @@
       color: #ffffff !important;
       border: 1px solid #34d399 !important;
       box-shadow: 0 0 20px rgba(16, 185, 129, 0.6) !important;
-      animation: blink 1.8s infinite ease-in-out;
     }
 
     .btn-submit:disabled {
@@ -285,7 +287,6 @@
       box-sizing: border-box;
       margin-top: 12px;
       border: 1px solid var(--accent-green-bright);
-      animation: blink 2s infinite ease-in-out;
       text-transform: uppercase;
     }
 
@@ -338,7 +339,7 @@
 
 <div class="card">
   <div class="header-bar">
-    <h2 style="color: var(--accent-green-bright); margin: 0; font-size: 1.35rem; display: flex; align-items: center; gap: 8px;" class="blink-anim">
+    <h2 style="color: var(--accent-green-bright); margin: 0; font-size: 1.35rem; display: flex; align-items: center; gap: 8px;" class="blink-slow">
       <span style="font-size: 1.6rem;">🌱</span> 
       <span>Register dMRV Impact</span>
     </h2>
@@ -375,11 +376,11 @@
     </div>
 
     <div class="form-group">
-      <label style="color: var(--accent-green-bright); font-weight: 800; display: flex; align-items: center; gap: 8px;" class="blink-anim">
+      <label style="color: var(--accent-green-bright); font-weight: 800; display: flex; align-items: center; gap: 8px;" class="blink-slow">
         <span style="font-size: 1.5rem;">📸</span> MANDATORY PROOF / RECEIPT
       </label>
       <div id="dropZone" class="file-drop-zone" onclick="document.getElementById('photo').click()">
-        <span id="filePromptText" style="font-size: 15px; color: var(--accent-green-bright); font-weight: 900; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+        <span id="filePromptText" style="font-size: 15px; color: var(--accent-green-bright); font-weight: 900; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;" class="blink-slow">
           <span style="font-size: 1.5rem;">⚡</span> 
           <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
           <span style="font-size: 1.5rem;">⚡</span>
@@ -392,7 +393,7 @@
       </div>
     </div>
 
-    <button type="submit" id="submitBtn" class="btn-submit">START AI AUDIT & dMRV GENERATION ➔</button>
+    <button type="submit" id="submitBtn" class="btn-submit ready blink-subtle">START AI AUDIT & dMRV GENERATION ➔</button>
   </form>
 
   <div id="errorBox" class="error-box"></div>
@@ -429,7 +430,7 @@
     <div id="resultDesc" class="result-desc"></div>
 
     <button type="button" id="btnLoadAnother" class="btn-submit ready" style="margin-top: 4px; margin-bottom: 6px;">
-      <span style="font-size: 1.2em; animation: blink 1.5s infinite; display: inline-block;">💰</span> REGISTER ANOTHER ASSET ➔
+      <span style="font-size: 1.2em; display: inline-block;">💰</span> REGISTER ANOTHER ASSET ➔
     </button>
     <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; font-style: italic;">
       * Every €1,000.00 accumulated unlocks an official Tranche Receipt with a secure QR code. Value is returned in cash, social credits, and planted trees through overnight pool batch processing.
@@ -457,7 +458,8 @@
       reader.onload = function (e) {
         imagePreview.src = e.target.result;
         previewContainer.style.display = 'block';
-        filePromptText.innerHTML = `<span class="blink-anim" style="font-size: 1.4rem;">✅</span> Photo loaded: ${file.name}`;
+        filePromptText.className = "";
+        filePromptText.innerHTML = `<span style="font-size: 1.4rem;">✅</span> Photo loaded: ${file.name}`;
         dropZone.classList.add('has-file');
         submitBtn.classList.add('ready');
       };
@@ -470,13 +472,14 @@
     photoInput.value = '';
     imagePreview.src = '';
     previewContainer.style.display = 'none';
+    filePromptText.className = "blink-slow";
     filePromptText.innerHTML = `
       <span style="font-size: 1.5rem;">⚡</span> 
       <span>CLICK HERE TO UPLOAD RECEIPT PROOFS</span> 
       <span style="font-size: 1.5rem;">⚡</span>
     `;
     dropZone.classList.remove('has-file');
-    submitBtn.classList.remove('ready');
+    submitBtn.classList.add('ready', 'blink-subtle');
     submitBtn.disabled = false;
     submitBtn.innerText = 'START AI AUDIT & dMRV GENERATION ➔';
     document.getElementById('errorBox').style.display = 'none';
@@ -517,6 +520,7 @@
 
     try {
       submitBtn.innerText = "🔍 AI Forensic Audit in progress (Gemini Flash)...";
+      submitBtn.classList.remove('blink-subtle');
       submitBtn.disabled = true;
       const imageHash = await calculateImageHash(file);
       
@@ -573,7 +577,7 @@
             tranchesHtml += `
               <div class="tranche-ticket-box">
                 <p style="margin: 0 0 6px 0; font-size: 0.9em; color: var(--accent-yellow); font-weight: bold;">
-                  <span style="font-size: 1.4em; animation: blink 1.2s infinite; display: inline-block;">🪙</span> TRANCHE #${i} VALUE REWARD TICKET & QR CODE READY
+                  <span style="font-size: 1.4em; display: inline-block;">🪙</span> TRANCHE #${i} VALUE REWARD TICKET & QR CODE READY
                 </p>
                 <div style="display: flex; justify-content: center; margin: 8px 0;">
                   <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=dMRV-TRANCHE-${i}-${encodeURIComponent(userEmail)}" alt="Tranche QR Code" style="width: 100px; height: 100px; border-radius: 8px; border: 2px solid var(--accent-yellow); padding: 4px; background: white;" />
@@ -607,6 +611,7 @@
       } else {
         showError(`❌ AI Audit Failed: ${data.message || data.error || 'Verification error.'}`);
         submitBtn.innerText = "START AI AUDIT & dMRV GENERATION ➔";
+        submitBtn.classList.add('blink-subtle');
         submitBtn.disabled = false;
       }
 
@@ -614,6 +619,7 @@
       console.error(err);
       showError("Connection error during submission.");
       submitBtn.innerText = "START AI AUDIT & dMRV GENERATION ➔";
+      submitBtn.classList.add('blink-subtle');
       submitBtn.disabled = false;
     }
   });
