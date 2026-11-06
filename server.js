@@ -462,22 +462,22 @@ app.get("/verify/:certId", (req, res) => {
           </style>
         </head>
         <body>
-          <h1>Certificato dMRV ESG Validato <span class="badge">VERIFICATO</span></h1>
-          <div class="data-row"><span class="label">ID Registro / Ticket:</span> <span class="val">${row.id} / ${row.ticket_id || certId}</span></div>
-          <div class="data-row"><span class="label">Titolo Azione:</span> <span class="val">${row.title}</span></div>
-          <div class="data-row"><span class="label">Categoria:</span> <span class="val">${row.category}</span></div>
-          <div class="data-row"><span class="label">Impatto CO2 Validato:</span> <span class="val">${row.co2_saved_kg} kg CO2e</span></div>
-          <div class="data-row"><span class="label">Tier Forense AI:</span> <span class="val">${row.tier} (${(row.confidence_score * 100).toFixed(0)}% Confidenza)</span></div>
-          <div class="data-row"><span class="label">Data Registrazione:</span> <span class="val">${row.created_at}</span></div>
+          <h1>Validated dMRV ESG Certificate<span class="badge">VERIFIED</span></h1>
+          <div class="data-row"><span class="label">Registry ID / Ticket:</span> <span class="val">${row.id} / ${row.ticket_id || certId}</span></div>
+          <div class="data-row"><span class="label">Action Title:</span> <span class="val">${row.title}</span></div>
+          <div class="data-row"><span class="label">Category:</span> <span class="val">${row.category}</span></div>
+          <div class="data-row"><span class="label">Validated CO₂ Impact:</span> <span class="val">${row.co2_saved_kg} kg CO2e</span></div>
+          <div class="data-row"><span class="label">AI Forensics Tier:</span> <span class="val">${row.tier} (${(row.confidence_score * 100).toFixed(0)}% Confidenza)</span></div>
+          <div class="data-row"><span class="label">Registration Date:</span> <span class="val">${row.created_at}</span></div>
           
-          <p style="margin-top:24px; font-weight:600; font-size:14px; color:#475569;">Impronta Forense SHA-256 Immagine:</p>
+          <p style="margin-top:24px; font-weight:600; font-size:14px; color:#475569;">SHA-256 Image Forensic Footprint:</p>
           <div class="hash-box">${row.image_hash || "Nessun Hash Immagine Generato"}</div>
           
-          <p style="margin-top:16px; font-weight:600; font-size:14px; color:#475569;">Impronta Digitale Scontrino / Ricevuta (Anti-Double Spending):</p>
-          <div class="hash-box">${row.receipt_hash || "Nessuno scontrino associato"}</div>
+          <p style="margin-top:16px; font-weight:600; font-size:14px; color:#475569;">Receipt Digital Fingerprint (Anti-Double Spending):</p>
+          <div class="hash-box">${row.receipt_hash || "No receipt associated"}</div>
           
           <div class="footer">
-            Carbon Credit dMRV Verification Engine &bull; Timestamp Immodificabile SQLite Ledger
+            Carbon Credit dMRV Verification Engine &bull; Immutable Timestamp SQLite Ledger
           </div>
         </body>
         </html>
@@ -729,7 +729,7 @@ app.post("/api/eco-actions", upload.single("photo"), async (req, res) => {
       fs.unlinkSync(file.path);
       return res.status(409).json({
         error: "DUPLICATE_IMAGE_DETECTED",
-        message: "Questa immagine è già stata utilizzata per una registrazione dMRV precedente.",
+        message: "This image has already been used for a previous dMRV registration.",
         existingActionId: existingImage.id,
       });
     }
