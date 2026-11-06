@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard dMRV — Impatto & Cashback</title>
+  <title>dMRV Asset Dashboard — Impact & Cashback</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     :root {
@@ -17,7 +17,6 @@
       --danger-red: #ef4444;
       --text-muted: #94a3b8;
     }
-
     body {
       background: var(--bg-dark);
       color: #f8fafc;
@@ -25,10 +24,17 @@
       margin: 0;
       padding: 24px;
     }
-
     .container {
       max-width: 900px;
       margin: 0 auto;
+    }
+
+    /* Struttura Intestazione a Due Righe */
+    .top-logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 16px;
     }
 
     .header-bar {
@@ -38,19 +44,37 @@
       margin-bottom: 24px;
     }
 
+    /* Animazioni di Blinking e Pulsazione */
+    @keyframes slowBlinkScale {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.75; }
+    }
+
+    .blink-slow {
+      display: inline-block;
+      animation: slowBlinkScale 2.2s infinite ease-in-out;
+    }
+
     .btn-primary {
       background: linear-gradient(180deg, #10b981 0%, #059669 100%);
       color: #ffffff;
       border: 1px solid #34d399;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-weight: 700;
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-weight: 800;
       text-decoration: none;
-      font-size: 0.9rem;
-      transition: box-shadow 0.2s;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s ease-in-out;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
     .btn-primary:hover {
-      box-shadow: 0 0 14px rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 24px rgba(52, 211, 153, 0.8);
+      transform: scale(1.04);
     }
 
     .stats-grid {
@@ -59,14 +83,12 @@
       gap: 16px;
       margin-bottom: 24px;
     }
-
     .stat-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 18px;
     }
-
     .stat-label {
       font-size: 0.75rem;
       color: var(--text-muted);
@@ -74,7 +96,6 @@
       font-weight: 700;
       letter-spacing: 0.5px;
     }
-
     .stat-val {
       font-size: 1.5rem;
       font-weight: 800;
@@ -90,65 +111,26 @@
       margin-top: 24px;
     }
 
-    /* Modulo Tranche Cashback */
-    .tranche-card {
-      background: rgba(16, 185, 129, 0.05);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 16px;
-      padding: 22px;
-      margin-top: 24px;
-    }
-
-    .progress-track {
-      width: 100%;
-      height: 14px;
-      background: #0f172a;
-      border-radius: 7px;
-      overflow: hidden;
-      border: 1px solid var(--border-color);
-      margin: 12px 0;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
-      width: 0%;
-      transition: width 0.6s ease-in-out;
-      box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
-    }
-
     .btn-action {
       background: rgba(16, 185, 129, 0.15);
       color: var(--accent-green-bright);
       border: 1px solid var(--accent-green);
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-weight: 700;
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-weight: 800;
       cursor: pointer;
       width: 100%;
       margin-top: 14px;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       transition: background 0.2s;
     }
     .btn-action:hover {
-      background: rgba(16, 185, 129, 0.25);
+      background: rgba(16, 185, 129, 0.3);
     }
 
-    .btn-inspect {
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--accent-blue);
-      border: 1px solid var(--accent-blue);
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.2s ease;
-    }
-    .btn-inspect:hover {
-      background: rgba(56, 189, 248, 0.3);
-    }
-
-    /* Modal Overlay & Card */
+    /* Modale Tranche Payout */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -164,7 +146,6 @@
       padding: 20px;
       box-sizing: border-box;
     }
-
     .modal-content {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -175,7 +156,6 @@
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
       animation: modalFadeIn 0.25s ease-out;
     }
-
     .tranche-item {
       background: #0f172a;
       border: 1px solid var(--border-color);
@@ -183,12 +163,10 @@
       padding: 14px;
       margin-bottom: 12px;
     }
-
     .tranche-item.completed {
       border-color: var(--accent-green);
       background: rgba(16, 185, 129, 0.08);
     }
-
     @keyframes modalFadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -196,49 +174,67 @@
   </style>
 </head>
 <body>
-
 <div class="container">
-  <div class="header-bar">
-    <h1 style="font-size: 1.4rem; color: var(--accent-green-bright); margin: 0;">🌱 Dashboard Gestione Beni dMRV</h1>
-    <a href="/add-asset" class="btn-primary">➕ Registra Nuovo Bene</a>
+
+  <!-- Riga 1: Logo in Cima Ingrandito e Lampeggiante -->
+  <div class="top-logo-container">
+    <img src="/images/logo.png" alt="Carbon Credit Cashback Logo" class="blink-slow" style="width: 180px; height: 180px; object-fit: contain;" />
   </div>
 
-  <!-- Contatori Statistiche principali -->
+  <!-- Riga 2: Tasto a Sinistra con + e Scritta Dashboard a Destra -->
+  <div class="header-bar">
+    <a href="/add-asset" class="btn-primary blink-slow">
+      <span style="font-size: 1.8em; line-height: 1;">➕</span> REGISTER NEW ASSET
+    </a>
+    <h1 style="font-size: 1.4rem; color: var(--accent-green-bright); margin: 0; display: flex; align-items: center; gap: 8px;" class="blink-slow">
+      <span style="font-size: 1.8em;">🌱</span> 
+      <span>dMRV Impact & Assets Dashboard</span>
+    </h1>
+  </div>
+
+  <!-- Contatori Statistiche Principali -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-label">Crediti Convalidati</div>
+      <div class="stat-label">Validated Carbon Credits</div>
       <div id="userCredits" class="stat-val">0.0 CC</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Stima Crediti In sospeso</div>
+      <div class="stat-label">Estimated Pending Credits</div>
       <div id="pendingCcVal" class="stat-val">0 CC</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">CO₂ Evitata</div>
+      <div class="stat-label">Avoided CO₂ Emissions</div>
       <div id="totalCo2" class="stat-val">0.0 kg</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Equivalente Alberi</div>
-      <div id="totalTrees" class="stat-val">0 🌳</div>
+      <div class="stat-label">Trees Equivalent</div>
+      <div id="totalTrees" class="stat-val">0 <span class="blink-slow" style="font-size: 1.3em;">🌳</span></div>
       <div id="treeBannerText" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;"></div>
     </div>
   </div>
 
-
-  <!-- Card B2B & Payout -->
+  <!-- Card B2B & Payout Batch (Senza scritta € 0) -->
   <div class="b2b-card">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <div>
-        <h3 style="margin: 0; font-size: 1.05rem;">💰 Saldo Cashback Maturato Totale (10%)</h3>
-        <span style="font-size: 0.8rem; color: var(--text-muted);">Batch ID: <strong id="batchId" style="color: var(--accent-blue);">N/A</strong> | Stato: <span id="batchStatus">In lavorazione</span></span>
+        <h3 style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+          <span class="blink-slow" style="font-size: 1.8em;">💰</span> Total Accumulated Cashback Pool
+        </h3>
+        <span style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-top: 4px;">
+          Batch ID: <strong id="batchId" style="color: var(--accent-blue);">N/A</strong> | Status: <span id="batchStatus" style="color: var(--accent-green-bright); font-weight: bold;">Processing Batch</span>
+        </span>
       </div>
-      <div id="pendingEur" style="font-size: 1.6rem; font-weight: 900; color: var(--accent-green-bright);">€ 0.00</div>
+      <!-- NESSUN PARAGRAFO O DIV CON "€ 0" QUI -->
     </div>
-    <button id="btnRedeem" class="btn-action">💸 RICHIEDI PAYOUT CASHBACK</button>
+    <button id="btnRedeem" class="btn-action blink-slow">
+      <span style="font-size: 1.5em; display: inline-block;">💸</span> REQUEST B2B CASHBACK PAYOUT <span style="font-size: 1.5em;">🚀</span>
+    </button>
   </div>
 
   <!-- Lista Beni Registrati -->
-  <h3 style="margin-top: 32px; font-size: 1.1rem;">📦 Elenco Beni & Prova d'Acquisto</h3>
+  <h3 style="margin-top: 32px; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+    <span class="blink-slow" style="font-size: 1.6em;">📦</span> Registered Assets & Proof of Purchase
+  </h3>
   <div id="assetsList"></div>
 </div>
 
@@ -246,20 +242,19 @@
 <div id="trancheModal" class="modal-overlay">
   <div class="modal-content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-      <h3 style="margin: 0; color: var(--accent-green-bright); font-size: 1.2rem;">🔍 Ispezione Tranche Cashback</h3>
-      <button id="btnCloseTrancheModal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer;">✕</button>
+      <h3 style="margin: 0; color: var(--accent-green-bright); font-size: 1.2rem; display: flex; align-items: center; gap: 8px;" class="blink-slow">
+        <span style="font-size: 1.6em;">🔍</span> Cashback Tranches Payout Inspection
+      </h3>
+      <button id="btnCloseTrancheModal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.6rem; cursor: pointer;">✕</button>
     </div>
-
-<p style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 14px;">
-    Each tranche requires reaching the <strong>€1,000</strong> collective pool milestone to unlock the next tranche sequence.
-</p>
-
+    <p style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 14px;">
+      Each tranche requires reaching the <strong>€1,000.00</strong> collective pool milestone to unlock the next tranche sequence.
+    </p>
     <div id="tranchesContainer">
       <!-- Popolato dinamicamente da dashboard.js -->
     </div>
-
     <button id="btnCloseTrancheModalBottom" class="btn-action" style="background: #334155; color: white; border-color: #475569; margin-top: 10px;">
-      Chiudi Ispezione
+      Close Inspection
     </button>
   </div>
 </div>
